@@ -108,7 +108,7 @@ namespace el {
 	struct PrimitiveVertex 
 	{
 		vec3 pos;
-		color col;
+		color8 col;
 	};
 	//=======================================================================================
 	// (vec3 pos, color col)
@@ -162,7 +162,7 @@ namespace el {
 	struct Primitive2DVertex 
 	{
 		vec2 pos;
-		color col;
+		color8 col;
 	};
 	//=======================================================================================
 	// (vec2 pos, color col)
@@ -225,7 +225,7 @@ namespace el {
 	{
 		vec2 pos;
 		vec2 uv;
-		color col;
+		color8 col;
 	};
 	//=======================================================================================
 	// (vec2 pos, vec2 uv, color col)

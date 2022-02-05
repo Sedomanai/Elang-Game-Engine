@@ -19,9 +19,9 @@ namespace el
     inline constexpr float div_360 = 0.00277777777f;
     inline constexpr float div_pi = 0.31830988618f;
 
-    struct color { 
+    struct color8 { 
         unsigned char r, g, b, a; 
-        color(unsigned char r_, unsigned char g_, unsigned char b_, unsigned char a_) 
+        color8(unsigned char r_, unsigned char g_, unsigned char b_, unsigned char a_) 
         : r(r_), g(g_), b(b_), a(a_) {}
     };
 

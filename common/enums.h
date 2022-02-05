@@ -68,7 +68,9 @@ enum struct eDataType
 	VEC2,
 	VEC3,
 	VEC4,
+	COLOR8,
 
 	MATRIX3,
-	MATRIX4
+	MATRIX4,
+
 };

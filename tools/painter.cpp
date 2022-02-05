@@ -22,7 +22,7 @@ namespace el
 		glGenTextures(1, &sNullTextureID);
 		glBindTexture(GL_TEXTURE_2D, sNullTextureID);
 
-		el::color c = el::color(255, 0, 255, 255);
+		color8 c = color8(255, 0, 255, 255);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &c);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -38,7 +38,7 @@ namespace el
 		glDeleteBuffers(1, &mIbo);
 	}
 
-	void Painter::batchline(const line& line, const el::color& c, float depth) {
+	void Painter::batchline(const line& line, const color8& c, float depth) {
 		if (!mLocked && mVert.vertdata->index() == Primitive2DVertexData::sVertexDataIndex && 
 			drawtype == GL_LINES) 
 		{
@@ -57,7 +57,7 @@ namespace el
 		}
 	}
 
-	void Painter::batchAABB(const aabb& aabb, const el::color& c, float depth) {
+	void Painter::batchAABB(const aabb& aabb, const color8& c, float depth) {
 		if (!mLocked && mVert.vertdata->index() == Primitive2DVertexData::sVertexDataIndex) {
 			switch (drawtype) {
 			case GL_LINES:
@@ -89,7 +89,7 @@ namespace el
 		}
 	}
 
-	void Painter::batchBox(const poly2d& box, const el::color& c, float depth) {
+	void Painter::batchBox(const poly2d& box, const color8& c, float depth) {
 		if (!mLocked && mVert.vertdata->index() == Primitive2DVertexData::sVertexDataIndex && box.count == 4) {
 			switch (drawtype) {
 			case GL_LINES:
@@ -117,7 +117,7 @@ namespace el
 		}
 	}
 
-	void Painter::batchPoly(const poly2d& poly, const el::color& c, float depth) {
+	void Painter::batchPoly(const poly2d& poly, const color8& c, float depth) {
 		if (!mLocked && mVert.vertdata->index() == Primitive2DVertexData::sVertexDataIndex &&
 			drawtype == GL_LINES) 
 		{
@@ -142,7 +142,7 @@ namespace el
 		}
 	}
 
-	void Painter::batchCircle(const circle& circ, const el::color& c, float depth) {
+	void Painter::batchCircle(const circle& circ, const color8& c, float depth) {
 		if (!mLocked && mVert.vertdata->index() == Primitive2DVertexData::sVertexDataIndex) {
 			auto& batch = mBatches.emplace_back();
 			mBatchOrder.emplace_back(mBatchOrder.size());
@@ -191,7 +191,7 @@ namespace el
 		}
 	}
 
-	void Painter::circlePoints(vector<Primitive2DVertex>& buffer, const el::color& c, float cx, float cy, float x, float y) {
+	void Painter::circlePoints(vector<Primitive2DVertex>& buffer, const color8& c, float cx, float cy, float x, float y) {
 		if (x == 0) {
 			buffer.emplace_back(Primitive2DVertex{ vec2(cx, cy + y), c });
 			buffer.emplace_back(Primitive2DVertex{ vec2(cx, cy - y), c });
@@ -357,7 +357,7 @@ namespace el
 	}
 	void Painter::bindMaterial(uint32 material) {
 		asset<Material> mate(material);
-\
+
 		if (mate) {
 			auto& mat = *mate;
 

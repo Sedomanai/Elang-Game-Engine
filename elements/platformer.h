@@ -102,7 +102,7 @@ namespace el
 		void open(eSide side) { mSides &= ~(char)side; }
 		void toggle(eSide side) { mSides ^= (char)side; }
 		bool isClosed(eSide side) { return (mSides & (char)side) == (char)side; }
-		void debug(ShapeDebug* debug, const color& c, bool fill);
+		void debug(ShapeDebug* debug, const color8& c, bool fill);
 
 		template<typename T>
 		void serialize(T& archive) {

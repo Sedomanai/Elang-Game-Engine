@@ -44,7 +44,7 @@ namespace el
 		//}
 	}
 
-	void batchDebuggingComponents(ShapeDebug* debugger, const color& color) {
+	void batchDebuggingComponents(ShapeDebug* debugger, const color8& color) {
 		for (auto e : gStage->view<Box>()) {
 			auto rect = ent<Box>(e);
 			debugger->line.batchAABB(*rect, color);

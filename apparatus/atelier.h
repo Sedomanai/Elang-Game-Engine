@@ -8,5 +8,5 @@ namespace el
 	extern ELANG_DLL void updateBasicSprites(Observer&);
 	extern ELANG_DLL void paintStageOrder();
 	extern ELANG_DLL void batchBasic2DComponents();
-	extern ELANG_DLL void batchDebuggingComponents(ShapeDebug* debugger, const color&);
+	extern ELANG_DLL void batchDebuggingComponents(ShapeDebug* debugger, const color8&);
 };

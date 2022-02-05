@@ -52,11 +52,11 @@ namespace el
 			bindDataBuffer();
 		}
 		void destroy();
-		void batchline(const line& line, const el::color& c, float depth = 0.0f);
-		void batchAABB(const aabb& aabb, const el::color& c, float depth = 0.0f);
-		void batchBox(const poly2d& box, const el::color& c, float depth = 0.0f);
-		void batchCircle(const circle& circ, const el::color& c, float depth = 0.0f);
-		void batchPoly(const poly2d& circ, const el::color& c, float depth = 0.0f);
+		void batchline(const line& line, const color8& c, float depth = 0.0f);
+		void batchAABB(const aabb& aabb, const color8& c, float depth = 0.0f);
+		void batchBox(const poly2d& box, const color8& c, float depth = 0.0f);
+		void batchCircle(const circle& circ, const color8& c, float depth = 0.0f);
+		void batchPoly(const poly2d& circ, const color8& c, float depth = 0.0f);
 
 		template<typename ...Arg>
 		void batch(sizet vert_type, Arg... args) {
@@ -81,7 +81,7 @@ namespace el
 		string getFragLabel() { return mFrag.key; }
 		sizet getTargetCount() { return mTargetCount; }
 	private:
-		void circlePoints(vector<Primitive2DVertex>& buffer, const el::color& c, float cx, float cy, float x, float y);
+		void circlePoints(vector<Primitive2DVertex>& buffer, const color8& c, float cx, float cy, float x, float y);
 		GlslProgram mVert, mFrag;
 
 		vector<Batch> mBatches;

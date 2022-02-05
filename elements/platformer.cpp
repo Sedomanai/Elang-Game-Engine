@@ -26,7 +26,7 @@ namespace el
 		}
 	}
 
-	void Platform::debug(ShapeDebug* debug, const color& c, bool fill) {
+	void Platform::debug(ShapeDebug* debug, const color8& c, bool fill) {
 		if ((mSides & 1) == 1) {
 			debug->line.batchline(line(l, b, l, t), c, 0.0f);
 		}
