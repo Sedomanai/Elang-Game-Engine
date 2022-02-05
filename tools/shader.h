@@ -15,7 +15,7 @@ namespace el {
 		uint shader() { return mShader; }
 
 	protected:
-		virtual void glslVertexProgram(uint32 shader,string& file) {};
+		virtual void glslVertexProgram(string& file) {};
 		void glslErrorCheck(const uint32 shader, const char* filePath);
 		uint mShader;
 	};
@@ -31,7 +31,7 @@ namespace el {
 		
 		sizet size() { return mSize; }
 	private:
-		void glslVertexProgram(uint32 shader, string& file) override;
+		void glslVertexProgram(string& file) override;
 
 		vector<eDataType> mData;
 		sizet mSize;

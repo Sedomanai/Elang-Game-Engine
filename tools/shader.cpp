@@ -15,30 +15,30 @@ namespace el {
 	void FragmentShader::compileShader(string& file, GLenum type)
 	{
 		const char* link = file.c_str();
-		const uint32 shader = glCreateShader(type);
+		const uint32 blob = glCreateShader(type);
 
-		if (shader) {
-			glShaderSource(shader, 1, &link, NULL);
-			glCompileShader(shader);
+		if (blob) {
+			glShaderSource(blob, 1, &link, NULL);
+			glCompileShader(blob);
 
 			int compiled = GL_FALSE;
-			glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+			glGetShaderiv(blob, GL_COMPILE_STATUS, &compiled);
 			if (compiled == GL_FALSE)
-				glslErrorCheck(shader, file.c_str());
+				glslErrorCheck(blob, file.c_str());
 			else {
-				auto id = glCreateProgram();
-				if (!id) {
+				mShader = glCreateProgram();
+				if (!mShader) {
 					std::cout << "program link error" << std::endl;
+					mShader = -1;
 					return;
 				}
 
-				mShader = id;
 				glProgramParameteri(mShader, GL_PROGRAM_SEPARABLE, GL_TRUE);
-				glAttachShader(mShader, shader);
-				glslVertexProgram(shader, file);
+				glAttachShader(mShader, blob);
+				glslVertexProgram(file);
 				glLinkProgram(mShader);
-				glDetachShader(mShader, shader);
-				glDeleteShader(shader);
+				glDetachShader(mShader, blob);
+				glDeleteShader(blob);
 			}
 		}
 	}
@@ -74,7 +74,7 @@ namespace el {
 
 	void VertexShader::disableVertexAttribArray() {
 		for (sizet i = 0; i < mData.size(); i++)
-			glEnableVertexAttribArray(uint(i));
+			glDisableVertexAttribArray(uint(i));
 	}
 
 	void VertexShader::vertexAttribPointer() {
@@ -98,13 +98,13 @@ namespace el {
 				offset += sizeof(color8);
 				break;
 			}
-		} cout << offset << endl;
+		}
 	}
 
-	void VertexShader::glslVertexProgram(uint32 shader, string& file) {
+	void VertexShader::glslVertexProgram(string& file) {
+		uint nameshift = 0;
 		iterate(file, '\n', [&](strview line, sizet) {
 			int read = 0;
-			uint nameshift = 0;
 			bool bvec4 = false;
 			iterate(line, ' ', [&](strview str, sizet) {
 				if (read == 1) {
@@ -120,13 +120,13 @@ namespace el {
 						if (str[0] == 'v' && str[1] == '8')
 							addData(eDataType::COLOR8);
 						else addData(eDataType::VEC4);
-						bvec4 = false;
 					} 
 
 					string name = string(str);
 					name.pop_back();
-					glBindAttribLocation(shader, nameshift, name.c_str());
-					read = 0;
+					glBindAttribLocation(mShader, nameshift, name.c_str());
+					cout << "(" << mShader << " " << nameshift << " " << name << ")" << endl;
+					nameshift++;
 				}
 
 				if (str == "in") {
