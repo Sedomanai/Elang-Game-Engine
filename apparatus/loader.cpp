@@ -154,6 +154,7 @@ namespace el
 				cout << "Bitmap Font " << key << " could not link to non-existing texture " << endl;
 			}
 		}
+
 	}
 
 	void saveElangProject(const char* project_path) {
@@ -177,7 +178,6 @@ namespace el
 			cout << "Asset  Directory: " << gProject->assetDir << endl;
 			cout << "Data   Directory: " << gProject->datDir << endl;
 			cout << "Source Directory: " << gProject->srcDir << endl;
-
 			initElang();
 			if (loadAllExternals && !gProject->internalBinary)
 				reloadAll(true);
@@ -237,6 +237,32 @@ namespace el
 		case eFileExtension::PNG:
 			asset<Texture>(data)->makeFromStandardImageFile(gProject->assetDir + key + ".png");
 			break;
+		}
+	}
+
+	void compileDefaultShaders() {
+		static bool uinit = true;
+
+		if (uinit) {
+			auto& v1 = gVertexShaders["position2d"];
+			v1.compileShader(gGlslVertexPosition2d, GL_VERTEX_SHADER);
+			auto& v2 = gVertexShaders["debug2d"];
+			v2.compileShader(gGlslVertexDebug2d, GL_VERTEX_SHADER);
+			auto& v3 = gVertexShaders["debug3d"];
+			v3.compileShader(gGlslVertexDebug3d, GL_VERTEX_SHADER);
+			auto& v4 = gVertexShaders["basic_sprite"];
+			v4.compileShader(gGlslVertexBasicSprite, GL_VERTEX_SHADER);
+			auto& v5 = gVertexShaders["color_sprite"];
+			v5.compileShader(gGlslVertexColorSprite, GL_VERTEX_SHADER);
+
+			auto& f1 = gFragmentShaders["debug"];
+			f1.compileShader(gGlslFragmentDebug, GL_FRAGMENT_SHADER);
+			auto& f2 = gFragmentShaders["texture_uv"];
+			f2.compileShader(gGlslFragmentTextureUV, GL_FRAGMENT_SHADER);
+			auto& f3 = gFragmentShaders["grid"];
+			f3.compileShader(gGlslFragmentGrid, GL_FRAGMENT_SHADER);
+
+			uinit = false;
 		}
 	}
 }

@@ -1,45 +1,138 @@
 #include "shader.h"
 
 namespace el {
+	hashmap<string, FragmentShader> gFragmentShaders;
+	hashmap<string, VertexShader> gVertexShaders;
 
-	ShaderLoader gGlsl;
+	void FragmentShader::compileShaderFromGlslFile(const string& filePath) {
+		tokenize(filePath, '.', [&](strview, strview tail) {
+			string file;
+			if (loadFile(filePath.c_str(), file))
+				compileShader(file, ((tail == ".vert") ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER));
+			});
+	}
 
-	void ShaderLoader::compileDefaultShaders(const char* assetdir) {
-		static bool done = false;
-		if (!done) {
-			string dir = string(assetdir);
-			compileShaderProgram<Position2DVertexData>(GL_VERTEX_SHADER, dir + "_2d_pos.vert");
-			compileShaderProgram<SpriteVertexData>(GL_VERTEX_SHADER, dir + "_basic_sprite.vert");
-			compileShaderProgram<Primitive2DVertexData>(GL_VERTEX_SHADER, dir + "_debug2d.vert");
-			compileShaderProgram<PrimitiveVertexData>(GL_VERTEX_SHADER, dir + "_primitive3d.vert");
-			compileShaderProgram<>(GL_FRAGMENT_SHADER, dir + "grid.frag");
-			compileShaderProgram<>(GL_FRAGMENT_SHADER, dir + "raw_pass.frag");
-			compileShaderProgram<>(GL_FRAGMENT_SHADER, dir + "texture_uv.frag");
-			done = true;
+	void FragmentShader::compileShader(string& file, GLenum type)
+	{
+		const char* link = file.c_str();
+		const uint32 shader = glCreateShader(type);
+		if (shader) {
+			glShaderSource(shader, 1, &link, NULL);
+			glCompileShader(shader);
+
+			int compiled = GL_FALSE;
+			glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+			if (compiled == GL_FALSE)
+				glslErrorCheck(shader, file.c_str());
+			else {
+				auto id = glCreateProgram();
+				if (!id) {
+					std::cout << "program link error" << std::endl;
+					return;
+				}
+
+				glProgramParameteri(id, GL_PROGRAM_SEPARABLE, GL_TRUE);
+				glAttachShader(id, shader);
+				glslVertexProgram(shader, file);
+				glLinkProgram(id);
+				glDetachShader(id, shader);
+				glDeleteShader(shader);
+			}
 		}
 	}
 
-	void ShaderLoader::errorCheck(sizet check, const uint32 shader, const char* filePath) {
-		if (check == GL_FALSE) {
-			GLint maxLength = 0;
-			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+	void FragmentShader::glslErrorCheck(const uint32 shader, const char* filePath) {
+		GLint maxLength = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
-			std::vector<GLchar> errorLog(maxLength);
-			glGetShaderInfoLog(shader, maxLength, &maxLength, &errorLog[0]);
+		std::vector<GLchar> errorLog(maxLength);
+		glGetShaderInfoLog(shader, maxLength, &maxLength, &errorLog[0]);
 
-			std::cout << "shader compile error " << filePath << std::endl;
-			std::printf("%s\n", &(errorLog[0]));
+		cout << "shader compile error " << endl;
+		cout << filePath << endl;
+		cout << endl;
+		std::printf("%s\n", &(errorLog[0]));
 
-			glDeleteShader(shader);
+		glDeleteShader(shader);
+	}
+
+	void VertexShader::addData(eDataType data) {
+		switch (data) {
+		case eDataType::VEC2: mSize += sizeof(vec2); break;
+		case eDataType::VEC3: mSize += sizeof(vec3); break;
+		case eDataType::VEC4: mSize += sizeof(vec4); break;
+		case eDataType::COLOR8: mSize += sizeof(color8); break;
 		}
 	}
 
-	GlslProgram ShaderLoader::find(const string& key) {
-		try {
-			return mPrograms.at(key);
-		} catch (std::exception& e) {
-			cout << e.what() << " at line ShaderLoader::find with key " << key;
-			return GlslProgram(0, 0, 0);
+	void VertexShader::enableVertexAttribArray() {
+		for (sizet i = 0; i < mData.size(); i++)
+			glEnableVertexAttribArray(uint(i));
+	}
+
+	void VertexShader::disableVertexAttribArray() {
+		for (sizet i = 0; i < mData.size(); i++)
+			glEnableVertexAttribArray(uint(i));
+	}
+
+	void VertexShader::vertexAttribPointer() {
+		for (sizet i = 0; i < mData.size(); i++) {
+			sizet offset = 0;
+			switch (mData[i]) {
+			case eDataType::VEC2:
+				glVertexAttribPointer(i, 2, GL_FLOAT, GL_FALSE, mSize, &offset);
+				offset += sizeof(vec2);
+				break;
+			case eDataType::VEC3:
+				glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE, mSize, &offset);
+				offset += sizeof(vec3);
+				break;
+			case eDataType::VEC4:
+				glVertexAttribPointer(i, 4, GL_FLOAT, GL_FALSE, mSize, &offset);
+				offset += sizeof(vec4);
+				break;
+			case eDataType::COLOR8:
+				glVertexAttribPointer(i, 4, GL_UNSIGNED_BYTE, GL_TRUE, mSize, &offset);
+				offset += sizeof(color8);
+				break;
+			}
 		}
+	}
+
+	void VertexShader::glslVertexProgram(uint32 shader, string& file) {
+		iterate(file, '\n', [&](strview line, sizet) {
+			int read = 0;
+			uint nameshift = 0;
+			bool bvec4 = false;
+			iterate(line, ' ', [&](strview str, sizet) {
+				if (read == 1) {
+					cout << "data type: " << str << "    ";
+					if (str == "vec2")
+						addData(eDataType::VEC2);
+					else if (str == "vec3")
+						addData(eDataType::VEC3);
+					else if (str == "vec4") {
+						bvec4 = true;
+					} read++;
+				} else if (read == 2) {
+					if (bvec4) {
+						if (str[0] == 'v' && str[1] == '8')
+							addData(eDataType::COLOR8);
+						else addData(eDataType::VEC4);
+						bvec4 = false;
+					} 
+
+					string name = string(str);
+					name.pop_back();
+					cout << "name: " << name << endl;
+					glBindAttribLocation(shader, nameshift, name.c_str());
+					read = 0;
+				}
+
+				if (str == "in") {
+					read++;
+				}
+			});
+		});
 	}
 }

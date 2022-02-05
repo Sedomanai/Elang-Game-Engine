@@ -1,4 +1,7 @@
 #pragma once
+
+#include "../default_glsl.h"
+
 #include "../tools/texture.h"
 #include "../tools/atlas.h"
 #include "../tools/bmpfont.h"
@@ -10,6 +13,7 @@
 #include "../elements/button.h"
 #include "../elements/platformer.h"
 #include "../elements/textbox.h"
+
 
 namespace el
 {	
@@ -55,17 +59,19 @@ namespace el
 	inline long long __s_gLoader_AssetCurrTime;
 	inline string __s_gLoader_AssetCurrKey;
 
-	extern void ELANG_DLL connectAssetDstr();
+
 	extern void ELANG_DLL __s_registerAllAssets();
 	extern void ELANG_DLL __s_registerAsset(bihashmap<string, Entity>& map, eFileExtension);
 	extern void ELANG_DLL reloadAll(bool reloadUnchanged = false);
+	extern void ELANG_DLL compileDefaultShaders();
+	extern void ELANG_DLL connectAssetDstr();
 
 	inline void initElang() {
 		connectAssetDstr();
-		gGlsl.compileDefaultShaders((gProject->datDir + "glsl/").c_str());
+		compileDefaultShaders();
 		for (auto e : gProject->view<Painter>()) {
 			asset<Painter>(e)->init();
-		} 
+		}
 		cout << "Initiating Elang Project " << gProject->name << " .." << endl;
 		cout << "..." << endl;
 	}

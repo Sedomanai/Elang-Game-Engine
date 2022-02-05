@@ -39,8 +39,7 @@ namespace el
 	template<typename T>
 	inline void Quad<T>::batch() {
 		if (painter && material) {
-			painter->batch(
-				SpriteVertexData::sVertexDataIndex,
+			painter->batch<SpriteVertex>(
 				&mVertices[0], &gBox2dFillIndices[0],
 				4, 6, (uint16)material.index(), 0, mDepth
 			);

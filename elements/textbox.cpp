@@ -61,8 +61,7 @@ namespace el
 
 	void Textfield::batch() {
 		if (mPainter && mFace && mVCount > 0) {
-			mPainter->batch(
-				SpriteVertexData::sVertexDataIndex,
+			mPainter->batch<SpriteVertex>(
 				&mVertices[0], &mIndices[0], 
 				(uint32)mVCount, (uint32)mICount, (uint32)mFace->material.index(), 0, mDepth
 			);
@@ -138,8 +137,7 @@ namespace el
 				uint32 gend = mLines[first + count - 1].gend;
 				uint32 gwidth = gend - gbegin;
 
-				mPainter->batch(
-					SpriteVertexData::sVertexDataIndex,
+				mPainter->batch<SpriteVertex>(
 					&mVertices[gbegin * 4], &mIndices[0], 
 					gwidth * 4, gwidth * 6, (uint32)mFace->material.index(), 0, mDepth
 				);
@@ -147,8 +145,7 @@ namespace el
 			}
 			else {
 			default_paint:
-				mPainter->batch(
-					SpriteVertexData::sVertexDataIndex,
+				mPainter->batch<SpriteVertex>(
 					&mVertices[0], &mIndices[0],
 					(uint32)mVCount, (uint32)mICount, (uint32)mFace->material.index(), 0, mDepth
 				);

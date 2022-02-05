@@ -45,7 +45,7 @@ namespace el
 
 		template<typename T>
 		void serialize(T& archive) {
-			archive(mVert.key, mFrag.key, mLocked, mTargetCount, camera, projection, flags, drawtype, color);
+			archive(mVertLabel, mFragLabel, mLocked, mTargetCount, camera, projection, flags, drawtype, color);
 		}
 		void init() {
 			bindShaderBuffer();
@@ -58,9 +58,11 @@ namespace el
 		void batchCircle(const circle& circ, const color8& c, float depth = 0.0f);
 		void batchPoly(const poly2d& circ, const color8& c, float depth = 0.0f);
 
-		template<typename ...Arg>
-		void batch(sizet vert_type, Arg... args) {
-			if (!mLocked && vert_type == mVert.vertdata->index()) {
+		template<typename T, typename ...Arg>
+		void batch(Arg... args) {
+			cout << sizeof(T) << "   " << mVert->size() << endl;
+
+			if (!mLocked && sizeof(T) == mVert->size()) {
 				mBatches.emplace_back(args...);
 				mBatchOrder.emplace_back(mBatchOrder.size());
 			}
@@ -77,12 +79,18 @@ namespace el
 		void setUniformVec4(uint32 shader, const vec4& dat, const char* name);
 		void setUniformMatrix(uint32 shader, const matrix4x4& dat, const char* name);
 
-		string getVertLabel() { return mVert.key; }
-		string getFragLabel() { return mFrag.key; }
+		string getVertLabel() { return mVertLabel; }
+		string getFragLabel() { return mFragLabel; }
+		/*string getVertLabel() { return mVert.key; }
+		string getFragLabel() { return mFrag.key; }*/
 		sizet getTargetCount() { return mTargetCount; }
 	private:
 		void circlePoints(vector<Primitive2DVertex>& buffer, const color8& c, float cx, float cy, float x, float y);
-		GlslProgram mVert, mFrag;
+		//GlslProgram mVert, mFrag;
+
+		string mVertLabel, mFragLabel;
+		VertexShader* mVert;
+		FragmentShader* mFrag;
 
 		vector<Batch> mBatches;
 		vector<sizet> mBatchOrder;
@@ -105,9 +113,9 @@ namespace el
 		Painter fill;
 
 		ShapeDebug() : mInit(false),
-			point("_debug2d.vert", "raw_pass.frag", 100000, NullEntity, Projection::eOrtho, Painter::Z_CLEAR),
-			line("_debug2d.vert", "raw_pass.frag", 100000, NullEntity, Projection::eOrtho, Painter::Z_CLEAR),
-			fill("_debug2d.vert", "raw_pass.frag", 100000, NullEntity, Projection::eOrtho, Painter::Z_CLEAR)
+			point("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, Painter::Z_CLEAR),
+			line("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, Painter::Z_CLEAR),
+			fill("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, Painter::Z_CLEAR)
 		{};
 		~ShapeDebug() {
 			if (mInit) {

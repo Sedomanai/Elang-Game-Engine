@@ -11,8 +11,8 @@ namespace el
 		: camera(camera_), projection(projection_), flags(flags_), drawtype(GL_TRIANGLES),
 		color(vec4(1.0f, 1.0f, 1.0f, 1.0f)), mVCount(0), mICount(0), mTargetCount(maxVertexCount), mLocked(false)
 	{
-		mVert.key = vertexShader;
-		mFrag.key = fragmentShader;
+		mVertLabel = vertexShader;
+		mFragLabel = fragmentShader;
 #ifdef QOPENGLVERSIONFUNCTIONS_4_5_CORE_H
 		initializeOpenGLFunctions();
 #endif
@@ -39,7 +39,7 @@ namespace el
 	}
 
 	void Painter::batchline(const line& line, const color8& c, float depth) {
-		if (!mLocked && mVert.vertdata->index() == Primitive2DVertexData::sVertexDataIndex && 
+		if (!mLocked && mVert->size() == sizeof(Primitive2DVertex) && 
 			drawtype == GL_LINES) 
 		{
 			auto& batch = mBatches.emplace_back(
@@ -58,7 +58,7 @@ namespace el
 	}
 
 	void Painter::batchAABB(const aabb& aabb, const color8& c, float depth) {
-		if (!mLocked && mVert.vertdata->index() == Primitive2DVertexData::sVertexDataIndex) {
+		if (!mLocked && mVert->size() == sizeof(Primitive2DVertex))  {
 			switch (drawtype) {
 			case GL_LINES:
 				mBatches.emplace_back(
@@ -90,7 +90,7 @@ namespace el
 	}
 
 	void Painter::batchBox(const poly2d& box, const color8& c, float depth) {
-		if (!mLocked && mVert.vertdata->index() == Primitive2DVertexData::sVertexDataIndex && box.count == 4) {
+		if (!mLocked && mVert->size() == sizeof(Primitive2DVertex) && box.count == 4) {
 			switch (drawtype) {
 			case GL_LINES:
 				mBatches.emplace_back(
@@ -118,7 +118,7 @@ namespace el
 	}
 
 	void Painter::batchPoly(const poly2d& poly, const color8& c, float depth) {
-		if (!mLocked && mVert.vertdata->index() == Primitive2DVertexData::sVertexDataIndex &&
+		if (!mLocked && mVert->size() == sizeof(Primitive2DVertex) &&
 			drawtype == GL_LINES) 
 		{
 			auto& batch = mBatches.emplace_back(
@@ -143,7 +143,7 @@ namespace el
 	}
 
 	void Painter::batchCircle(const circle& circ, const color8& c, float depth) {
-		if (!mLocked && mVert.vertdata->index() == Primitive2DVertexData::sVertexDataIndex) {
+		if (!mLocked && mVert->size() == sizeof(Primitive2DVertex)) {
 			auto& batch = mBatches.emplace_back();
 			mBatchOrder.emplace_back(mBatchOrder.size());
 
@@ -261,7 +261,7 @@ namespace el
 			for (sizet i = 0; i < size; i++) {
 				auto& current = mBatches[mBatchOrder[i]];
 				glBindBuffer(GL_ARRAY_BUFFER, mVbo);
-				glBufferSubData(GL_ARRAY_BUFFER, mVCount * mVert.vertdata->getSize(), current.vertex_count * mVert.vertdata->getSize(), current.vertices);
+				glBufferSubData(GL_ARRAY_BUFFER, mVCount * mVert->size(), current.vertex_count * mVert->size(), current.vertices);
 				mVCount += current.vertex_count;
 			}
 		} mBumpers.push_back(mICount);
@@ -288,9 +288,9 @@ namespace el
 
 
 			if (camera) {
-				setUniformMatrix(mVert.shader, ((projection == Projection::ePerspective) ? gPerspective : gOrtho) * camera->inversed().matrix(), "uView");
+				setUniformMatrix(mVert->shader(), ((projection == Projection::ePerspective) ? gPerspective : gOrtho) * camera->inversed().matrix(), "uView");
 			} else {
-				setUniformMatrix(mVert.shader, ((projection == Projection::ePerspective) ? gPerspective : gOrtho), "uView");
+				setUniformMatrix(mVert->shader(), ((projection == Projection::ePerspective) ? gPerspective : gOrtho), "uView");
 			}
 
 			for (sizet i = 0; i < mBumpers.size() - 2; i += 2) {
@@ -320,21 +320,32 @@ namespace el
 	}
 
 	void Painter::bindShaderBuffer() {
-		mVert = gGlsl.find(mVert.key);
-		mFrag = gGlsl.find(mFrag.key);
+		if (gVertexShaders.contains(mVertLabel)) {
+			mVert = &gVertexShaders[mVertLabel];
+		} else {
+			cout << "Vertex Shader " << mVertLabel << " does not exist." << endl;
+			return;
+		}
+		if (gFragmentShaders.contains(mFragLabel)) {
+			mFrag = &gVertexShaders[mFragLabel];
+		} else {
+			cout << "Fragment Shader " << mFragLabel << " does not exist." << endl;
+			return;
+		}
+
 		glGenProgramPipelines(1, &mPipeline);
 		glBindProgramPipeline(mPipeline);
-		glUseProgramStages(mPipeline, GL_VERTEX_SHADER_BIT, mVert.shader);
-		glUseProgramStages(mPipeline, GL_FRAGMENT_SHADER_BIT, mFrag.shader);
+		glUseProgramStages(mPipeline, GL_VERTEX_SHADER_BIT, mVert->shader());
+		glUseProgramStages(mPipeline, GL_FRAGMENT_SHADER_BIT, mFrag->shader());
 	}
 	void Painter::bindDataBuffer() {
 		glGenVertexArrays(1, &mVao);
 		glBindVertexArray(mVao);
 		glGenBuffers(1, &mVbo);
 		glBindBuffer(GL_ARRAY_BUFFER, mVbo);
-		mVert.vertdata->vertexAttribPointer();
-		mVert.vertdata->enableVertexAttribArray();
-		glBufferData(GL_ARRAY_BUFFER, mTargetCount * mVert.vertdata->getSize(), 0, GL_DYNAMIC_DRAW);
+		mVert->vertexAttribPointer();
+		mVert->enableVertexAttribArray();
+		glBufferData(GL_ARRAY_BUFFER, mTargetCount * mVert->size(), 0, GL_DYNAMIC_DRAW);
 
 		glGenBuffers(1, &mIbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIbo);
@@ -365,19 +376,19 @@ namespace el
 				auto& uni = mat.uniforms[i];
 				switch (uni.type) {
 				case eDataType::FLOAT:
-					setUniformFloat(uni.vertex ? mVert.shader : mFrag.shader, *reinterpret_cast<float*>(uni.data), uni.name.c_str());
+					setUniformFloat(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<float*>(uni.data), uni.name.c_str());
 					break;
 				case eDataType::VEC2:
-					setUniformVec2(uni.vertex ? mVert.shader : mFrag.shader, *reinterpret_cast<vec2*>(uni.data), uni.name.c_str());
+					setUniformVec2(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec2*>(uni.data), uni.name.c_str());
 					break;
 				case eDataType::VEC3:
-					setUniformVec3(uni.vertex ? mVert.shader : mFrag.shader, *reinterpret_cast<vec3*>(uni.data), uni.name.c_str());
+					setUniformVec3(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec3*>(uni.data), uni.name.c_str());
 					break;
 				case eDataType::VEC4:
-					setUniformVec4(uni.vertex ? mVert.shader : mFrag.shader, *reinterpret_cast<vec4*>(uni.data), uni.name.c_str());
+					setUniformVec4(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec4*>(uni.data), uni.name.c_str());
 					break;
 				case eDataType::MATRIX4:
-					setUniformMatrix(uni.vertex ? mVert.shader : mFrag.shader, *reinterpret_cast<matrix4x4*>(uni.data), uni.name.c_str());
+					setUniformMatrix(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<matrix4x4*>(uni.data), uni.name.c_str());
 					break;
 				}
 			}

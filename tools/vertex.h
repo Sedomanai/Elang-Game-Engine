@@ -14,6 +14,60 @@ namespace el {
 	inline sizet gBox2dLineIndices[8] = { 0, 1, 1, 2, 2, 3, 3, 0 };
 
 
+	//struct GlslVertexData
+	//{
+	//	GlslVertexData(uint shader) : mSize(0), mShader(shader) {}
+
+	//	uint shader() { return mShader; }
+
+	//	void addData(eDataType data) {
+	//		switch (data) {
+	//			case eDataType::VEC2: mSize += sizeof(vec2); break;
+	//			case eDataType::VEC3: mSize += sizeof(vec3); break;
+	//			case eDataType::VEC4: mSize += sizeof(vec4); break;
+	//			case eDataType::COLOR8: mSize += sizeof(color8); break;
+	//		}
+	//	}
+
+	//	void enableVertexAttribArray() {
+	//		for (sizet i = 0; i < mData.size(); i++)
+	//			glEnableVertexAttribArray(uint(i));
+	//	}
+	//	void disableVertexAttribArray() {
+	//		for (sizet i = 0; i < mData.size(); i++)
+	//			glEnableVertexAttribArray(uint(i));
+	//	}
+
+	//	void vertexAttribPointer() {
+	//		for (sizet i = 0; i < mData.size(); i++) {
+	//			sizet offset = 0;
+	//			switch (mData[i]) {
+	//			case eDataType::VEC2: 
+	//				glVertexAttribPointer(i, 2, GL_FLOAT, GL_FALSE, mSize, &offset);
+	//				offset += sizeof(vec2);
+	//				break;
+	//			case eDataType::VEC3:
+	//				glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE, mSize, &offset);
+	//				offset += sizeof(vec3);
+	//				break;
+	//			case eDataType::VEC4:
+	//				glVertexAttribPointer(i, 4, GL_FLOAT, GL_FALSE, mSize, &offset);
+	//				offset += sizeof(vec4);
+	//				break;
+	//			case eDataType::COLOR8:
+	//				glVertexAttribPointer(i, 4, GL_UNSIGNED_BYTE, GL_TRUE, mSize, &offset);
+	//				offset += sizeof(color8);
+	//				break;
+	//			}
+	//		}
+	//	}
+
+	//private:
+	//	vector<eDataType> mData;
+	//	sizet mSize;
+	//	uint mShader;
+	//};
+
 	//=======================================================================================
 	// Inherit to make a Vertex Data Type (include macro EL_DECLARE_VERTEX_DATA_H on top)
 	//=======================================================================================
@@ -42,15 +96,15 @@ namespace el {
 	//=======================================================================================
 	// GlslProgram used by Painters
 	//=======================================================================================
-	struct GlslProgram
-	{
-		uint32 shader;
-		IVertexData* vertdata;
-		string key;
+	//struct GlslProgram
+	//{
+	//	uint32 shader;
+	//	IVertexData* vertdata;
+	//	string key;
 
-		GlslProgram() : shader(-1), vertdata(0) {};
-		GlslProgram(uint32 shader_, IVertexData* vertdata_, const string& key_) : shader(shader_), vertdata(vertdata_), key(key_) {};
-	};
+	//	GlslProgram() : shader(-1), vertdata(0) {};
+	//	GlslProgram(uint32 shader_, IVertexData* vertdata_, const string& key_) : shader(shader_), vertdata(vertdata_), key(key_) {};
+	//};
 }
 
 #define EL_DECLARE_VERTEX_DATA_H \
