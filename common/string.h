@@ -133,7 +133,7 @@ namespace el {
 	/// Splits a string by a delimiter and iterates the result
 	/// Currently only supports single character delim
 	/// </summary>
-	/// <param name="func"> (strview str, sizet: iter_num) </param>
+	/// <param name="T func //"> bool (*) (strview: data, sizet: iteration_number) </param>
 	template<typename T>
 	void iterate(strview str, const char delim, T func) {
 		sizet strsize = str.size();
@@ -142,7 +142,8 @@ namespace el {
 			sizet i = 0, j = 0, n = 0;
 			while (i < strsize) {
 				if (str[i] == delim) {
-					func(str.substr(j, i - j), n++);
+					if (func(str.substr(j, i - j), n++))
+						return;
 					j = i + 1;
 				} i++;
 			}
@@ -159,7 +160,7 @@ namespace el {
 	/// Currently only supports single character delim
 	/// Iterates from the back because it's easier to deal with file directories
 	/// </summary>
-	/// <param name="func"> (strview: head, strview: tail) </param>
+	/// <param name="T func //"> void (*) (strview: head, strview: tail) </param>
 	template<typename T>
 	void tokenize(strview str, const char delim, T func) {
 		sizet strsize = str.size();
@@ -182,7 +183,7 @@ namespace el {
 	/// Useful for a single specific case at the moment; to traverse a directory
 	/// For details refer to <common/fileio.h> (deprected)
 	/// </summary>
-	/// <param name="func"> (strview: head) </param>
+	/// <param name="T func //"> void (*) (strview: head) </param>
 	template<typename T>
 	void traverse(strview str, const char delim, T func) {
 		for (auto i = 0; i < str.size(); i++) {

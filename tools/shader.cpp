@@ -12,10 +12,10 @@ namespace el {
 			});
 	}
 
-	void FragmentShader::compileShader(string& file, GLenum type)
+	void FragmentShader::compileShader(string& glsl, GLenum type)
 	{
-		const char* link = file.c_str();
-		const uint32 blob = glCreateShader(type);
+		const char* link = glsl.c_str();
+		const uint blob = glCreateShader(type);
 
 		if (blob) {
 			glShaderSource(blob, 1, &link, NULL);
@@ -24,7 +24,7 @@ namespace el {
 			int compiled = GL_FALSE;
 			glGetShaderiv(blob, GL_COMPILE_STATUS, &compiled);
 			if (compiled == GL_FALSE)
-				glslErrorCheck(blob, file.c_str());
+				glslErrorCheck(blob, glsl.c_str());
 			else {
 				mShader = glCreateProgram();
 				if (!mShader) {
@@ -35,7 +35,7 @@ namespace el {
 
 				glProgramParameteri(mShader, GL_PROGRAM_SEPARABLE, GL_TRUE);
 				glAttachShader(mShader, blob);
-				glslVertexProgram(file);
+				glslVertexProgram(glsl);
 				glLinkProgram(mShader);
 				glDetachShader(mShader, blob);
 				glDeleteShader(blob);
@@ -82,19 +82,19 @@ namespace el {
 		for (sizet i = 0; i < mData.size(); i++) {
 			switch (mData[i]) {
 			case eDataType::VEC2:
-				glVertexAttribPointer((uint)i, 2, GL_FLOAT, GL_FALSE, (int)mSize, &offset);
+				glVertexAttribPointer((uint)i, 2, GL_FLOAT, GL_FALSE, (int)mSize, (void*)offset);
 				offset += sizeof(vec2);
 				break;
 			case eDataType::VEC3:
-				glVertexAttribPointer((uint)i, 3, GL_FLOAT, GL_FALSE, (int)mSize, &offset);
+				glVertexAttribPointer((uint)i, 3, GL_FLOAT, GL_FALSE, (int)mSize, (void*)offset);
 				offset += sizeof(vec3);
 				break;
 			case eDataType::VEC4:
-				glVertexAttribPointer((uint)i, 4, GL_FLOAT, GL_FALSE, (int)mSize, &offset);
+				glVertexAttribPointer((uint)i, 4, GL_FLOAT, GL_FALSE, (int)mSize, (void*)offset);
 				offset += sizeof(vec4);
 				break;
 			case eDataType::COLOR8:
-				glVertexAttribPointer((uint)i, 4, GL_UNSIGNED_BYTE, GL_TRUE, (int)mSize, &offset);
+				glVertexAttribPointer((uint)i, 4, GL_UNSIGNED_BYTE, GL_TRUE, (int)mSize, (void*)offset);
 				offset += sizeof(color8);
 				break;
 			}
@@ -102,12 +102,26 @@ namespace el {
 	}
 
 	void VertexShader::glslVertexProgram(string& file) {
-		uint nameshift = 0;
-		iterate(file, '\n', [&](strview line, sizet) {
+		int state = 0, nameshift = 0;
+		iterate(file, '\n', [&](strview line, sizet) -> bool {
 			int read = 0;
 			bool bvec4 = false;
-			iterate(line, ' ', [&](strview str, sizet) {
-				if (read == 1) {
+			if (state == 2)
+				return true;
+
+			iterate(line, ' ', [&](strview str, sizet) -> bool {
+				switch (read) {
+				default:
+					if (str == "in") {
+						read++;
+						if (state == 0)
+							state = 1;
+					} else if (state == 1) {
+						state = 2;
+						return true;
+					}
+					break;
+				case 1:
 					if (str == "vec2")
 						addData(eDataType::VEC2);
 					else if (str == "vec3")
@@ -115,24 +129,24 @@ namespace el {
 					else if (str == "vec4") {
 						bvec4 = true;
 					} read++;
-				} else if (read == 2) {
+					break;
+				case 2:
 					if (bvec4) {
 						if (str[0] == 'v' && str[1] == '8')
 							addData(eDataType::COLOR8);
 						else addData(eDataType::VEC4);
-					} 
+					}
 
 					string name = string(str);
-					name.pop_back();
-					glBindAttribLocation(mShader, nameshift, name.c_str());
-					cout << "(" << mShader << " " << nameshift << " " << name << ")" << endl;
-					nameshift++;
-				}
+					if (name.size() > 0 && name.back() == ';') {
+						name.pop_back();
+					}
 
-				if (str == "in") {
-					read++;
-				}
-			});
+					glBindAttribLocation(mShader, nameshift, name.c_str());
+					nameshift++;
+					break;
+				} return false;
+			}); return false;
 		});
 	}
 }

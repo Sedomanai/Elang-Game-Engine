@@ -71,11 +71,11 @@ namespace el
 		void bindShaderBuffer();
 		void bindDataBuffer();
 		void bindMaterial(uint32 material);
-		void setUniformFloat(uint32 shader, float dat, const char* name);
-		void setUniformVec2(uint32 shader, const vec2& dat, const char* name);
-		void setUniformVec3(uint32 shader, const vec3& dat, const char* name);
-		void setUniformVec4(uint32 shader, const vec4& dat, const char* name);
-		void setUniformMatrix(uint32 shader, const matrix4x4& dat, const char* name);
+		void setUniformFloat(uint shader, float dat, const char* name);
+		void setUniformVec2(uint shader, const vec2& dat, const char* name);
+		void setUniformVec3(uint shader, const vec3& dat, const char* name);
+		void setUniformVec4(uint shader, const vec4& dat, const char* name);
+		void setUniformMatrix(uint shader, const matrix4x4& dat, const char* name);
 
 		string getVertLabel() { return mVertLabel; }
 		string getFragLabel() { return mFragLabel; }

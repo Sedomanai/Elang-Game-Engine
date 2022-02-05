@@ -15,22 +15,22 @@ namespace el {
 		Clipframe frame;
 
 		asset<Clip> clip;
-		iterate(out, '\n', [&](strview line, sizet) {
-			iterate(line, ' ', [&](strview word, sizet iter) {
+		iterate(out, '\n', [&](strview line, sizet) -> bool {
+			iterate(line, ' ', [&](strview word, sizet iter) -> bool {
 				switch (iter) {
 				case 0: act = gAtlasActions[string(word)]; break;
 				case 1:
 					switch (act) {
 					case AtlasAction::SET_WIDTH:
 						aw = toInt(word);
-						return;
+						return false;
 					case AtlasAction::SET_HEIGHT:
 						ah = toInt(word);
-						return;
+						return false;
 					case AtlasAction::SET_CLIP:
 						clip = gProject->makeSub<Clip>();
 						clips.emplace(string(word), clip);
-						return;
+						return false;
 					}
 				default:
 					switch (act) {
@@ -67,7 +67,9 @@ namespace el {
 					}
 					break;
 				}
+				return false;
 			});
+			return false;
 		});
 	}
 

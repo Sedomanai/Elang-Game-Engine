@@ -349,21 +349,21 @@ namespace el
 
 		glGenBuffers(1, &mIbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIbo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mTargetCount * 8 * sizeof(unsigned int), 0, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mTargetCount * 8 * sizeof(uint), 0, GL_DYNAMIC_DRAW);
 	}
-	void Painter::setUniformFloat(uint32 shader, float dat, const char* location) {
+	void Painter::setUniformFloat(uint shader, float dat, const char* location) {
 		glProgramUniform1f(shader, glGetUniformLocation(shader, location), dat);
 	}
-	void Painter::setUniformVec2(uint32 shader, const vec2& dat, const char* location) {
+	void Painter::setUniformVec2(uint shader, const vec2& dat, const char* location) {
 		glProgramUniform2f(shader, glGetUniformLocation(shader, location), dat.x, dat.y);
 	}
-	void Painter::setUniformVec3(uint32 shader, const vec3& dat, const char* location) {
+	void Painter::setUniformVec3(uint shader, const vec3& dat, const char* location) {
 		glProgramUniform3f(shader, glGetUniformLocation(shader, location), dat.x, dat.y, dat.z);
 	}
-	void Painter::setUniformVec4(uint32 shader, const vec4& dat, const char* location) {
+	void Painter::setUniformVec4(uint shader, const vec4& dat, const char* location) {
 		glProgramUniform4f(shader, glGetUniformLocation(shader, location), dat.x, dat.y, dat.z, dat.w);
 	}
-	void Painter::setUniformMatrix(uint32 shader, const matrix4x4& dat, const char* location) {
+	void Painter::setUniformMatrix(uint shader, const matrix4x4& dat, const char* location) {
 		glProgramUniformMatrix4fv(shader, glGetUniformLocation(shader, location), 1, GL_FALSE, &dat.data[0]);
 	}
 	void Painter::bindMaterial(uint32 material) {
