@@ -1,4 +1,6 @@
-# Elang Engine
+# Elang Game Engine
+
+Elang Game Engine is a work in progress intended to make generic 2d games in the future. It's a project continued to built mostly for studying purposes but also to provide some mechanics that are not 
 
 Source for building the engine, including all the qt modules. Dependencies not included; you must set them up yourself.
 
