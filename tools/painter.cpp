@@ -327,7 +327,7 @@ namespace el
 			return;
 		}
 		if (gFragmentShaders.contains(mFragLabel)) {
-			mFrag = &gVertexShaders[mFragLabel];
+			mFrag = &gFragmentShaders[mFragLabel];
 		} else {
 			cout << "Fragment Shader " << mFragLabel << " does not exist." << endl;
 			return;

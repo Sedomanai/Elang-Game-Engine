@@ -32,11 +32,12 @@ namespace el {
 					return;
 				}
 
-				glProgramParameteri(id, GL_PROGRAM_SEPARABLE, GL_TRUE);
-				glAttachShader(id, shader);
+				mShader = id;
+				glProgramParameteri(mShader, GL_PROGRAM_SEPARABLE, GL_TRUE);
+				glAttachShader(mShader, shader);
 				glslVertexProgram(shader, file);
-				glLinkProgram(id);
-				glDetachShader(id, shader);
+				glLinkProgram(mShader);
+				glDetachShader(mShader, shader);
 				glDeleteShader(shader);
 			}
 		}
@@ -59,10 +60,10 @@ namespace el {
 
 	void VertexShader::addData(eDataType data) {
 		switch (data) {
-		case eDataType::VEC2: mSize += sizeof(vec2); cout << "add vec2" << endl; break;
-		case eDataType::VEC3: mSize += sizeof(vec3); cout << "add vec3" << endl; break;
-		case eDataType::VEC4: mSize += sizeof(vec4); cout << "add vec4" << endl; break;
-		case eDataType::COLOR8: mSize += sizeof(color8); cout << "add color" << endl; break;
+		case eDataType::VEC2: mSize += sizeof(vec2); break;
+		case eDataType::VEC3: mSize += sizeof(vec3); break;
+		case eDataType::VEC4: mSize += sizeof(vec4); break;
+		case eDataType::COLOR8: mSize += sizeof(color8); break;
 		} mData.emplace_back(data);
 	}
 
@@ -101,16 +102,12 @@ namespace el {
 	}
 
 	void VertexShader::glslVertexProgram(uint32 shader, string& file) {
-		cout << endl;
-		cout << shader << endl;
-
 		iterate(file, '\n', [&](strview line, sizet) {
 			int read = 0;
 			uint nameshift = 0;
 			bool bvec4 = false;
 			iterate(line, ' ', [&](strview str, sizet) {
 				if (read == 1) {
-					cout << "data type: " << str << "    ";
 					if (str == "vec2")
 						addData(eDataType::VEC2);
 					else if (str == "vec3")
@@ -128,7 +125,6 @@ namespace el {
 
 					string name = string(str);
 					name.pop_back();
-					cout << "name: " << name << endl;
 					glBindAttribLocation(shader, nameshift, name.c_str());
 					read = 0;
 				}
