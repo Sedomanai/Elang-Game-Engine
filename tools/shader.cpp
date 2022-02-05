@@ -16,6 +16,7 @@ namespace el {
 	{
 		const char* link = file.c_str();
 		const uint32 shader = glCreateShader(type);
+
 		if (shader) {
 			glShaderSource(shader, 1, &link, NULL);
 			glCompileShader(shader);
@@ -58,11 +59,11 @@ namespace el {
 
 	void VertexShader::addData(eDataType data) {
 		switch (data) {
-		case eDataType::VEC2: mSize += sizeof(vec2); break;
-		case eDataType::VEC3: mSize += sizeof(vec3); break;
-		case eDataType::VEC4: mSize += sizeof(vec4); break;
-		case eDataType::COLOR8: mSize += sizeof(color8); break;
-		}
+		case eDataType::VEC2: mSize += sizeof(vec2); cout << "add vec2" << endl; break;
+		case eDataType::VEC3: mSize += sizeof(vec3); cout << "add vec3" << endl; break;
+		case eDataType::VEC4: mSize += sizeof(vec4); cout << "add vec4" << endl; break;
+		case eDataType::COLOR8: mSize += sizeof(color8); cout << "add color" << endl; break;
+		} mData.emplace_back(data);
 	}
 
 	void VertexShader::enableVertexAttribArray() {
@@ -76,30 +77,33 @@ namespace el {
 	}
 
 	void VertexShader::vertexAttribPointer() {
+		sizet offset = 0;
 		for (sizet i = 0; i < mData.size(); i++) {
-			sizet offset = 0;
 			switch (mData[i]) {
 			case eDataType::VEC2:
-				glVertexAttribPointer(i, 2, GL_FLOAT, GL_FALSE, mSize, &offset);
+				glVertexAttribPointer((uint)i, 2, GL_FLOAT, GL_FALSE, (int)mSize, &offset);
 				offset += sizeof(vec2);
 				break;
 			case eDataType::VEC3:
-				glVertexAttribPointer(i, 3, GL_FLOAT, GL_FALSE, mSize, &offset);
+				glVertexAttribPointer((uint)i, 3, GL_FLOAT, GL_FALSE, (int)mSize, &offset);
 				offset += sizeof(vec3);
 				break;
 			case eDataType::VEC4:
-				glVertexAttribPointer(i, 4, GL_FLOAT, GL_FALSE, mSize, &offset);
+				glVertexAttribPointer((uint)i, 4, GL_FLOAT, GL_FALSE, (int)mSize, &offset);
 				offset += sizeof(vec4);
 				break;
 			case eDataType::COLOR8:
-				glVertexAttribPointer(i, 4, GL_UNSIGNED_BYTE, GL_TRUE, mSize, &offset);
+				glVertexAttribPointer((uint)i, 4, GL_UNSIGNED_BYTE, GL_TRUE, (int)mSize, &offset);
 				offset += sizeof(color8);
 				break;
 			}
-		}
+		} cout << offset << endl;
 	}
 
 	void VertexShader::glslVertexProgram(uint32 shader, string& file) {
+		cout << endl;
+		cout << shader << endl;
+
 		iterate(file, '\n', [&](strview line, sizet) {
 			int read = 0;
 			uint nameshift = 0;

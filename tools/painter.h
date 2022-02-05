@@ -60,8 +60,6 @@ namespace el
 
 		template<typename T, typename ...Arg>
 		void batch(Arg... args) {
-			cout << sizeof(T) << "   " << mVert->size() << endl;
-
 			if (!mLocked && sizeof(T) == mVert->size()) {
 				mBatches.emplace_back(args...);
 				mBatchOrder.emplace_back(mBatchOrder.size());
