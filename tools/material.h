@@ -3,37 +3,31 @@
 #include "../common/container.h"
 #include "../common/string.h"
 #include "../common/math.h"
+#include "../common/enums.h"
 #include "texture.h"
 
 namespace el
 {
 	struct Uniform
 	{
-		enum
-		{
-			FLOAT,
-			VEC2,
-			VEC3,
-			VEC4,
-			MATRIX // TODO
-		};
-		uint32 type;
+		eDataType type;
 		uint32 vertex;
 		void* data;
 		string name;
 
-		Uniform(uint32 type_, uint32 vertex_, void* data_, const string& name_) 
+		Uniform(eDataType type_, uint32 vertex_, void* data_, const string& name_) 
 			: type(type_), vertex(vertex_), data(data_), name(name_) {};
-		Uniform() : type(FLOAT), vertex(1), data(0), name("uSomething__NULL_") {};
+		Uniform() : type(eDataType::FLOAT), vertex(1), data(0), name("uSomething__NULL_") {};
 
 		template<typename T>
 		void save(T& archive) const {
 			archive(type, vertex, name);
 			switch (type) {
-				case FLOAT: archive(*(reinterpret_cast<float*>(data))); break;
-				case VEC2: archive(*(reinterpret_cast<vec2*>(data))); break;
-				case VEC3: archive(*(reinterpret_cast<vec3*>(data))); break;
-				case VEC4: archive(*(reinterpret_cast<vec4*>(data))); break;
+				case eDataType::FLOAT: archive(*(reinterpret_cast<float*>(data))); break;
+				case eDataType::VEC2: archive(*(reinterpret_cast<vec2*>(data))); break;
+				case eDataType::VEC3: archive(*(reinterpret_cast<vec3*>(data))); break;
+				case eDataType::VEC4: archive(*(reinterpret_cast<vec4*>(data))); break;
+				case eDataType::MATRIX4: archive(*(reinterpret_cast<matrix4x4*>(data))); break;
 			};
 		}
 
@@ -41,10 +35,11 @@ namespace el
 		void load(T& archive) {
 			archive(type, vertex, name);
 			switch (type) {
-				case FLOAT: data = malloc(sizeof(float)); archive(*(reinterpret_cast<float*>(data))); break;
-				case VEC2: data = malloc(sizeof(vec2)); archive(*(reinterpret_cast<vec2*>(data))); break;
-				case VEC3: data = malloc(sizeof(vec3)); archive(*(reinterpret_cast<vec3*>(data))); break;
-				case VEC4: data = malloc(sizeof(vec4)); archive(*(reinterpret_cast<vec4*>(data))); break;
+				case eDataType::FLOAT: data = malloc(sizeof(float)); archive(*(reinterpret_cast<float*>(data))); break;
+				case eDataType::VEC2: data = malloc(sizeof(vec2)); archive(*(reinterpret_cast<vec2*>(data))); break;
+				case eDataType::VEC3: data = malloc(sizeof(vec3)); archive(*(reinterpret_cast<vec3*>(data))); break;
+				case eDataType::VEC4: data = malloc(sizeof(vec4)); archive(*(reinterpret_cast<vec4*>(data))); break;
+				case eDataType::MATRIX4: data = malloc(sizeof(matrix4x4)); archive(*(reinterpret_cast<matrix4x4*>(data))); break;
 			}
 		}
 	};
@@ -54,7 +49,7 @@ namespace el
 		vector<Uniform> uniforms;
 		vector<asset<Texture>> textures;
 
-		void addUniform(uint32 type_, uint32 vertex_, void* data_, const string& name_) {
+		void addUniform(eDataType type_, uint32 vertex_, void* data_, const string& name_) {
 			uniforms.emplace_back(type_, vertex_, data_, name_);
 		}
 

@@ -5,6 +5,7 @@
 #include "../common/container.h"
 #include "../common/math.h"
 #include "../common/string.h"
+#include "../common/enums.h"
 
 
 namespace el {
@@ -12,7 +13,6 @@ namespace el {
 	inline sizet gBox2dFillIndices[6] = { 0, 1, 3, 1, 3, 2 };
 	inline sizet gBox2dLineIndices[8] = { 0, 1, 1, 2, 2, 3, 3, 0 };
 
-	this isdf aiodfj aodf aweikfjkoawdfjkoawedfj id 
 
 	//=======================================================================================
 	// Inherit to make a Vertex Data Type (include macro EL_DECLARE_VERTEX_DATA_H on top)

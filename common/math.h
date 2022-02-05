@@ -429,7 +429,8 @@ namespace el
 
         template<typename T>
         void serialize(T& archive) {
-            archive(s_identity);
+            for (sizet i = 0; i < 16; i++) // optimize?..
+                archive(data[i]);
         }
     private:
         static const constexpr float s_identity[16] = { 1.0f, 0.0f, 0.0f, 0.0f,  0.0f, 1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f,  0.0f, 0.0f, 0.0f, 1.0f };

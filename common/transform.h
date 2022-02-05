@@ -7,7 +7,8 @@ namespace el
 	//=======================================================================================
 	// Transform is not a matrix4x4
 	// Rather it uses abbreviated calculations for game related geometric transformations
-	// This makes Transform a much faster alternative to matrix4x4 (at the expense of two more variables)
+	// This makes Transform a somewhat faster alternative to matrix4x4 (at the expense of two more variables)
+    // Neither is optimized by simd
 	//=======================================================================================
 	struct Transform
 	{

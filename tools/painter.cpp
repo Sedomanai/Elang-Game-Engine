@@ -364,19 +364,19 @@ namespace el
 			for (sizet i = 0; i < mat.uniforms.size(); i++) {
 				auto& uni = mat.uniforms[i];
 				switch (uni.type) {
-				case Uniform::FLOAT:
+				case eDataType::FLOAT:
 					setUniformFloat(uni.vertex ? mVert.shader : mFrag.shader, *reinterpret_cast<float*>(uni.data), uni.name.c_str());
 					break;
-				case Uniform::VEC2:
+				case eDataType::VEC2:
 					setUniformVec2(uni.vertex ? mVert.shader : mFrag.shader, *reinterpret_cast<vec2*>(uni.data), uni.name.c_str());
 					break;
-				case Uniform::VEC3:
+				case eDataType::VEC3:
 					setUniformVec3(uni.vertex ? mVert.shader : mFrag.shader, *reinterpret_cast<vec3*>(uni.data), uni.name.c_str());
 					break;
-				case Uniform::VEC4:
+				case eDataType::VEC4:
 					setUniformVec4(uni.vertex ? mVert.shader : mFrag.shader, *reinterpret_cast<vec4*>(uni.data), uni.name.c_str());
 					break;
-				case Uniform::MATRIX:
+				case eDataType::MATRIX4:
 					setUniformMatrix(uni.vertex ? mVert.shader : mFrag.shader, *reinterpret_cast<matrix4x4*>(uni.data), uni.name.c_str());
 					break;
 				}

@@ -32,3 +32,43 @@ enum struct eAlignment
 	LEFT,
 	RIGHT
 };
+
+
+enum struct eExtension
+{
+	MID,
+	LEFT,
+	RIGHT
+};
+
+
+enum struct eDataType
+{
+	VOID = 0,
+
+	INT,
+	SHORT,
+	LONG,
+	LONGLONG,
+	INT8,
+	INT16,
+	INT32,
+	INT64,
+
+	UINT,
+	USHORT,
+	ULONG,
+	ULONGLONG,
+	UINT8,
+	UINT16,
+	UINT32,
+	UINT64,
+
+	FLOAT,
+	VEC2,
+	VEC3,
+	VEC4,
+
+	MATRIX3,
+	MATRIX4
+};
