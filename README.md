@@ -9,12 +9,13 @@ There are several design policies worth noting. First of all, encapsulation is n
 This potentially makes everything global, inviting many problems usually associated with it. So far it has not been as dangerous as it sounds and the work flow is very much like working with glew, which is also mostly global bindings. Much of the apparatus classes are stand alone functions, but I may consider makking static classes with encapsulated data if it becomes a problem in the future. As of now, users are discouraged from creating and deleting asset entities manually. 
 
 
+
 # Intended Usage
 
 The initial setup begins with creating a game class which inherits the engine class and overriding its virtual methods. It must contain at least one instance of a Project class and a Stage class. The Project manages all the assets, including texture, texture atlas, fonts, sound (pending), materials, cameras, and painters (which are like draw layers bound to a vertex shader and a fragment shader.) The Stage contains all the world entities i.e. game objects, with qualities like positions, sprites, hitboxes, and so on. 
 
 
-# Loading
+## Loading
 
 The load method must begin by binding an instance of a Project. Then the user can assign an external asset folder directory to the project, then use the apparatus function 'reloadAll' to load all assets from the folder recursively. Alternatively, the user can also save a Project by serializing and archiving it and load that file to the Project. This file is expected to have an .elang extension. 
 
@@ -26,12 +27,15 @@ The best aspect of entwining all these methods is that the project serializes th
 
 The engine has built in shaders but can also load external glsl files in the asset folder. Vertex shaders must have an extension of .vert and fragment shaders of .frag. (This is almost finished as of v0.1.0 - the architecture is there, I just need to employ it in reloadAll.) Elang engine reads glsl and automatically deduces vertex attributes based on its inputs. There are several glsl grammar rules that must be noted. Refer the following example-
 
+'''
+test
+'''
 
 
 The asset entities can be wrapped in a templated asset entity holder. Beware though that the holders rely solely on the afforementioned global binding pointers. Generally speaking, there is no need to have more than one Project instance... per project.  
 
 
-# Gmae Logic
+## Game Logic
 
 The game logic consists of the start, input, and update method. 
 
@@ -44,7 +48,7 @@ This is not impossible with Project instances - which is a technique I use for m
 Stage objects can also be wrapped in a templated object entity holder. The same warnings apply as with the Project asset wrappers. In the aforementioned case of binding multiple stages, it is highly discouraged to use this wrapper and the apparatus functions that refer to the global Stage pointer. Instead, the user is encouraged to use the actual Stage instances as ENTT registries to attain inter-stage communication. The intefrace is the same as that of orthodox ENTT.
 
 
-# Batch & Paint
+## Batch & Paint
 
 The paint method deals with graphics. Currently the Elang Engine only supports the OpenGL pipeline. It will be very long before I employ other graphics APIs such as DirectX other than OpenGL. If I ever get around to this, I will try to keep the interface as same as possible. 
 
