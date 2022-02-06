@@ -160,7 +160,7 @@ namespace el
 		}
 	}
 
-	void Textbox::addChar(ent<aabb> rect, char ch) {
+	void Textbox::addChar(obj<aabb> rect, char ch) {
 		if (mLines.empty()) {
 			mLines.emplace_back();
 		}
@@ -250,7 +250,7 @@ namespace el
 		}
 	}
 
-	void Textbox::wordwrap(ent<aabb> rect) {
+	void Textbox::wordwrap(obj<aabb> rect) {
 		mVCount = 0;
 		mICount = 0;
 		mCursor.y = rect->t;
@@ -282,7 +282,7 @@ namespace el
 		auto& line = mLines.back();
 	}
 
-	void Textbox::splitAllLines(ent<aabb> rect) {
+	void Textbox::splitAllLines(obj<aabb> rect) {
 		mLines.clear();
 		mLines.emplace_back();
 		auto& line = mLines.back();

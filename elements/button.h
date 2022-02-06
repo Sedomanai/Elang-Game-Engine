@@ -1,16 +1,17 @@
 #pragma once
 
+#include "../elang_library_builder.h"
 #include "sprite.h"
 #include "basic.h"
 
 namespace el
 {
-	__interface IButtonEvent
+	__interface ELANG_DLL IButtonEvent
 	{
-		void onEnter(Entity e) {};
-		void onHover(Entity e) {};
-		void onExit(Entity e) {};
-		void postUpdate(Entity e) {};
+		void onEnter(Entity self, Entity context);
+		void onHover(Entity self, Entity context);
+		void onExit(Entity self, Entity context);
+		void postUpdate(Entity self, Entity context);
 	};
 
 	struct Button
@@ -25,21 +26,22 @@ namespace el
 
 			if (mCurr) {
 				if (mPrev) {
-					ev->onHover(e);
+					ev->onHover(e, context);
 				}
 				else {
-					ev->onHover(e);
-					ev->onEnter(e);
+					ev->onHover(e, context);
+					ev->onEnter(e, context);
 				}
 			}
 			else if (mPrev) {
-				ev->onExit(e);
+				ev->onExit(e, context);
 			}
-			ev->postUpdate(e);
+			ev->postUpdate(e, context);
 		}
 
 		template<typename T> void serialize(T& archive) {};
 
+		obj<Entity> context;
 	private:
 		IButtonEvent* ev;
 		bool mPrev, mCurr;

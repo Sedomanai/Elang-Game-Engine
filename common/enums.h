@@ -44,7 +44,7 @@ enum struct eExtension
 
 enum struct eDataType
 {
-	VOID = 0,
+	VOID_TYPE = 0,
 
 	INT,
 	SHORT,
@@ -71,6 +71,5 @@ enum struct eDataType
 	COLOR8,
 
 	MATRIX3,
-	MATRIX4,
-
+	MATRIX4
 };

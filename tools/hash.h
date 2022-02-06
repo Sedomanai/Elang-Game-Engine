@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "../common/container.h"
 
@@ -103,8 +103,8 @@ namespace el
 		hashmap<Data, Key> mKeys;
 	};
 
-	//ÀÎµ¦½º º¯µ¿ÀÌ ÇÊ¿äÇÒ ¶§ ¸®½ºÆ®Ã³·³ »ç¿ëÇÒ ¼ö ÀÖ´Â ¸Ê
-	//ÀÌ¸§ÀÌ ÇÊ¿äÇÑ GUI ¿£ÁøÀÌ¶û ÇÊ¿ä¾ø´Â °ÔÀÓ Å¬·¡½º¿Í ¿¬µ¿ÇÒ ¶§ ¾´´Ù
+	//ì¸ë±ìŠ¤ ë³€ë™ì´ í•„ìš”í•  ë•Œ ë¦¬ìŠ¤íŠ¸ì²˜ëŸ¼ ì‚¬ìš©í•  ìˆ˜ ìžˆëŠ” ë§µ
+	//ì´ë¦„ì´ í•„ìš”í•œ GUI ì—”ì§„ì´ëž‘ í•„ìš”ì—†ëŠ” ê²Œìž„ í´ëž˜ìŠ¤ì™€ ì—°ë™í•  ë•Œ ì“´ë‹¤
 	template<typename T>
 	struct listmap
 	{

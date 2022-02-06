@@ -14,6 +14,7 @@ namespace el
 		gProject->on_destroy<Texture>().connect<entt::invoke<&Texture::destroy>>();
 		gProject->on_destroy<Atlas>().connect<entt::invoke<&Atlas::destroy>>();
 		gProject->on_destroy<FontFace>().connect<entt::invoke<&FontFace::destroy>>();
+		Painter::sCreateNullTexture();
 		//TODO: Fonts and everything
 	}
 

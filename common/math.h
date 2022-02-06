@@ -6,10 +6,6 @@
 #include "define.h"
 #include "stream.h"
 
-#define ELMATH_GLOBAL_SIDE vec3(1, 0, 0)
-#define ELMATH_GLOBAL_UP vec3(0, 1, 0)
-#define ELMATH_GLOBAL_FRONT vec3(0, 0, 1)
-
 namespace el
 {
     inline constexpr double d_pi = 3.14159265358979;
@@ -435,4 +431,8 @@ namespace el
     private:
         static const constexpr float s_identity[16] = { 1.0f, 0.0f, 0.0f, 0.0f,  0.0f, 1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f,  0.0f, 0.0f, 0.0f, 1.0f };
     };
+
+    #define ELMATH_GLOBAL_SIDE vec3(1, 0, 0)
+    #define ELMATH_GLOBAL_UP vec3(0, 1, 0)
+    #define ELMATH_GLOBAL_FRONT vec3(0, 0, 1)
 }

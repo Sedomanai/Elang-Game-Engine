@@ -1,7 +1,5 @@
 #include "sprite.h"
 
-#include "basic.h"
-
 namespace el
 {
 	Canvas::Canvas(asset<Material> material_, asset<Painter> painter_) : Quad(material_, painter_),
@@ -54,7 +52,7 @@ namespace el
 		}
 	}
 
-	void Sprite::updatePositionSprite(ent<Position> position) {
+	void Sprite::updatePositionSprite(obj<Position> position) {
 		if (position) {
 			auto& pos = *position;
 			if (mCell) {
@@ -96,7 +94,7 @@ namespace el
 		}
 	}
 
-	void Sprite::updatePlanarSprite(ent<Planar> plane) {
+	void Sprite::updatePlanarSprite(obj<Planar> plane) {
 		if (plane) {
 			auto& tr = *plane;
 			if (mCell) {

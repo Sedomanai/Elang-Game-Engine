@@ -5,11 +5,11 @@ namespace el
 	uint32 Painter::sNullTextureID = -1;
 	vector<Entity> gAtelier;
 
-	Painter::Painter() : mVCount(0), mICount(0), drawtype(GL_TRIANGLES) {}
+	Painter::Painter() : drawtype(GL_TRIANGLES) {}
 	Painter::Painter(strview vertexShader, strview fragmentShader, sizet maxVertexCount,
 		asset<Camera> camera_, Projection projection_, sizet flags_) 
 		: camera(camera_), projection(projection_), flags(flags_), drawtype(GL_TRIANGLES),
-		color(vec4(1.0f, 1.0f, 1.0f, 1.0f)), mVCount(0), mICount(0), mTargetCount(maxVertexCount), mLocked(false)
+		color(vec4(1.0f, 1.0f, 1.0f, 1.0f)), mTargetCount(maxVertexCount), mLocked(false)
 	{
 		mVertLabel = vertexShader;
 		mFragLabel = fragmentShader;
@@ -222,18 +222,24 @@ namespace el
 					std::sort(mBatchOrder.begin(), mBatchOrder.end(), [&](sizet a, sizet b) -> bool {
 						return (mBatches[a].depth > mBatches[b].depth) 
 							|| ((mBatches[a].depth == mBatches[b].depth) && mBatches[a].material < mBatches[b].material);
-						});
+					});
 				} else {
 					std::sort(mBatchOrder.begin(), mBatchOrder.end(), [&](sizet a, sizet b) -> bool {
 						return mBatches[a].material < mBatches[b].material;
-						});
+					});
 				}
 			} else if (flags & DEPTH_SORT) {
 				std::sort(mBatchOrder.begin(), mBatchOrder.end(), [&](sizet a, sizet b) -> bool {
 					return  mBatches[a].depth > mBatches[b].depth;
-					});
+				});
 			}
+		}
+	}
 
+	void Painter::flush() {
+		sizet iCount = 0;
+		if (!mBatches.empty()) {
+			sizet vCount = 0;
 			unsigned int* iBuffer = (unsigned int*)glMapNamedBuffer(mIbo, GL_WRITE_ONLY);
 			auto size = mBatchOrder.size();
 			for (sizet i = 0; i < size; i++) {
@@ -241,37 +247,40 @@ namespace el
 				if (i > 0) {
 					auto& previous = mBatches[mBatchOrder[i - 1]];
 					if (previous.material != current.material) {
-						mBumpers.push_back(mICount);
+						mBumpers.push_back(iCount);
 						mBumpers.push_back(current.material);
 					}
-				} else {
+				}
+				else {
 					mBumpers.push_back(0);
 					mBumpers.push_back(current.material);
 				}
 
 				for (sizet i = 0; i < current.index_count; i++) {
-					iBuffer[mICount + i] = (unsigned int)(current.indices[i] + mVCount);
+					iBuffer[iCount + i] = (unsigned int)(current.indices[i] + vCount);
 				}
-				mICount += current.index_count;
-				mVCount += current.vertex_count;
+				iCount += current.index_count;
+				vCount += current.vertex_count;
 			} glUnmapNamedBuffer(mIbo);
 
-			mVCount = 0;
+			vCount = 0;
 
 			for (sizet i = 0; i < size; i++) {
 				auto& current = mBatches[mBatchOrder[i]];
 				glBindBuffer(GL_ARRAY_BUFFER, mVbo);
-				glBufferSubData(GL_ARRAY_BUFFER, mVCount * mVert->size(), current.vertex_count * mVert->size(), current.vertices);
-				mVCount += current.vertex_count;
+				glBufferSubData(GL_ARRAY_BUFFER, vCount * mVert->size(), current.vertex_count * mVert->size(), current.vertices);
+				vCount += current.vertex_count;
 			}
-		} mBumpers.push_back(mICount);
+		} mBumpers.push_back(iCount);
 	}
 
 	void Painter::paint() {
-		if (!mLocked)
+		if (!mLocked) {
 			sort();
+			flush();
+		}
 		
-		if (mICount > 0) {
+		if (mBumpers.size() > 1) {
 			//bind
 			glBindProgramPipeline(mPipeline);
 			glBindVertexArray(mVao);
@@ -314,9 +323,16 @@ namespace el
 
 		mLocked = (flags & LOCKED) ? true : false;
 		if (!mLocked) {
-			mICount = mVCount = 0;
 			mBumpers.clear();
 		}
+	}
+
+	void Painter::forceUnlock() {
+		mLocked = false;
+		flags &= ~LOCKED;
+		mBatches.clear();
+		mBatchOrder.clear();
+		mBumpers.clear();
 	}
 
 	void Painter::bindShaderBuffer() {

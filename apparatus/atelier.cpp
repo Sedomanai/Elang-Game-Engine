@@ -8,16 +8,16 @@ namespace el
 {
 	void updateBasicSprites(Observer& obs) {
 		for (auto e : obs) {
-			ent<Sprite>(e)->update(e);
+			obj<Sprite>(e)->update(e);
 		} obs.clear();
 		for (auto e : gStage->view<Canvas>()) {
-			ent<Canvas>(e)->update();
+			obj<Canvas>(e)->update();
 		}
 		for (auto e : gStage->view<Textfield>()) {
-			ent<Textfield>(e)->update(e);
+			obj<Textfield>(e)->update(e);
 		}
 		for (auto e : gStage->view<Textbox>()) {
-			ent<Textbox>(e)->update(e);
+			obj<Textbox>(e)->update(e);
 		}
 	}
 
@@ -31,26 +31,26 @@ namespace el
 
 	void batchBasic2DComponents() {
 		for (auto e : gStage->view<Sprite>()) {
-			ent<Sprite>(e)->batch();
+			obj<Sprite>(e)->batch();
 		}
 		//for (auto e : gStage->view<Canvas>()) {
-		//	ent<Canvas>(e)->batch();
+		//	obj<Canvas>(e)->batch();
 		//}
 		//for (auto e : gStage->view<Textfield>()) {
-		//	ent<Textfield>(e)->batch();
+		//	obj<Textfield>(e)->batch();
 		//}
 		//for (auto e : gStage->view<Textbox>()) {
-		//	ent<Textbox>(e)->batch(e);
+		//	obj<Textbox>(e)->batch(e);
 		//}
 	}
 
 	void batchDebuggingComponents(ShapeDebug* debugger, const color8& color) {
 		for (auto e : gStage->view<Box>()) {
-			auto rect = ent<Box>(e);
+			auto rect = obj<Box>(e);
 			debugger->line.batchAABB(*rect, color);
 		}
 		for (auto e : gStage->view<Radius>()) {
-			auto circ = ent<Radius>(e);
+			auto circ = obj<Radius>(e);
 			debugger->line.batchCircle(*circ, color);
 		}
 	}

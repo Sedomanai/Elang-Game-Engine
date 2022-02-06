@@ -68,10 +68,10 @@ namespace el
 		pos += mAxis + pass;
 		mHitX = mHitY = eHitType::NO_HIT;
 		mCrossedX = mCrossedY = false;
-		mGround = ent<Platform>();
+		mGround = obj<Platform>();
 	}
 
-	void Platformer::hitTest(ent<Platform> platform_, Position& pos) {
+	void Platformer::hitTest(obj<Platform> platform_, Position& pos) {
 		auto& platform = *platform_;
 		if (intersects(platform)) {
 			vec2 offset;

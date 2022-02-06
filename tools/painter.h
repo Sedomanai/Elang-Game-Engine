@@ -65,11 +65,11 @@ namespace el
 				mBatchOrder.emplace_back(mBatchOrder.size());
 			}
 		}
-		void sort();
 		void paint();
+		void lock() { flags |= LOCKED; }
+		void unlock() { flags &= ~LOCKED; }
+		void forceUnlock();
 
-		void bindShaderBuffer();
-		void bindDataBuffer();
 		void bindMaterial(uint32 material);
 		void setUniformFloat(uint shader, float dat, const char* name);
 		void setUniformVec2(uint shader, const vec2& dat, const char* name);
@@ -77,14 +77,18 @@ namespace el
 		void setUniformVec4(uint shader, const vec4& dat, const char* name);
 		void setUniformMatrix(uint shader, const matrix4x4& dat, const char* name);
 
-		string getVertLabel() { return mVertLabel; }
-		string getFragLabel() { return mFragLabel; }
-		/*string getVertLabel() { return mVert.key; }
-		string getFragLabel() { return mFrag.key; }*/
-		sizet getTargetCount() { return mTargetCount; }
+		string vertLabel() { return mVertLabel; }
+		string fragLabel() { return mFragLabel; }
+		sizet targetCount() { return mTargetCount; }
+		sizet currentBatchCount() { return mBatches.size(); }
+		bool empty() { return !(bool)mBumpers.size(); }
+
 	private:
+		void sort();
+		void flush();
+		void bindShaderBuffer();
+		void bindDataBuffer();
 		void circlePoints(vector<Primitive2DVertex>& buffer, const color8& c, float cx, float cy, float x, float y);
-		//GlslProgram mVert, mFrag;
 
 		string mVertLabel, mFragLabel;
 		VertexShader* mVert;
@@ -97,8 +101,7 @@ namespace el
 		unsigned int mPipeline, mVao, mVbo, mIbo;
 		sizet mTargetCount;
 		sizet mIndexCount;
-
-		sizet mVCount, mICount;
+		
 		bool mLocked;
 
 		static uint32 sNullTextureID;

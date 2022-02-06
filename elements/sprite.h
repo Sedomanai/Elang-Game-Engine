@@ -36,8 +36,8 @@ namespace el
 			archive(material, painter, mCell, mFlipped);
 		}
 	protected:
-		void updatePositionSprite(ent<Position> position);
-		void updatePlanarSprite(ent<Planar> plane);
+		void updatePositionSprite(obj<Position> position);
+		void updatePlanarSprite(obj<Planar> plane);
 
 		asset<Cell> mCell;
 		bool mFlipped;

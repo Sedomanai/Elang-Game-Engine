@@ -81,7 +81,7 @@ namespace el
 		Textbox(asset<FontFace> face, asset<Painter> painter, const string& text);
 		void batch(Entity e);
 		void update(Entity e);
-		void addChar(ent<aabb> e, char ch);
+		void addChar(obj<aabb> e, char ch);
 
 		template<typename T>
 		void save(T& archive) const {
@@ -96,8 +96,8 @@ namespace el
 		float spacing, scroll;
 	private:
 		void reinterpretLine();
-		void splitAllLines(ent<aabb> rect);
-		void wordwrap(ent<aabb> rect);
+		void splitAllLines(obj<aabb> rect);
+		void wordwrap(obj<aabb> rect);
 
 		vector<Line> mLines;
 	};

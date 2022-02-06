@@ -19,7 +19,7 @@ namespace el
     template<typename T>
     struct asset;
     template<typename T>
-    struct ent;
+    struct obj;
 
     struct ELANG_DLL Project : Registry
     {
@@ -76,14 +76,14 @@ namespace el
         //bihashmap<string, vector<Entity>> namedGroups; // TODO: can't because of vector hash function, find another way
 
         template<typename T, typename... Args>
-        ent<T> make(Args... args) {
+        obj<T> make(Args... args) {
             auto e = create();
             Registry::emplace<T>(e, args...);
             return e;
         }
 
         template<typename T, typename... Args>
-        ent<T> makeNamed(const string& key, Args... args) {
+        obj<T> makeNamed(const string& key, Args... args) {
             if (!named.contains(key)) {
                 auto e = Registry::create();
                 Registry::emplace<T>(e, args...);
@@ -109,7 +109,7 @@ namespace el
             archive(named);
         }
         //template<typename T, typename... Args>
-        //ent<T> makeForGroup(const string& key, Args... args) {
+        //obj<T> makeForGroup(const string& key, Args... args) {
         //    auto e = Registry::create();
         //    Registry::emplace<T>(e, args...);
         //    namedGroups[key].emplace_back(e);
@@ -196,7 +196,7 @@ namespace el
         Entity e;\
     };
     __EL_DEFINE_REGISTRY_NODES(asset, gProject)
-    __EL_DEFINE_REGISTRY_NODES(ent, gStage)
+    __EL_DEFINE_REGISTRY_NODES(obj, gStage)
 
     template<typename T, typename ...Arg>
     inline void connectObserver(Observer& observer) {

@@ -8,13 +8,13 @@ namespace el
 {
 	void syncButtonsToSprite() {
 		for (auto e : gStage->view<Sprite, Button>()) {
-			auto rect = ent<Box>(e);
-			auto circ = ent<Radius>(e);
+			auto rect = obj<Box>(e);
+			auto circ = obj<Radius>(e);
 			if (rect.has()) {
-				ent<Sprite>(e)->sync(*rect);
+				obj<Sprite>(e)->sync(*rect);
 			}
 			else if (circ.has()) {
-				ent<Sprite>(e)->sync(*circ);
+				obj<Sprite>(e)->sync(*circ);
 			}
 		}
 	}
@@ -22,9 +22,9 @@ namespace el
 	void updateAllButtons(asset<Camera> camera) {
 		auto pos = *camera * gMouse.currentPosition();
 		for (auto e : gStage->view<Button>()) {
-			ent<Button> button = e;
-			auto rect = ent<Box>(e);
-			auto circ = ent<Radius>(e);
+			obj<Button> button = e;
+			auto rect = obj<Box>(e);
+			auto circ = obj<Radius>(e);
 
 			bool hit = ((rect.has() && rect->contains(pos)) ||
 				(circ.has() && circ->contains(pos)));

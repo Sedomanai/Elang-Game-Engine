@@ -125,7 +125,7 @@ namespace el
 			THIS_SHOULDN_T_HAPPEN
 		};
 
-		ent<Platform> ground() {
+		obj<Platform> ground() {
 			return mGround;
 		}
 
@@ -152,7 +152,7 @@ namespace el
 
 		void applyForce(Position& pos);
 
-		void hitTest(ent<Platform> platform_, Position& pos);
+		void hitTest(obj<Platform> platform_, Position& pos);
 
 		void finishingTouch() {
 			if (mHitX != eHitType::NO_HIT && !mCrossedX)
@@ -171,7 +171,7 @@ namespace el
 		}
 
 	private:
-		ent<Platform> mGround;
+		obj<Platform> mGround;
 		vec2 mCap;
 		vec2 mAxis;
 		eHitType mHitX, mHitY;
