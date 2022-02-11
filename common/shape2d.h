@@ -22,29 +22,29 @@ namespace el
 
     struct aabb
 	{
-        aabb() : l(0), b(0), r(0), t(0) {}
-        aabb(float left, float bottom, float right, float top)
+        constexpr aabb() : l(0), b(0), r(0), t(0) {}
+        constexpr aabb(float left, float bottom, float right, float top)
             : l(left), b(bottom), r(right), t(top) {}
 
-        vec2 center() const {
+        constexpr vec2 center() const {
             return vec2((l + r) / 2.0f, (b + t) / 2.0f);
         }
-        float width() const {
+        constexpr float width() const {
             return r - l;
         }
-        float height() const {
+        constexpr float height() const {
             return t - b;
         }
-        float area() const {
+        constexpr  float area() const {
             return (r - l) * (t - b);
         }
-        void move(const vec2& value) {
+        constexpr void move(const vec2& value) {
             l += value.x;
             r += value.x;
             b += value.y;
             t += value.y;
         }
-        void normalize() {
+        constexpr void normalize() {
             if (r < l) {
                 float temp = l;
                 l = r;
@@ -56,21 +56,46 @@ namespace el
                 t = temp;
             }
         }
-        bool contains(const vec2& point) const {
+        constexpr bool contains(const vec2& point) const {
             return point.x >= l && point.x <= r && point.y >= b && point.y <= t;
         }
-        bool intersects(const aabb& a) const {
+        constexpr bool contains(const aabb& a) const {
+            return a.l >= l && a.r <= r && a.b >= b && a.t <= t;
+        }
+        constexpr bool intersects(const aabb& a) const {
             return (a.l <= r && l <= a.r && a.b <= t && b <= a.t);
         }
-        aabb intersected(const aabb& a) const {
+        constexpr aabb intersected(const aabb& a) const {
             return aabb(l > a.l ? l : a.l, b > a.b ? b : a.b, r < a.r ? r : a.r, t < a.t ? t : a.t);
         }
-        aabb united(const aabb& a) const {
+        constexpr aabb united(const aabb& a) const {
             return aabb(l<a.l ? l : a.l, b < a.b ? b : a.b, r>a.r ? r : a.r, t > a.t ? t : a.t);
         }
-        void trap(vec2& point) {
+        constexpr void trap(vec2& point) {
             point.x = clamp(point.x, l, r);
             point.y = clamp(point.y, b, t);
+        }
+        constexpr void trap(aabb& a) {
+            vec2 val;
+            bool lo = a.l < l;
+            bool ro = a.r > r;
+            bool bo = a.b < b;
+            bool to = a.t > t;
+
+            if (lo) {
+                if (!ro)
+                    val.x = l - a.l;
+            } else if (ro) {
+                val.x = r - a.r;
+            }
+
+            if (bo)
+                if (!to)
+                    val.y = b - a.b;
+            else if (to)
+                val.y = t - a.t;
+
+            a.move(val);
         }
 
         void roundCorners() {
@@ -105,6 +130,11 @@ namespace el
         template<typename T>
         void serialize(T& archive) {
             archive(l, b, r, t);
+        }
+
+        friend logger& operator<<(logger& log, const aabb& a) {
+            log << "( " << a.l << ", " << a.b << ", " << a.r << ", " <<  a.t << " )";
+            return log;
         }
 
         float l, b, r, t;

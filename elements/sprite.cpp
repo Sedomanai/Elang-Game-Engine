@@ -79,15 +79,15 @@ namespace el
 			}
 			else {
 				auto tex = material->textures[0];
-				auto w = float(tex->width()) / 2.0f;
-				auto h = float(tex->height()) / 2.0f;
-				mVertices[0].pos = vec2(-w, -h) + pos;
+				auto w = float(tex->width());
+				auto h = -float(tex->height());
+				mVertices[0].pos = vec2(0.0f, h) + pos;
 				mVertices[0].uv = vec2(0.0f, 1.0f);
-				mVertices[1].pos = vec2(w, -h) + pos;
+				mVertices[1].pos = vec2(w, h) + pos;
 				mVertices[1].uv = vec2(1.0f, 1.0f);
-				mVertices[2].pos = vec2(w, h) + pos;
+				mVertices[2].pos = vec2(w, 0.0f) + pos;
 				mVertices[2].uv = vec2(1.0f, 0.0f);
-				mVertices[3].pos = vec2(-w, h) + pos;
+				mVertices[3].pos =				   pos;
 				mVertices[3].uv = vec2(0.0f, 0.0f);
 			}
 			return;

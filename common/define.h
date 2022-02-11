@@ -13,6 +13,13 @@ using uint16 = uint16_t;
 using uint32 = uint32_t;
 using uint64 = uint64_t;
 
+#define EL_USING_BASE_CLASS(t, base) \
+using base::base; \
+t(const base& src) : base::base(src) {} \
+t(base&& src) : base::base(src) {} \
+void operator=(const base& src) { base::base(src); } \
+void operator=(base&& src) { base::base(src); }
+
 #ifdef _IOSTREAM_
 	using std::cout;
 	using std::cin;

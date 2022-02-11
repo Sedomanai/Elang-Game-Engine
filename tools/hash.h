@@ -97,6 +97,7 @@ namespace el
 
 		auto begin() { return mData.begin(); }
 		auto end() { return mData.end(); }
+		void clear() { mData.clear(); mKeys.clear(); }
 
 	private:
 		hashmap<Key, Data> mData;

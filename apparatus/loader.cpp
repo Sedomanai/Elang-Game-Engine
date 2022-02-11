@@ -18,6 +18,16 @@ namespace el
 		//TODO: Fonts and everything
 	}
 
+	void initElang() {
+		connectAssetDstr();
+		compileDefaultShaders();
+		for (auto e : gProject->view<Painter>()) {
+			asset<Painter>(e)->init();
+		}
+		cout << "Initiating Elang Project " << gProject->name << " .." << endl;
+		cout << "..." << endl;
+	}
+
 	void __s_registerAsset(bihashmap<string, Entity>& map, eFileExtension ext) {
 		if (map.contains(__s_gLoader_AssetCurrKey)) {
 			asset<FileData> file = map[__s_gLoader_AssetCurrKey];
@@ -245,6 +255,7 @@ namespace el
 		static bool uinit = true;
 
 		if (uinit) {
+			cout << "Compiling Default Shaders .." << endl;
 			auto& v1 = gVertexShaders["position2d"];
 			v1.compileShader(gGlslVertexPosition2d, GL_VERTEX_SHADER);
 			auto& v2 = gVertexShaders["debug2d"];

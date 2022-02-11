@@ -9,7 +9,7 @@ namespace el
 {
 	constexpr int ortho_far = 100000000;
 
-	struct ELANG_DLL Camera : Transform { using Transform::Transform; };
+	struct ELANG_DLL Camera : Transform { EL_USING_BASE_CLASS(Camera, Transform) };
 	enum class Projection
 	{
 		eOrtho, ePerspective

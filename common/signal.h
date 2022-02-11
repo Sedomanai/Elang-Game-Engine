@@ -23,6 +23,7 @@ namespace el
 		void connect(T& instance, void(T::* method)(Arg... arg)) {
 			mSlots.push_back([&instance, method](Arg... arg) { (instance.*method)(arg...); });
 		}
+		void clear() { mSlots.clear(); }
 	private:
 		std::vector<std::function<void(Arg...)>> mSlots;
 	};
@@ -43,6 +44,7 @@ namespace el
 		void connect(T& instance, void(T::* method)(Arg... arg)) {
 			mSlot = [&instance, method](Arg... arg) { (instance.*method)(arg...); };
 		}
+		void disconnect() { mSlot.swap(); }
 	private:
 		std::function<void(Arg...)> mSlot;
 	};

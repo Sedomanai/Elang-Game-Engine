@@ -11,7 +11,7 @@ namespace el {
 		loadFile(filePath.c_str(), out);
 
 		AtlasAction act = AtlasAction::NONE;
-		int x, y, w, h, ox, oy;
+		int index, x, y, w, h, ox, oy;
 		Clipframe frame;
 
 		asset<Clip> clip;
@@ -43,6 +43,7 @@ namespace el {
 						break;
 					case AtlasAction::SET_CELL:
 						switch (iter) {
+						case 1: index = toInt(word); break;
 						case 2: x = toInt(word); break;
 						case 3: y = toInt(word); break;
 						case 4: w = toInt(word); break;
@@ -50,7 +51,7 @@ namespace el {
 						case 6: ox = toInt(word); break;
 						case 7: oy = toInt(word); break;
 						case 9:
-							auto cell = gProject->makeSub<Cell>(x, y, w, h, ox, oy, aw, ah);
+							auto cell = gProject->makeSub<Cell>(x, y, w, h, ox, oy, aw, ah, index);
 							cells.emplace(string(word), cell);
 							break;
 						}
@@ -81,6 +82,51 @@ namespace el {
 		}
 	}
 
+	void Atlas::packAndCacheCells() {
+		auto&& ents = linearCells();
+
+		vector<Cell> data; data.reserve(ents.size());
+		for (sizet i = 0; i < ents.size(); i++) {
+			data.emplace_back(*ents[i]);
+		}
+
+		gProject->remove<Cell>(ents.begin(), ents.end());
+		for (sizet i = 0; i < data.size(); i++) {
+			auto cell = ents[i];
+			cell.add<Cell>(data[i]);
+			cell->index = i;
+		}
+	}
+
+	void Atlas::recreateCells(const vector<asset<Cell>>& cv) {
+		for (sizet i = 0; i < cv.size(); i++) {
+			auto cell = cv[i];
+			Cell n = *cell;
+			n.index = i;
+			cell.remove<Cell>();
+			cell.add<Cell>(n);
+		}
+	}
+
+	vector<asset<Cell>> Atlas::linearCells(eSortType sortType) {
+		vector<asset<Cell>> cv; cv.reserve(cells.count());
+
+		for (auto it : cells) {
+			cv.emplace_back(it.second);
+		} 
+
+		switch (sortType) {
+		case eSortType::INDEX:
+			std::sort(cv.begin(), cv.end(), [&](auto lhs, auto rhs) { return lhs->index < rhs->index; });
+			break;
+		case eSortType::ENTITY_HANDLE:
+			std::sort(cv.begin(), cv.end(), [&](auto lhs, auto rhs) { return (uint32)lhs < (uint32)rhs; });
+			break;
+		}
+		
+		return std::move(cv);
+	}
+
 	/*void AtlasLoader::loadGrid(sizet column, sizet row, bool nearest) {
 		stringstream ss;
 		ss << "el_grid_" << column << 'x' << row;
@@ -103,17 +149,15 @@ namespace el {
 	}*/
 
 
-	Cell::Cell(int x, int y, int w, int h, int oX, int oY, int aw, int ah) :
-		left((float)(oX - w / 2)), down((float)(-oY - h / 2)), right((float)(oX + w / 2)), up((float)(-oY + h / 2)),
+	Cell::Cell(int x, int y, int w, int h, int oX_, int oY_, int aw, int ah, int index) :
+		oX((int16)oX_), oY((int16)oY_),
+		left((float)(oX)), down((float)(-oY)), right((float)(oX + w)), up((float)(-oY + h)),
 		uvLeft((float)x / (float)aw),
 		uvDown((float)(y + h) / (float)ah),
 		uvRight((float)(x + w) / (float)aw),
-		uvUp((float)y / (float)ah)
+		uvUp((float)y / (float)ah),
+		index((uint32)index)
 	{
-		if (w % 2 != 0) {
-			right++;
-		} if (h % 2 != 0) {
-			up++;
-		}
+
 	}
 }

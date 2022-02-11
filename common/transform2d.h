@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math.h"
+#include "shape2d.h"
 
 namespace el
 {
@@ -37,6 +37,11 @@ namespace el
 		}
 		constexpr vec2 operator*(const vec2& v) const {
 			return vec2(rx * v.x + ux * v.y + tx, ry * v.x + uy * v.y + ty);
+		}
+		constexpr aabb operator*(const aabb& a) const {
+			vec2 lb = operator*(vec2(a.l, a.b));
+			vec2 rt = operator*(vec2(a.r, a.t));
+			return aabb(lb.x, lb.y, rt.x, rt.y);
 		}
 		Transform2d operator*(const Transform2d& v) const {
 			return Transform2d(

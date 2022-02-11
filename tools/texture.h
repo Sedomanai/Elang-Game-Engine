@@ -35,6 +35,12 @@ namespace el
 		// destroy texture
 		void destroy();
 
+		// auto generate an atlas - not perfect, use the gui instead of a raw call
+		void autoGenerateAtlas(asset<Texture> self, float alphaCut);
+
+		// detach atlas from texture - warning: if no other atlas users exist, the atlas is destroyed
+		void removeAtlas(asset<Texture> self);
+
 		template<typename T>
 		void save(T& archive) const;
 		template<typename T>
@@ -42,6 +48,7 @@ namespace el
 
 		asset<Atlas> atlas;
 	private:
+		void autogenAlgorithm(hashmap<int64, vector<int64>>&, float alphaCut);
 		void encode(vector<uint8>& out) const;
 		void decode(vector<uint8>& in);
 		uint32 mID;

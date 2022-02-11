@@ -53,6 +53,12 @@ namespace el
 			uniforms.emplace_back(type_, vertex_, data_, name_);
 		}
 
+		void setTexture(asset<Texture> texture, sizet index = 0) {
+			while (textures.size() <= index) {
+				textures.emplace_back();
+			} textures[index] = texture;
+		}
+
 		bool hasTexture() {
 			return ((textures.size() > 0) && textures[0]);
 		}

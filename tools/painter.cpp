@@ -281,7 +281,7 @@ namespace el
 		}
 		
 		if (mBumpers.size() > 1) {
-			//bind
+			//bindAll
 			glBindProgramPipeline(mPipeline);
 			glBindVertexArray(mVao);
 			glBindBuffer(GL_ARRAY_BUFFER, mVbo);
@@ -411,8 +411,9 @@ namespace el
 
 			for (sizet i = 0; i < mat.textures.size(); ++i) {
 				glActiveTexture(GL_TEXTURE0 + (uint32)i);
-				if (auto tex = mat.textures[i])
+				if (auto tex = mat.textures[i]) {
 					glBindTexture(GL_TEXTURE_2D, (tex->id() == -1) ? sNullTextureID : tex->id());
+				}
 			}
 		}
 	}

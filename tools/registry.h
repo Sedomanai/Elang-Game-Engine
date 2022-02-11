@@ -64,6 +64,22 @@ namespace el
             archive(name, assetDir, datDir, srcDir, entryStage,
                 textures, atlases, models, fonts, sfx, bgm, events, texts, materials, painters, cameras, misc);
         }
+        void reset() {
+            clear();
+            name = assetDir = datDir = srcDir = entryStage = "";
+            textures.clear();
+            atlases.clear();
+            models.clear();
+            fonts.clear();
+            sfx.clear();
+            bgm.clear();
+            events.clear();
+            texts.clear();
+            materials.clear();
+            painters.clear();
+            cameras.clear();
+            misc.clear();
+        }
     };
 
     struct ELANG_DLL Stage : Registry
@@ -179,7 +195,7 @@ namespace el
 \
         T& update() { return regname->patch<T>(e); }\
         template<typename U>\
-        T& update() { return regname->patch<U>(e); }\
+        U& update() { return regname->patch<U>(e); }\
         template<typename ...Arg>\
         void update(Arg... args) { regname->replace<T>(e, args...); }\
         template<typename U, typename ...Arg>\

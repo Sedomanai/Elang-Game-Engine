@@ -70,8 +70,9 @@ namespace el {
 		uint32 w = mWidth, h = mHeight, ent = 4;
 		vector<uint8> out;
 
-		if (fpng::fpng_decode_memory(&in[0], (uint32)in.size(), out, w, h, ent, 4) == 0)
+		if (fpng::fpng_decode_memory(&in[0], (uint32)in.size(), out, w, h, ent, 4) == 0) {
 			make(&out[0]);
+		}
 #ifdef _DEBUG
 		else
 			std::cout << "Failed to load texture from memory"  << std::endl;
@@ -108,4 +109,159 @@ namespace el {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
+
+	void Texture::autoGenerateAtlas(asset<Texture> self, float alphaCut) {
+		if (!gProject->textures.contains(self))
+			return;
+
+		auto key = gProject->textures[self];
+
+		if (atlas) {
+			atlas.remove<Atlas>();
+			atlas.add<Atlas>();
+		} else {
+			atlas = gProject->make<Atlas>(gProject->atlases, key);
+		}
+
+		int64 w = (sizet)mWidth;
+		int64 h = (sizet)mHeight;
+		int64 pixcount = w * h;
+
+		hashmap<int64, vector<int64>> result;
+		autogenAlgorithm(result, alphaCut);
+
+		int64 name = 0;
+		auto intmax = std::numeric_limits<int64>::max();
+		for (auto& vec : result) {
+			int64 il = intmax;
+			int64 ib = intmax;
+			int64 ir = -intmax;
+			int64 it = -intmax;
+			for (int s : vec.second) {
+				il = min(il, (s % w));
+				ib = min(ib, (s / w));
+				ir = max(ir, (s % w) + 1);
+				it = max(it, (s / w) + 1);
+			}
+
+			auto cell = gProject->makeSub<Cell>((int)il, (int)ib, (int)(ir - il), (int)(it - ib), 0, 0, (int)w, (int)h, -1);
+			atlas->cells.emplace(key + "_" + std::to_string(name++), cell);
+		}
+	}
+
+	void Texture::removeAtlas(asset<Texture> self) {
+		if (atlas) {
+			auto& tex = atlas->textures;
+			for (auto it = tex.begin(); it != tex.end(); it++) {
+				if (*it == self) {
+					atlas->textures.erase(it);
+					if (atlas->textures.size() == 0) {
+						atlas->destroy();
+						gProject->atlases.erase(atlas);
+					} break;
+				}
+			} atlas = NullEntity;
+		}
+	}
+
+	void Texture::autogenAlgorithm(hashmap<int64, vector<int64>>& result, float alphaCut) {
+		int64 name = 0;
+		int64 w = (int64)mWidth;
+		int64 h = (int64)mHeight;
+		int64 pixcount = w * h;
+
+		auto pixels = (unsigned char*)malloc(pixcount);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, mID);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels);
+
+		int64* buffer = (int64*)malloc((pixcount) * sizeof(int64));
+		for (int64 i = 0; i < pixcount; i++) {
+			bool notop = ((i < w) || (buffer[i - w] == 0));
+			bool noleft = ((i % w == 0) || (buffer[i - 1] == 0));
+			bool notopleft = ((i < w) || (i % w == 0) || (buffer[i - w - 1] == 0));
+			bool notopright = ((i < w) || (i % w == w - 1) || (buffer[i - w + 1] == 0));
+
+			buffer[i] = 0;
+
+			if (pixels[i] > alphaCut) {
+				if (noleft) {
+					if (notop) {
+						if (notopleft) {
+							buffer[i] = ++name;
+							result[name].reserve(256);
+							result[name].push_back(i);
+						}
+						else {
+							// only topleft
+							buffer[i] = buffer[i - w - 1];
+							result[buffer[i]].push_back(i);
+						}
+					}
+					else {
+						// top (topleft should it exist would already be the same as top)
+						buffer[i] = buffer[i - w];
+						result[buffer[i]].push_back(i);
+					}
+				}
+				else {
+					if (notop) {
+						// left (topleft should it exist would already be the same as left)
+						buffer[i] = buffer[i - 1];
+						result[buffer[i]].push_back(i);
+					}
+					else {
+						if (notopleft) {
+							// only left and above
+							auto top = buffer[i - w];
+							auto left = buffer[i - 1];
+
+							if (top != left) {
+								auto& tops = result[top];
+								auto& lefts = result[left];
+								for (uint i = 0; i < tops.size(); i++) {
+									buffer[tops[i]] = left;
+								}
+								lefts.reserve(lefts.size() + tops.size());
+								lefts.insert(lefts.end(), tops.begin(), tops.end());
+								result.erase(top);
+							}
+
+							buffer[i] = left;
+							result[left].push_back(i);
+						}
+						else {
+							// all three topleft pixels are the same, could use any
+							buffer[i] = buffer[i - 1];
+							result[buffer[i]].push_back(i);
+						}
+					}
+				}
+
+				if (notop && !notopright) {
+					// special case where topright exists but top doesn't
+					auto topright = buffer[i - w + 1];
+					auto curr = buffer[i];
+					if (curr == 0) {
+						buffer[i] = topright;
+						result[topright].push_back(i);
+					}
+					else if (curr != topright) {
+						auto& toprights = result[topright];
+						auto& currs = result[curr];
+						for (sizet i = 0; i < currs.size(); i++) {
+							buffer[currs[i]] = topright;
+						}
+						toprights.reserve(toprights.size() + currs.size());
+						toprights.insert(toprights.end(), currs.begin(), currs.end());
+						result.erase(curr);
+					}
+				}
+			}
+		}
+
+		free(pixels);
+		free(buffer);
+	}
 }

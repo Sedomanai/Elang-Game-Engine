@@ -65,16 +65,7 @@ namespace el
 	extern void ELANG_DLL reloadAll(bool reloadUnchanged = false);
 	extern void ELANG_DLL compileDefaultShaders();
 	extern void ELANG_DLL connectAssetDstr();
-
-	inline void initElang() {
-		connectAssetDstr();
-		compileDefaultShaders();
-		for (auto e : gProject->view<Painter>()) {
-			asset<Painter>(e)->init();
-		}
-		cout << "Initiating Elang Project " << gProject->name << " .." << endl;
-		cout << "..." << endl;
-	}
+	extern void ELANG_DLL initElang();
 
 	extern asset<Material> ELANG_DLL createSingleTextureMaterial(const string& label);
 	extern void ELANG_DLL saveElangProject(const char* filePath);
