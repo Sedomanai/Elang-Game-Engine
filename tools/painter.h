@@ -70,22 +70,26 @@ namespace el
 		void unlock() { flags &= ~LOCKED; }
 		void forceUnlock();
 
-		void bindMaterial(uint32 material);
-		void setUniformFloat(uint shader, float dat, const char* name);
-		void setUniformVec2(uint shader, const vec2& dat, const char* name);
-		void setUniformVec3(uint shader, const vec3& dat, const char* name);
-		void setUniformVec4(uint shader, const vec4& dat, const char* name);
-		void setUniformMatrix(uint shader, const matrix4x4& dat, const char* name);
-
 		string vertLabel() { return mVertLabel; }
 		string fragLabel() { return mFragLabel; }
 		sizet targetCount() { return mTargetCount; }
 		sizet currentBatchCount() { return mBatches.size(); }
 		bool empty() { return !(bool)mBumpers.size(); }
 
-	private:
+		void setUniformFloat(uint shader, float dat, const char* name);
+		void setUniformVec2(uint shader, const vec2& dat, const char* name);
+		void setUniformVec3(uint shader, const vec3& dat, const char* name);
+		void setUniformVec4(uint shader, const vec4& dat, const char* name);
+		void setUniformMatrix(uint shader, const matrix4x4& dat, const char* name);
+	protected:
+		virtual void setCamera();
+		virtual void bindMaterial(uint32 material);
+		void bindMaterialBody(Material& mat);
+
+
 		void sort();
 		void flush();
+		void clear();
 		void bindShaderBuffer();
 		void bindDataBuffer();
 		void circlePoints(vector<Primitive2DVertex>& buffer, const color8& c, float cx, float cy, float x, float y);

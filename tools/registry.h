@@ -121,7 +121,7 @@ namespace el
         void load(InArchive& archive) {
             clear();
             RegistryLoader shot(*this);
-            shot.entities(archive).component<Arg...>(archive);
+            shot.entities(archive).component<Arg...>(archive).orphans();
             archive(named);
         }
         //template<typename T, typename... Args>

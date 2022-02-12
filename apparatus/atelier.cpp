@@ -1,6 +1,7 @@
 #include "atelier.h"
 
 #include "../elements/basic.h"
+#include "../elements/canvas.h"
 #include "../elements/sprite.h"
 #include "../elements/textbox.h" 
 

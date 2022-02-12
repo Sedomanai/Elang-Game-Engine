@@ -1,9 +1,5 @@
 #include "ui.h"
 
-#include "../tools/controls.h"
-#include "../elements/button.h"
-#include "../elements/sprite.h"
-
 namespace el
 {
 	void syncButtonsToSprite() {

@@ -9,6 +9,7 @@
 #include "../tools/camera.h"
 
 #include "../elements/basic.h"
+#include "../elements/canvas.h"
 #include "../elements/sprite.h"
 #include "../elements/button.h"
 #include "../elements/platformer.h"

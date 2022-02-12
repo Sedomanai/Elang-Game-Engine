@@ -214,7 +214,6 @@ namespace el
 		}
 	}
 
-
 	void Painter::sort() {
 		if (!mBatches.empty()) {
 			if (flags & MULTI_MATERIAL) {
@@ -274,6 +273,36 @@ namespace el
 		} mBumpers.push_back(iCount);
 	}
 
+	void Painter::setCamera() {
+		if (camera) {
+			setUniformMatrix(mVert->shader(), ((projection == Projection::ePerspective) ? gPerspective : gOrtho) * camera->inversed().matrix(), "uView");
+		} 	else {
+			setUniformMatrix(mVert->shader(), ((projection == Projection::ePerspective) ? gPerspective : gOrtho), "uView");
+		}
+	}
+
+
+	void Painter::clear() {
+		for (sizet i = 0; i < mBatchOrder.size(); i++) {
+			auto& batch = mBatches[mBatchOrder[i]];
+			if ((batch.flag & E_DANGLING_VERTICES) == E_DANGLING_VERTICES) {
+				free(batch.vertices);
+			}
+			if ((batch.flag & E_DANGLING_INDICES) == E_DANGLING_INDICES) {
+				free(batch.indices);
+			}
+		}
+		
+		cout << mBatches.size() << endl;
+		mBatches.clear();
+		mBatchOrder.clear();
+
+		mLocked = (flags & LOCKED) ? true : false;
+		if (!mLocked) {
+			mBumpers.clear();
+		}
+	}
+
 	void Painter::paint() {
 		if (!mLocked) {
 			sort();
@@ -295,12 +324,7 @@ namespace el
 				glDepthMask(GL_FALSE);
 			} else glDepthMask(GL_TRUE);
 
-
-			if (camera) {
-				setUniformMatrix(mVert->shader(), ((projection == Projection::ePerspective) ? gPerspective : gOrtho) * camera->inversed().matrix(), "uView");
-			} else {
-				setUniformMatrix(mVert->shader(), ((projection == Projection::ePerspective) ? gPerspective : gOrtho), "uView");
-			}
+			setCamera();
 
 			for (sizet i = 0; i < mBumpers.size() - 2; i += 2) {
 				auto count = mBumpers[i + 2] - mBumpers[i];
@@ -309,22 +333,7 @@ namespace el
 			} 
 		}
 
-		for (sizet i = 0; i < mBatchOrder.size(); i++) {
-			auto& batch = mBatches[mBatchOrder[i]];
-			if ((batch.flag & E_DANGLING_VERTICES) == E_DANGLING_VERTICES) {
-				free(batch.vertices);
-			}
-			if ((batch.flag & E_DANGLING_INDICES) == E_DANGLING_INDICES) {
-				free(batch.indices);
-			}
-		}
-		mBatches.clear();
-		mBatchOrder.clear();
-
-		mLocked = (flags & LOCKED) ? true : false;
-		if (!mLocked) {
-			mBumpers.clear();
-		}
+		clear();
 	}
 
 	void Painter::forceUnlock() {
@@ -384,36 +393,37 @@ namespace el
 	}
 	void Painter::bindMaterial(uint32 material) {
 		asset<Material> mate(material);
-
 		if (mate) {
 			auto& mat = *mate;
-
-			for (sizet i = 0; i < mat.uniforms.size(); i++) {
-				auto& uni = mat.uniforms[i];
-				switch (uni.type) {
-				case eDataType::FLOAT:
-					setUniformFloat(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<float*>(uni.data), uni.name.c_str());
-					break;
-				case eDataType::VEC2:
-					setUniformVec2(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec2*>(uni.data), uni.name.c_str());
-					break;
-				case eDataType::VEC3:
-					setUniformVec3(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec3*>(uni.data), uni.name.c_str());
-					break;
-				case eDataType::VEC4:
-					setUniformVec4(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec4*>(uni.data), uni.name.c_str());
-					break;
-				case eDataType::MATRIX4:
-					setUniformMatrix(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<matrix4x4*>(uni.data), uni.name.c_str());
-					break;
-				}
+			bindMaterialBody(mat);
+		}
+	}
+	void Painter::bindMaterialBody(Material& mat) {
+		for (sizet i = 0; i < mat.uniforms.size(); i++) {
+			auto& uni = mat.uniforms[i];
+			switch (uni.type) {
+			case eDataType::FLOAT:
+				setUniformFloat(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<float*>(uni.data), uni.name.c_str());
+				break;
+			case eDataType::VEC2:
+				setUniformVec2(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec2*>(uni.data), uni.name.c_str());
+				break;
+			case eDataType::VEC3:
+				setUniformVec3(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec3*>(uni.data), uni.name.c_str());
+				break;
+			case eDataType::VEC4:
+				setUniformVec4(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec4*>(uni.data), uni.name.c_str());
+				break;
+			case eDataType::MATRIX4:
+				setUniformMatrix(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<matrix4x4*>(uni.data), uni.name.c_str());
+				break;
 			}
+		}
 
-			for (sizet i = 0; i < mat.textures.size(); ++i) {
-				glActiveTexture(GL_TEXTURE0 + (uint32)i);
-				if (auto tex = mat.textures[i]) {
-					glBindTexture(GL_TEXTURE_2D, (tex->id() == -1) ? sNullTextureID : tex->id());
-				}
+		for (sizet i = 0; i < mat.textures.size(); ++i) {
+			glActiveTexture(GL_TEXTURE0 + (uint32)i);
+			if (auto tex = mat.textures[i]) {
+				glBindTexture(GL_TEXTURE_2D, (tex->id() == -1) ? sNullTextureID : tex->id());
 			}
 		}
 	}

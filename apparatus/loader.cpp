@@ -219,7 +219,6 @@ namespace el
 	void loadElangStage(const char* filePath) {
 		InArchive ar(filePath);
 		if (ar.valid()) {
-			auto temp = gStage->project;
 			gStage->serializeProject(ar);
 			if (gProject->name == gStage->project) {
 				gStage->load<Position, Planar, Box, Radius, Canvas, Sprite,
@@ -228,7 +227,6 @@ namespace el
 				cout << "Loading Elang Stage at Project Path " << filePath << "  ..." << endl;
 #endif
 			} else {
-				gStage->project = temp;
 #ifdef _DEBUG
 				cout << "Elang Stage at Project Path " << filePath << " does not belong to current project" << endl;
 #endif
