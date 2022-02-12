@@ -5,6 +5,8 @@
 namespace el {
 	//TODO: change ordering and data structure
 	void Atlas::makeFromAtlsFile(const string& filePath) {
+		cout << "why is this not firing" << endl;
+
 		int aw, ah;
 
 		string out;
@@ -94,7 +96,7 @@ namespace el {
 		for (sizet i = 0; i < data.size(); i++) {
 			auto cell = ents[i];
 			cell.add<Cell>(data[i]);
-			cell->index = i;
+			cell->index = (uint32)i;
 		}
 	}
 
@@ -102,7 +104,7 @@ namespace el {
 		for (sizet i = 0; i < cv.size(); i++) {
 			auto cell = cv[i];
 			Cell n = *cell;
-			n.index = i;
+			n.index = (uint32)i;
 			cell.remove<Cell>();
 			cell.add<Cell>(n);
 		}
@@ -151,7 +153,7 @@ namespace el {
 
 	Cell::Cell(int x, int y, int w, int h, int oX_, int oY_, int aw, int ah, int index) :
 		oX((int16)oX_), oY((int16)oY_),
-		left((float)(oX)), down((float)(-oY)), right((float)(oX + w)), up((float)(-oY + h)),
+		left((float)(oX_)), down((float)(-oY_)), right((float)(oX_ + w)), up((float)(-oY_ + h)),
 		uvLeft((float)x / (float)aw),
 		uvDown((float)(y + h) / (float)ah),
 		uvRight((float)(x + w) / (float)aw),

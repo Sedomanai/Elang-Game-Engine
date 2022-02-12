@@ -293,7 +293,6 @@ namespace el
 			}
 		}
 		
-		cout << mBatches.size() << endl;
 		mBatches.clear();
 		mBatchOrder.clear();
 

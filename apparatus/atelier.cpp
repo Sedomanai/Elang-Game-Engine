@@ -1,9 +1,5 @@
 #include "atelier.h"
 
-#include "../elements/basic.h"
-#include "../elements/canvas.h"
-#include "../elements/sprite.h"
-#include "../elements/textbox.h" 
 
 namespace el
 {
@@ -34,15 +30,15 @@ namespace el
 		for (auto e : gStage->view<Sprite>()) {
 			obj<Sprite>(e)->batch();
 		}
-		//for (auto e : gStage->view<Canvas>()) {
-		//	obj<Canvas>(e)->batch();
-		//}
-		//for (auto e : gStage->view<Textfield>()) {
-		//	obj<Textfield>(e)->batch();
-		//}
-		//for (auto e : gStage->view<Textbox>()) {
-		//	obj<Textbox>(e)->batch(e);
-		//}
+		for (auto e : gStage->view<Canvas>()) {
+			obj<Canvas>(e)->batch();
+		}
+		for (auto e : gStage->view<Textfield>()) {
+			obj<Textfield>(e)->batch();
+		}
+		for (auto e : gStage->view<Textbox>()) {
+			obj<Textbox>(e)->batch(e);
+		}
 	}
 
 	void batchDebuggingComponents(ShapeDebug* debugger, const color8& color) {

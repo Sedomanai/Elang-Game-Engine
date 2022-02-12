@@ -108,6 +108,7 @@ namespace el
 						file.add<Texture>()->makeFromStandardImageFile(gProject->assetDir + file->key + ".png");
 					break;
 					case eFileExtension::ATLS:
+						cout << "load an atlas" << endl;
 						file.add<Atlas>()->makeFromAtlsFile(gProject->assetDir + file->key + ".atls");
 					break;
 					case eFileExtension::BFNT:
