@@ -7,7 +7,11 @@
 #include <lodepng/lodepng.cpp>
 
 namespace el {
-	void Texture::makeFromStandardImageFile(const string& filePath) {
+
+	template struct TextureImpl<0>;
+
+	template<int N>
+	void TextureImpl<N>::makeFromStandardImageFile(const string& filePath) {
 		uint32 w = mWidth, h = mHeight, ent = 4;
 		vector<uint8> out;
 		if (fpng::fpng_decode_file(filePath.c_str(), out, w, h, ent, 4) == 0) {
@@ -33,7 +37,8 @@ namespace el {
 		}
 	}
 
-	void Texture::importFile(const string& key) {
+	template<int N>
+	void TextureImpl<N>::importFile(const string& key) {
 		string filePath = gProject->datDir + key;
 		uint32 w = mWidth, h = mHeight, ent = 4;
 		vector<uint8> out;
@@ -47,7 +52,8 @@ namespace el {
 #endif
 	}
 
-	void Texture::exportFile(const string& key) {
+	template<int N>
+	void TextureImpl<N>::exportFile(const string& key) {
 		string filePath = gProject->datDir + key;
 		auto size = mWidth * mHeight * 4;
 		unsigned char* pixels = (unsigned char*)malloc(size);
@@ -61,12 +67,14 @@ namespace el {
 #endif
 	}
 
-	void Texture::destroy() {
+	template<int N>
+	void TextureImpl<N>::destroy() {
 		glDeleteTextures(1, &mID);
 		mID = -1;
 	}
 
-	void Texture::decode(vector<uint8>& in) {
+	template<int N>
+	void TextureImpl<N>::decode(vector<uint8>& in) {
 		uint32 w = mWidth, h = mHeight, ent = 4;
 		vector<uint8> out;
 
@@ -79,7 +87,8 @@ namespace el {
 #endif
 	}
 
-	void Texture::encode(vector<uint8>& out) const {
+	template<int N>
+	void TextureImpl<N>::encode(vector<uint8>& out) const {
 		auto size = mWidth * mHeight * 4;
 		unsigned char* pixels = (unsigned char*)malloc(size);
 		glBindTexture(GL_TEXTURE_2D, mID);
@@ -91,7 +100,8 @@ namespace el {
 		}
 	}
 
-	void Texture::make(unsigned char* pixels) {
+	template<int N>
+	void TextureImpl<N>::make(unsigned char* pixels) {
 		glGenTextures(1, &mID);
 		glBindTexture(GL_TEXTURE_2D, mID);
 
@@ -109,18 +119,18 @@ namespace el {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-
-	void Texture::autoGenerateAtlas(asset<Texture> self, float alphaCut) {
+	template<int N>
+	void TextureImpl<N>::autoGenerateAtlas(asset<TextureImpl<N>> self, float alphaCut) {
 		if (!gProject->textures.contains(self))
 			return;
 
 		auto key = gProject->textures[self];
 
 		if (atlas) {
-			atlas.remove<Atlas>();
-			atlas.add<Atlas>();
+			atlas.remove<AtlasImpl<N>>();
+			atlas.add<AtlasImpl<N>>();
 		} else {
-			atlas = gProject->make<Atlas>(gProject->atlases, key);
+			atlas = gProject->make<AtlasImpl<N>>(gProject->atlases, key);
 		}
 
 		int64 w = (sizet)mWidth;
@@ -149,7 +159,8 @@ namespace el {
 		}
 	}
 
-	void Texture::removeAtlas(asset<Texture> self) {
+	template<int N>
+	void TextureImpl<N>::removeAtlas(asset<TextureImpl<N>> self) {
 		if (atlas) {
 			auto& tex = atlas->textures;
 			for (auto it = tex.begin(); it != tex.end(); it++) {
@@ -164,7 +175,8 @@ namespace el {
 		}
 	}
 
-	void Texture::autogenAlgorithm(hashmap<int64, vector<int64>>& result, float alphaCut) {
+	template<int N>
+	void TextureImpl<N>::autogenAlgorithm(hashmap<int64, vector<int64>>& result, float alphaCut) {
 		int64 name = 0;
 		int64 w = (int64)mWidth;
 		int64 h = (int64)mHeight;

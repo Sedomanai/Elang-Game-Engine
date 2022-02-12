@@ -3,11 +3,15 @@
 
 namespace el
 {
-	struct Material;
-	struct ELANG_DLL FontGlyph
+	template<int N, int TextureType>
+	struct MaterialImpl;
+
+
+	template<int N>
+	struct ELANG_DLL FontGlyphImpl
 	{
-		FontGlyph() {};
-		FontGlyph(uint16 x, uint16 y, uint16 w, uint16 h, int16 oX, int16 oY, uint16 aw, uint16 ah, float adv_);
+		FontGlyphImpl() {};
+		FontGlyphImpl(uint16 x, uint16 y, uint16 w, uint16 h, int16 oX, int16 oY, uint16 aw, uint16 ah, float adv_);
 
 		template<typename T>
 		void serialize(T& archive) {
@@ -19,11 +23,13 @@ namespace el
 		float adv;
 	};
 
-	struct ELANG_DLL FontFace 
+
+	template<int N, int TextureIndex>
+	struct ELANG_DLL FontFaceImpl
 	{
 		void makeFromBfntFile(const string& filePath);
 		bihashmap<uint32, Entity> glyphs;
-		asset<Material> material;
+		asset<MaterialImpl<N, TextureIndex>> material;
 		uint16 lineHeight;
 
 		void destroy();
@@ -33,4 +39,7 @@ namespace el
 			archive(glyphs, material, lineHeight);
 		}
 	};
+
+	using FontGlyph = FontGlyphImpl<0>;
+	using FontFace = FontFaceImpl<0, 0>;
 }

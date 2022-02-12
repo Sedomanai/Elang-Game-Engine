@@ -6,32 +6,33 @@
 
 namespace el
 {
+	template<int M, int T, int C>
 	struct ELANG_DLL Visage
 	{
-		Visage() {}
-		Visage(asset<Material> material_, asset<Painter> painter_) : material(material_), painter(painter_) {}
-
-		asset<Material> material;
-		asset<Painter> painter;
+		Visage<M, T, C>() {}
+		Visage<M, T, C>(asset<MaterialImpl<M, T>> material_, asset<PainterImpl<M, T, C>> painter_) : material(material_), painter(painter_) {}
+		asset<MaterialImpl<M, T>> material;
+		asset<PainterImpl<M, T, C>> painter;
 	};
 
-	struct ELANG_DLL Quad : Visage
+	template<typename V, int M, int T, int C>
+	struct ELANG_DLL Quad : Visage<M, T, C>
 	{
+		Quad() : Visage<M, T, C>(), mDepth(0) {};
+		Quad(asset<MaterialImpl<M, T>> material_, asset<PainterImpl<M, T, C>> painter_);
+
 		void batch();
 		void sync(aabb&);
 		void sync(circle&);
 		void sync(poly2d&);
 
-		void setLT(const SpriteVertex& vertex) { mVertices[0] = vertex; }
-		void setRT(const SpriteVertex& vertex) { mVertices[1] = vertex; }
-		void setRB(const SpriteVertex& vertex) { mVertices[2] = vertex; }
-		void setLB(const SpriteVertex& vertex) { mVertices[3] = vertex; }
-
-		Quad() : Visage(), mDepth(0) {};
-		Quad(asset<Material> material_, asset<Painter> painter_);
+		void setLT(const V& vertex) { mVertices[0] = vertex; }
+		void setRT(const V& vertex) { mVertices[1] = vertex; }
+		void setRB(const V& vertex) { mVertices[2] = vertex; }
+		void setLB(const V& vertex) { mVertices[3] = vertex; }
 
 	protected:
-		SpriteVertex mVertices[4];
+		V mVertices[4];
 		float mDepth;
 	};
 }

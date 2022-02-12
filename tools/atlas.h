@@ -8,16 +8,14 @@
 
 namespace el
 {
-	inline uint32 gAtlasSortIndex() {
-		uint32 atlasSortIndex = 0;
-		return atlasSortIndex++;
-	}
+	template<int N>
+	struct TextureImpl;
 
-	struct Texture;
-	struct ELANG_DLL Cell
+	template<int N>
+	struct ELANG_DLL CellImpl
 	{
-		Cell() : oX(0), oY(0), index(-1) {};
-		Cell(int x, int y, int w, int h, int oX_, int oY_, int aw, int ah, int index);
+		CellImpl() : oX(0), oY(0), index(-1) {};
+		CellImpl(int x, int y, int w, int h, int oX_, int oY_, int aw, int ah, int index);
 		float left, down, right, up;
 		float uvLeft, uvDown, uvRight, uvUp;
 		int16 oX, oY; 
@@ -29,7 +27,8 @@ namespace el
 		}
 	};
 
-	struct Clipframe
+	template<int N>
+	struct ClipframeImpl
 	{
 		uint16 cell;
 		uint16 duration;
@@ -40,10 +39,12 @@ namespace el
 		}
 	};
 
-	using Clip = vector<Clipframe>;
+	template<int N>
+	using ClipImpl = vector<ClipframeImpl<N>>;
 
 
-	struct ELANG_DLL Atlas
+	template<int N>
+	struct ELANG_DLL AtlasImpl
 	{
 		enum class eSortType
 		{
@@ -56,18 +57,18 @@ namespace el
 
 		bihashmap<string, Entity> cells;
 		bihashmap<string, Entity> clips;
-		vector<asset<Texture>> textures;
+		vector<asset<TextureImpl<N>>> textures;
 
 		void makeFromAtlsFile(const string& filePath);
 		void destroy();
 
-		vector<asset<Cell>> linearCells(eSortType sortType = eSortType::NONE);
+		vector<asset<CellImpl<N>>> linearCells(eSortType sortType = eSortType::NONE);
 
 		/// <summary>
 		/// Destroys and recreates atlas cells to the back of the Cell pool
 		/// </summary>
 		void packAndCacheCells();
-		void recreateCells(const vector<asset<Cell>>&);
+		void recreateCells(const vector<asset<CellImpl<N>>>&);
 
 		template<typename T>
 		void serialize(T& archive) {
@@ -92,4 +93,10 @@ namespace el
 		{"width", AtlasAction::SET_WIDTH },
 		{"height", AtlasAction::SET_HEIGHT },
 	};
+
+	using Cell = CellImpl<0>;
+	using Clipframe = ClipframeImpl<0>;
+	using Clip = ClipImpl<0>;
+	using Atlas = AtlasImpl<0>;
+
 }

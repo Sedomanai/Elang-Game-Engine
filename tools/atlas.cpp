@@ -3,8 +3,13 @@
 #include "texture.h"
 
 namespace el {
+	template struct CellImpl<0>;
+	template struct ClipframeImpl<0>;
+	template struct AtlasImpl<0>;
+
 	//TODO: change ordering and data structure
-	void Atlas::makeFromAtlsFile(const string& filePath) {
+	template<int N>
+	void AtlasImpl<N>::makeFromAtlsFile(const string& filePath) {
 		cout << "why is this not firing" << endl;
 
 		int aw, ah;
@@ -53,7 +58,7 @@ namespace el {
 						case 6: ox = toInt(word); break;
 						case 7: oy = toInt(word); break;
 						case 9:
-							auto cell = gProject->makeSub<Cell>(x, y, w, h, ox, oy, aw, ah, index);
+							auto cell = gProject->makeSub<CellImpl<N>>(x, y, w, h, ox, oy, aw, ah, index);
 							cells.emplace(string(word), cell);
 							break;
 						}
@@ -76,7 +81,8 @@ namespace el {
 		});
 	}
 
-	void Atlas::destroy() {
+	template<int N>
+	void AtlasImpl<N>::destroy() {
 		for (auto e : cells) {
 			gProject->destroy(e.second);
 		} for (auto e : clips) {
@@ -84,34 +90,37 @@ namespace el {
 		}
 	}
 
-	void Atlas::packAndCacheCells() {
+	template<int N>
+	void AtlasImpl<N>::packAndCacheCells() {
 		auto&& ents = linearCells();
 
-		vector<Cell> data; data.reserve(ents.size());
+		vector<CellImpl<N>> data; data.reserve(ents.size());
 		for (sizet i = 0; i < ents.size(); i++) {
 			data.emplace_back(*ents[i]);
 		}
 
-		gProject->remove<Cell>(ents.begin(), ents.end());
+		gProject->remove<CellImpl<N>>(ents.begin(), ents.end());
 		for (sizet i = 0; i < data.size(); i++) {
 			auto cell = ents[i];
-			cell.add<Cell>(data[i]);
+			cell.add<CellImpl<N>>(data[i]);
 			cell->index = (uint32)i;
 		}
 	}
 
-	void Atlas::recreateCells(const vector<asset<Cell>>& cv) {
+	template<int N>
+	void AtlasImpl<N>::recreateCells(const vector<asset<CellImpl<N>>>& cv) {
 		for (sizet i = 0; i < cv.size(); i++) {
 			auto cell = cv[i];
-			Cell n = *cell;
+			CellImpl<N> n = *cell;
 			n.index = (uint32)i;
-			cell.remove<Cell>();
-			cell.add<Cell>(n);
+			cell.remove<CellImpl<N>>();
+			cell.add<CellImpl<N>>(n);
 		}
 	}
 
-	vector<asset<Cell>> Atlas::linearCells(eSortType sortType) {
-		vector<asset<Cell>> cv; cv.reserve(cells.count());
+	template<int N>
+	vector<asset<CellImpl<N>>> AtlasImpl<N>::linearCells(eSortType sortType) {
+		vector<asset<CellImpl<N>>> cv; cv.reserve(cells.count());
 
 		for (auto it : cells) {
 			cv.emplace_back(it.second);
@@ -150,8 +159,8 @@ namespace el {
 		}
 	}*/
 
-
-	Cell::Cell(int x, int y, int w, int h, int oX_, int oY_, int aw, int ah, int index) :
+	template<int N>
+	CellImpl<N>::CellImpl(int x, int y, int w, int h, int oX_, int oY_, int aw, int ah, int index) :
 		oX((int16)oX_), oY((int16)oY_),
 		left((float)(oX_)), down((float)(-oY_)), right((float)(oX_ + w)), up((float)(-oY_ + h)),
 		uvLeft((float)x / (float)aw),

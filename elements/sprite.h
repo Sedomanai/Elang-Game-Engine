@@ -5,25 +5,28 @@
 namespace el
 {
 	
-	struct ELANG_DLL Sprite : Quad
+	template<typename V, int M, int T, int C>
+	struct ELANG_DLL SpriteImpl : Quad<V, M, T, C>
 	{
-		Sprite() : Quad() {};
-		Sprite(asset<Material> material, asset<Painter> painter, const string& cell_key);
+		SpriteImpl() : Quad<V, M, T, C>() {};
+		SpriteImpl(asset<MaterialImpl<M, T>> material, asset<PainterImpl<M, T, C>> painter, const string& cell_key);
 
 		void update(Entity e);
 		void setCell(const string& value);
 		void flip() { mFlipped = !mFlipped; }
 		void flipside(bool invert) { mFlipped = invert; }
 
-		template<typename T>
-		void serialize(T& archive) {
-			archive(material, painter, mCell, mFlipped);
+		template<typename Arc>
+		void serialize(Arc& archive) {
+			archive(Visage<M, T, C>::material, Visage<M, T, C>::painter, mCell, mFlipped);
 		}
 	protected:
 		void updatePositionSprite(obj<Position> position);
 		void updatePlanarSprite(obj<Planar> plane);
 
-		asset<Cell> mCell;
+		asset<CellImpl<T>> mCell;
 		bool mFlipped;
 	};
+
+	using Sprite = SpriteImpl<SpriteVertex, 0, 0, 0>;
 }

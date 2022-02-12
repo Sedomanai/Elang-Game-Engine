@@ -14,9 +14,10 @@
 namespace el
 {
 
-	struct ELANG_DLL Texture
+	template<int N>
+	struct ELANG_DLL TextureImpl
 	{
-		Texture() : mID(-1), mWidth(0), mHeight(0) {}
+		TextureImpl() : mID(-1), mWidth(0), mHeight(0) {}
 
 		uint32 id() { return mID; }
 		uint32 width() { return mWidth; }
@@ -36,17 +37,31 @@ namespace el
 		void destroy();
 
 		// auto generate an atlas - not perfect, use the gui instead of a raw call
-		void autoGenerateAtlas(asset<Texture> self, float alphaCut);
+		void autoGenerateAtlas(asset<TextureImpl<N>> self, float alphaCut);
 
 		// detach atlas from texture - warning: if no other atlas users exist, the atlas is destroyed
-		void removeAtlas(asset<Texture> self);
+		void removeAtlas(asset<TextureImpl<N>> self);
 
 		template<typename T>
-		void save(T& archive) const;
+		void save(T& archive) const {
+			archive(mWidth, mHeight, atlas);
+			if (gProject->internalBinary) {
+				vector<uint8> encoded;
+				encode(encoded);
+				archive(encoded);
+			}
+		}
 		template<typename T>
-		void load(T& archive);
+		void load(T& archive) {
+			archive(mWidth, mHeight, atlas);
+			if (gProject->internalBinary) {
+				vector<uint8> decoded;
+				archive(decoded);
+				decode(decoded);
+			}
+		}
 
-		asset<Atlas> atlas;
+		asset<AtlasImpl<N>> atlas;
 	private:
 		void autogenAlgorithm(hashmap<int64, vector<int64>>&, float alphaCut);
 		void encode(vector<uint8>& out) const;
@@ -55,23 +70,5 @@ namespace el
 		uint16 mWidth, mHeight;
 	};
 
-	template<typename T>
-	void Texture::save(T& archive) const {
-		archive(mWidth, mHeight, atlas);
-		if (gProject->internalBinary) {
-			vector<uint8> encoded;
-			encode(encoded);
-			archive(encoded);
-		}
-	}
-
-	template<typename T>
-	void Texture::load(T& archive) {
-		archive(mWidth, mHeight, atlas);
-		if (gProject->internalBinary) {
-			vector<uint8> decoded;
-			archive(decoded);
-			decode(decoded);
-		}
-	}
+	using Texture = TextureImpl<0>;
 }

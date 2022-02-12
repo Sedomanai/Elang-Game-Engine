@@ -21,24 +21,27 @@ namespace el
 	// A painter has its own GL Shader Pipeline, a VBO, and a VBO
 	// Can only batch Visages with a matching Vertex Type
 	//=======================================================================================
-	struct ELANG_DLL Painter
-	{
-		enum
-		{
-			MULTI_MATERIAL	= 1,
-			DEPTH_SORT		= 2,
-			LOCKED			= 4,
-			Z_READ_ONLY		= 8,
-			Z_CLEAR			= 16,
-		};
 
-		Painter();
-		Painter(strview vertexShader, strview fragmentShader, sizet maxVertexCount = 3000U, 
+
+	enum ePainterFlags
+	{
+		MULTI_MATERIAL = 1,
+		DEPTH_SORT = 2,
+		LOCKED = 4,
+		Z_READ_ONLY = 8,
+		Z_CLEAR = 16,
+	};
+
+	template<int M, int T, int C>
+	struct ELANG_DLL PainterImpl
+	{
+		PainterImpl();
+		PainterImpl(strview vertexShader, strview fragmentShader, sizet maxVertexCount = 3000U,
 			asset<Camera> camera = NullEntity, Projection projection = Projection::eOrtho, sizet flags = 0);
 
 		static void sCreateNullTexture();
 
-		asset<Camera> camera;
+		asset<CameraImpl<C>> camera;
 		Projection projection;
 		sizet flags, drawtype;
 		vec4 color;
@@ -66,8 +69,8 @@ namespace el
 			}
 		}
 		void paint();
-		void lock() { flags |= LOCKED; }
-		void unlock() { flags &= ~LOCKED; }
+		void lock() { flags |= ePainterFlags::LOCKED; }
+		void unlock() { flags &= ~ePainterFlags::LOCKED; }
 		void forceUnlock();
 
 		string vertLabel() { return mVertLabel; }
@@ -81,15 +84,13 @@ namespace el
 		void setUniformVec3(uint shader, const vec3& dat, const char* name);
 		void setUniformVec4(uint shader, const vec4& dat, const char* name);
 		void setUniformMatrix(uint shader, const matrix4x4& dat, const char* name);
-	protected:
-		virtual void setCamera();
-		virtual void bindMaterial(uint32 material);
-		void bindMaterialBody(Material& mat);
-
+	private:
 
 		void sort();
 		void flush();
 		void clear();
+		void setCamera();
+		void bindMaterial(uint32 material);
 		void bindShaderBuffer();
 		void bindDataBuffer();
 		void circlePoints(vector<Primitive2DVertex>& buffer, const color8& c, float cx, float cy, float x, float y);
@@ -110,19 +111,20 @@ namespace el
 
 		static uint32 sNullTextureID;
 	};
-
-	struct ShapeDebug
+	
+	template<int C>
+	struct ShapeDebugImpl
 	{
-		Painter point;
-		Painter line;
-		Painter fill;
+		PainterImpl<0, 0, C> point;
+		PainterImpl<0, 0, C> line;
+		PainterImpl<0, 0, C> fill;
 
-		ShapeDebug() : mInit(false),
-			point("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, Painter::Z_CLEAR),
-			line("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, Painter::Z_CLEAR),
-			fill("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, Painter::Z_CLEAR)
+		ShapeDebugImpl() : mInit(false),
+			point("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR),
+			line("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR),
+			fill("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR)
 		{};
-		~ShapeDebug() {
+		~ShapeDebugImpl() {
 			if (mInit) {
 				point.destroy();
 				line.destroy();
@@ -130,8 +132,8 @@ namespace el
 			}
 		}
 
-		void init(asset<Camera> camera_) {
-			if (!mInit) {
+		void init(asset<CameraImpl<C>> camera_) {
+			if (!mInit && camera_) {
 				mInit = true;
 				fill.camera = point.camera = fill.camera = line.camera = point.camera = camera_;
 				fill.color = vec4(1, 1, 1, 0.2f);
@@ -153,6 +155,9 @@ namespace el
 	private:
 		bool mInit;
 	};
+
+	using Painter = PainterImpl<0, 0, 0>;
+	using ShapeDebug = ShapeDebugImpl<0>;
 
 	extern ELANG_DLL vector<Entity> gAtelier;
 };

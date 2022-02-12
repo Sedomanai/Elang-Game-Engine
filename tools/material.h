@@ -44,16 +44,18 @@ namespace el
 		}
 	};
 
-	struct Material
+
+	template<int N, int TextureIndex>
+	struct MaterialImpl
 	{
 		vector<Uniform> uniforms;
-		vector<asset<Texture>> textures;
+		vector<asset<TextureImpl<TextureIndex>>> textures;
 
 		void addUniform(eDataType type_, uint32 vertex_, void* data_, const string& name_) {
 			uniforms.emplace_back(type_, vertex_, data_, name_);
 		}
 
-		void setTexture(asset<Texture> texture, sizet index = 0) {
+		void setTexture(asset<TextureImpl<TextureIndex>> texture, sizet index = 0) {
 			while (textures.size() <= index) {
 				textures.emplace_back();
 			} textures[index] = texture;
@@ -73,5 +75,7 @@ namespace el
 			uniforms.clear();
 		}
 	};
+
+	using Material = MaterialImpl<0, 0>;
 }
 

@@ -2,18 +2,25 @@
 
 namespace el
 {
-	Quad::Quad(asset<Material> material_, asset<Painter> painter_) : Visage(material_, painter_), mDepth(0.0f) {}
+	template struct Visage<0, 0, 0>;
+	template struct Quad<SpriteVertex, 0, 0, 0>;
 
-	void Quad::batch() {
-		if (painter && material) {
-			painter->batch<SpriteVertex>(
+	template<typename V, int M, int T, int C>
+	Quad<V, M, T, C>::Quad(asset<MaterialImpl<M, T>> material_, asset<PainterImpl<M, T, C>> painter_)
+		: Visage<M, T, C>(material_, painter_), mDepth(0.0f) {}
+
+	template<typename V, int M, int T, int C>
+	void Quad<V, M, T, C>::batch() {
+		if (Visage<M, T, C>::painter && Visage<M, T, C>::material) {
+				Visage<M, T, C>::painter->batch<SpriteVertex>(
 				&mVertices[0], &gBox2dFillIndices[0],
-				4, 6, material.index(), 0, mDepth
+				4, 6, Visage<M, T, C>::material.index(), 0, mDepth
 			);
 		}
 	}
 
-	void Quad::sync(aabb& box) {
+	template<typename V, int M, int T, int C>
+	void Quad<V, M, T, C>::sync(aabb& box) {
 		box.l = mVertices[0].pos.x;
 		box.b = mVertices[0].pos.y;
 		box.r = mVertices[2].pos.x;
@@ -21,7 +28,8 @@ namespace el
 		box.normalize();
 	}
 
-	void Quad::sync(circle& circ) {
+	template<typename V, int M, int T, int C>
+	void Quad<V, M, T, C>::sync(circle& circ) {
 		auto& lb = mVertices[0].pos;
 		auto& rt = mVertices[2].pos;
 
@@ -30,7 +38,8 @@ namespace el
 		circ.r = (rt.x - lb.x) / 2.0f;
 	}
 
-	void Quad::sync(poly2d& poly) {
+	template<typename V, int M, int T, int C>
+	void Quad<V, M, T, C>::sync(poly2d& poly) {
 		for (int i = 0; i < 4; i++)
 			poly.verts[i] = mVertices[i].pos;
 		poly.count = 4;

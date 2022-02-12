@@ -2,11 +2,19 @@
 
 namespace el
 {
-	uint32 Painter::sNullTextureID = -1;
+
+	template struct PainterImpl<0, 0, 0>;
+	template struct ShapeDebugImpl<0>;
+
+	template<int M, int T, int C>
+	uint32 PainterImpl<M, T, C>::sNullTextureID = -1;
 	vector<Entity> gAtelier;
 
-	Painter::Painter() : drawtype(GL_TRIANGLES) {}
-	Painter::Painter(strview vertexShader, strview fragmentShader, sizet maxVertexCount,
+	template<int M, int T, int C>
+	PainterImpl<M, T, C>::PainterImpl() : drawtype(GL_TRIANGLES) {}
+
+	template<int M, int T, int C>
+	PainterImpl<M, T, C>::PainterImpl(strview vertexShader, strview fragmentShader, sizet maxVertexCount,
 		asset<Camera> camera_, Projection projection_, sizet flags_) 
 		: camera(camera_), projection(projection_), flags(flags_), drawtype(GL_TRIANGLES),
 		color(vec4(1.0f, 1.0f, 1.0f, 1.0f)), mTargetCount(maxVertexCount), mLocked(false)
@@ -18,7 +26,8 @@ namespace el
 #endif
 	}
 
-	void Painter::sCreateNullTexture() {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::sCreateNullTexture() {
 		glGenTextures(1, &sNullTextureID);
 		glBindTexture(GL_TEXTURE_2D, sNullTextureID);
 
@@ -31,14 +40,16 @@ namespace el
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	}
 
-	void Painter::destroy() {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::destroy() {
 		glDeleteProgramPipelines(1, &mPipeline);
 		glDeleteVertexArrays(1, &mVao);
 		glDeleteBuffers(1, &mVbo);
 		glDeleteBuffers(1, &mIbo);
 	}
 
-	void Painter::batchline(const line& line, const color8& c, float depth) {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::batchline(const line& line, const color8& c, float depth) {
 		if (!mLocked && mVert->size() == sizeof(Primitive2DVertex) && 
 			drawtype == GL_LINES) 
 		{
@@ -57,7 +68,8 @@ namespace el
 		}
 	}
 
-	void Painter::batchAABB(const aabb& aabb, const color8& c, float depth) {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::batchAABB(const aabb& aabb, const color8& c, float depth) {
 		if (!mLocked && mVert->size() == sizeof(Primitive2DVertex))  {
 			switch (drawtype) {
 			case GL_LINES:
@@ -89,7 +101,8 @@ namespace el
 		}
 	}
 
-	void Painter::batchBox(const poly2d& box, const color8& c, float depth) {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::batchBox(const poly2d& box, const color8& c, float depth) {
 		if (!mLocked && mVert->size() == sizeof(Primitive2DVertex) && box.count == 4) {
 			switch (drawtype) {
 			case GL_LINES:
@@ -117,7 +130,8 @@ namespace el
 		}
 	}
 
-	void Painter::batchPoly(const poly2d& poly, const color8& c, float depth) {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::batchPoly(const poly2d& poly, const color8& c, float depth) {
 		if (!mLocked && mVert->size() == sizeof(Primitive2DVertex) &&
 			drawtype == GL_LINES) 
 		{
@@ -142,7 +156,8 @@ namespace el
 		}
 	}
 
-	void Painter::batchCircle(const circle& circ, const color8& c, float depth) {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::batchCircle(const circle& circ, const color8& c, float depth) {
 		if (!mLocked && mVert->size() == sizeof(Primitive2DVertex)) {
 			auto& batch = mBatches.emplace_back();
 			mBatchOrder.emplace_back(mBatchOrder.size());
@@ -191,7 +206,8 @@ namespace el
 		}
 	}
 
-	void Painter::circlePoints(vector<Primitive2DVertex>& buffer, const color8& c, float cx, float cy, float x, float y) {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::circlePoints(vector<Primitive2DVertex>& buffer, const color8& c, float cx, float cy, float x, float y) {
 		if (x == 0) {
 			buffer.emplace_back(Primitive2DVertex{ vec2(cx, cy + y), c });
 			buffer.emplace_back(Primitive2DVertex{ vec2(cx, cy - y), c });
@@ -214,10 +230,11 @@ namespace el
 		}
 	}
 
-	void Painter::sort() {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::sort() {
 		if (!mBatches.empty()) {
-			if (flags & MULTI_MATERIAL) {
-				if (flags & DEPTH_SORT) {
+			if (flags & ePainterFlags::MULTI_MATERIAL) {
+				if (flags & ePainterFlags::DEPTH_SORT) {
 					std::sort(mBatchOrder.begin(), mBatchOrder.end(), [&](sizet a, sizet b) -> bool {
 						return (mBatches[a].depth > mBatches[b].depth) 
 							|| ((mBatches[a].depth == mBatches[b].depth) && mBatches[a].material < mBatches[b].material);
@@ -227,7 +244,7 @@ namespace el
 						return mBatches[a].material < mBatches[b].material;
 					});
 				}
-			} else if (flags & DEPTH_SORT) {
+			} else if (flags & ePainterFlags::DEPTH_SORT) {
 				std::sort(mBatchOrder.begin(), mBatchOrder.end(), [&](sizet a, sizet b) -> bool {
 					return  mBatches[a].depth > mBatches[b].depth;
 				});
@@ -235,7 +252,8 @@ namespace el
 		}
 	}
 
-	void Painter::flush() {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::flush() {
 		sizet iCount = 0;
 		if (!mBatches.empty()) {
 			sizet vCount = 0;
@@ -273,7 +291,8 @@ namespace el
 		} mBumpers.push_back(iCount);
 	}
 
-	void Painter::setCamera() {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::setCamera() {
 		if (camera) {
 			setUniformMatrix(mVert->shader(), ((projection == Projection::ePerspective) ? gPerspective : gOrtho) * camera->inversed().matrix(), "uView");
 		} 	else {
@@ -282,7 +301,8 @@ namespace el
 	}
 
 
-	void Painter::clear() {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::clear() {
 		for (sizet i = 0; i < mBatchOrder.size(); i++) {
 			auto& batch = mBatches[mBatchOrder[i]];
 			if ((batch.flag & E_DANGLING_VERTICES) == E_DANGLING_VERTICES) {
@@ -296,13 +316,14 @@ namespace el
 		mBatches.clear();
 		mBatchOrder.clear();
 
-		mLocked = (flags & LOCKED) ? true : false;
+		mLocked = (flags & ePainterFlags::LOCKED) ? true : false;
 		if (!mLocked) {
 			mBumpers.clear();
 		}
 	}
 
-	void Painter::paint() {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::paint() {
 		if (!mLocked) {
 			sort();
 			flush();
@@ -314,12 +335,12 @@ namespace el
 			glBindVertexArray(mVao);
 			glBindBuffer(GL_ARRAY_BUFFER, mVbo);
 
-			if (flags & Z_CLEAR) {
+			if (flags & ePainterFlags::Z_CLEAR) {
 				glClearDepth(1.0f);
 				glClear(GL_DEPTH_BUFFER_BIT);
 			}
 
-			if (flags & Z_READ_ONLY) {
+			if (flags & ePainterFlags::Z_READ_ONLY) {
 				glDepthMask(GL_FALSE);
 			} else glDepthMask(GL_TRUE);
 
@@ -335,15 +356,17 @@ namespace el
 		clear();
 	}
 
-	void Painter::forceUnlock() {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::forceUnlock() {
 		mLocked = false;
-		flags &= ~LOCKED;
+		flags &= ~ePainterFlags::LOCKED;
 		mBatches.clear();
 		mBatchOrder.clear();
 		mBumpers.clear();
 	}
 
-	void Painter::bindShaderBuffer() {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::bindShaderBuffer() {
 		if (gVertexShaders.contains(mVertLabel)) {
 			mVert = &gVertexShaders[mVertLabel];
 		} else {
@@ -362,7 +385,8 @@ namespace el
 		glUseProgramStages(mPipeline, GL_VERTEX_SHADER_BIT, mVert->shader());
 		glUseProgramStages(mPipeline, GL_FRAGMENT_SHADER_BIT, mFrag->shader());
 	}
-	void Painter::bindDataBuffer() {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::bindDataBuffer() {
 		glGenVertexArrays(1, &mVao);
 		glBindVertexArray(mVao);
 		glGenBuffers(1, &mVbo);
@@ -375,54 +399,57 @@ namespace el
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIbo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mTargetCount * 8 * sizeof(uint), 0, GL_DYNAMIC_DRAW);
 	}
-	void Painter::setUniformFloat(uint shader, float dat, const char* location) {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::setUniformFloat(uint shader, float dat, const char* location) {
 		glProgramUniform1f(shader, glGetUniformLocation(shader, location), dat);
 	}
-	void Painter::setUniformVec2(uint shader, const vec2& dat, const char* location) {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::setUniformVec2(uint shader, const vec2& dat, const char* location) {
 		glProgramUniform2f(shader, glGetUniformLocation(shader, location), dat.x, dat.y);
 	}
-	void Painter::setUniformVec3(uint shader, const vec3& dat, const char* location) {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::setUniformVec3(uint shader, const vec3& dat, const char* location) {
 		glProgramUniform3f(shader, glGetUniformLocation(shader, location), dat.x, dat.y, dat.z);
 	}
-	void Painter::setUniformVec4(uint shader, const vec4& dat, const char* location) {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::setUniformVec4(uint shader, const vec4& dat, const char* location) {
 		glProgramUniform4f(shader, glGetUniformLocation(shader, location), dat.x, dat.y, dat.z, dat.w);
 	}
-	void Painter::setUniformMatrix(uint shader, const matrix4x4& dat, const char* location) {
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::setUniformMatrix(uint shader, const matrix4x4& dat, const char* location) {
 		glProgramUniformMatrix4fv(shader, glGetUniformLocation(shader, location), 1, GL_FALSE, &dat.data[0]);
 	}
-	void Painter::bindMaterial(uint32 material) {
-		asset<Material> mate(material);
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::bindMaterial(uint32 material) {
+		asset<MaterialImpl<M, T>> mate(material);
 		if (mate) {
 			auto& mat = *mate;
-			bindMaterialBody(mat);
-		}
-	}
-	void Painter::bindMaterialBody(Material& mat) {
-		for (sizet i = 0; i < mat.uniforms.size(); i++) {
-			auto& uni = mat.uniforms[i];
-			switch (uni.type) {
-			case eDataType::FLOAT:
-				setUniformFloat(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<float*>(uni.data), uni.name.c_str());
-				break;
-			case eDataType::VEC2:
-				setUniformVec2(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec2*>(uni.data), uni.name.c_str());
-				break;
-			case eDataType::VEC3:
-				setUniformVec3(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec3*>(uni.data), uni.name.c_str());
-				break;
-			case eDataType::VEC4:
-				setUniformVec4(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec4*>(uni.data), uni.name.c_str());
-				break;
-			case eDataType::MATRIX4:
-				setUniformMatrix(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<matrix4x4*>(uni.data), uni.name.c_str());
-				break;
+			for (sizet i = 0; i < mat.uniforms.size(); i++) {
+				auto& uni = mat.uniforms[i];
+				switch (uni.type) {
+				case eDataType::FLOAT:
+					setUniformFloat(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<float*>(uni.data), uni.name.c_str());
+					break;
+				case eDataType::VEC2:
+					setUniformVec2(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec2*>(uni.data), uni.name.c_str());
+					break;
+				case eDataType::VEC3:
+					setUniformVec3(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec3*>(uni.data), uni.name.c_str());
+					break;
+				case eDataType::VEC4:
+					setUniformVec4(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<vec4*>(uni.data), uni.name.c_str());
+					break;
+				case eDataType::MATRIX4:
+					setUniformMatrix(uni.vertex ? mVert->shader() : mFrag->shader(), *reinterpret_cast<matrix4x4*>(uni.data), uni.name.c_str());
+					break;
+				}
 			}
-		}
 
-		for (sizet i = 0; i < mat.textures.size(); ++i) {
-			glActiveTexture(GL_TEXTURE0 + (uint32)i);
-			if (auto tex = mat.textures[i]) {
-				glBindTexture(GL_TEXTURE_2D, (tex->id() == -1) ? sNullTextureID : tex->id());
+			for (sizet i = 0; i < mat.textures.size(); ++i) {
+				glActiveTexture(GL_TEXTURE0 + (uint32)i);
+				if (auto tex = mat.textures[i]) {
+					glBindTexture(GL_TEXTURE_2D, (tex->id() == -1) ? sNullTextureID : tex->id());
+				}
 			}
 		}
 	}

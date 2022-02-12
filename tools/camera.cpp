@@ -5,6 +5,8 @@
 
 namespace el
 {
+	template struct CameraImpl<0>;
+
 	void updateViewport(float left, float right, float bottom, float top)
 	{
 		float width = right - left;
