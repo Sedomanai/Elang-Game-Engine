@@ -1,4 +1,4 @@
-#include "registry.h"
+﻿#include "registry.h"
 
 namespace el
 {

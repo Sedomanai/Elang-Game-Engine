@@ -3,7 +3,16 @@
 namespace el
 {
 	template struct Visage<0, 0, 0>;
+	template struct Visage<1, 1, 1>;
+	template struct Visage<1, 0, 1>;
+	template struct Visage<1, 1, 0>;
+	template struct Visage<1, 0, 0>;
+
 	template struct Quad<SpriteVertex, 0, 0, 0>;
+	template struct Quad<SpriteVertex, 1, 1, 1>;
+	template struct Quad<SpriteVertex, 1, 0, 1>;
+	template struct Quad<SpriteVertex, 1, 1, 0>;
+	template struct Quad<SpriteVertex, 1, 0, 0>;
 
 	template<typename V, int M, int T, int C>
 	Quad<V, M, T, C>::Quad(asset<MaterialImpl<M, T>> material_, asset<PainterImpl<M, T, C>> painter_)

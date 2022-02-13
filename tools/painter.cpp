@@ -1,9 +1,16 @@
-#include "painter.h"
+﻿#include "painter.h"
 
 namespace el
 {
 
 	template struct PainterImpl<0, 0, 0>;
+	template struct PainterImpl<0, 0, 1>;
+	template struct PainterImpl<1, 1, 1>;
+	template struct PainterImpl<1, 0, 1>;
+	template struct PainterImpl<1, 1, 0>;
+	template struct PainterImpl<1, 0, 0>;
+
+	template struct ShapeDebugImpl<1>;
 	template struct ShapeDebugImpl<0>;
 
 	template<int M, int T, int C>
@@ -15,7 +22,7 @@ namespace el
 
 	template<int M, int T, int C>
 	PainterImpl<M, T, C>::PainterImpl(strview vertexShader, strview fragmentShader, sizet maxVertexCount,
-		asset<Camera> camera_, Projection projection_, sizet flags_) 
+		asset<CameraImpl<C>> camera_, Projection projection_, sizet flags_) 
 		: camera(camera_), projection(projection_), flags(flags_), drawtype(GL_TRIANGLES),
 		color(vec4(1.0f, 1.0f, 1.0f, 1.0f)), mTargetCount(maxVertexCount), mLocked(false)
 	{
@@ -38,6 +45,12 @@ namespace el
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	}
+
+	template<int M, int T, int C>
+	void PainterImpl<M, T, C>::init() {
+		bindShaderBuffer();
+		bindDataBuffer();
 	}
 
 	template<int M, int T, int C>
@@ -291,8 +304,11 @@ namespace el
 		} mBumpers.push_back(iCount);
 	}
 
+
+	// change name to setGlobalUniform
 	template<int M, int T, int C>
 	void PainterImpl<M, T, C>::setCamera() {
+		setUniformVec4(mVert->shader(), color, "uColor");
 		if (camera) {
 			setUniformMatrix(mVert->shader(), ((projection == Projection::ePerspective) ? gPerspective : gOrtho) * camera->inversed().matrix(), "uView");
 		} 	else {

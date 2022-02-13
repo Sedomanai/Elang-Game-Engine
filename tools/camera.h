@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../elang_library_builder.h"
 #include "../common/transform.h"
@@ -12,6 +12,7 @@ namespace el
 	template<int N>
 	struct ELANG_DLL CameraImpl : Transform { EL_USING_BASE_CLASS(CameraImpl<N>, Transform) };
 	using Camera = CameraImpl<0>;
+	using EditorCamera = CameraImpl<1>;
 
 	enum class Projection
 	{

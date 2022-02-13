@@ -1,4 +1,4 @@
-#include "texture.h"
+﻿#include "texture.h"
 
 #include <encoder/fpng.h>
 #include <encoder/fpng.cpp>
@@ -127,8 +127,8 @@ namespace el {
 		auto key = gProject->textures[self];
 
 		if (atlas) {
-			atlas.remove<AtlasImpl<N>>();
-			atlas.add<AtlasImpl<N>>();
+			cout << "fucking destroy" << endl;
+			atlas->destroy();
 		} else {
 			atlas = gProject->make<AtlasImpl<N>>(gProject->atlases, key);
 		}

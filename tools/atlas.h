@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../elang_library_builder.h"
 #include "../common/fileio.h"
@@ -23,7 +23,7 @@ namespace el
 
 		template<typename T>
 		void serialize(T& archive) {
-			archive(left, down, right, up, uvLeft, uvDown, uvRight, uvUp, index);
+			archive(left, down, right, up, uvLeft, uvDown, uvRight, uvUp, oX, oY, index);
 		}
 	};
 
@@ -67,7 +67,7 @@ namespace el
 		/// <summary>
 		/// Destroys and recreates atlas cells to the back of the Cell pool
 		/// </summary>
-		void packAndCacheCells();
+		vector<asset<CellImpl<N>>> packedAndCachedCells();
 		void recreateCells(const vector<asset<CellImpl<N>>>&);
 
 		template<typename T>

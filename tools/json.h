@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/document.h>

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <rapidxml/rapidxml_iterators.hpp>
 #include <rapidxml/rapidxml_print.hpp>

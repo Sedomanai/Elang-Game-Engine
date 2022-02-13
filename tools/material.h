@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../common/container.h"
 #include "../common/string.h"
@@ -19,8 +19,8 @@ namespace el
 			: type(type_), vertex(vertex_), data(data_), name(name_) {};
 		Uniform() : type(eDataType::FLOAT), vertex(1), data(0), name("uSomething__NULL_") {};
 
-		template<typename T>
-		void save(T& archive) const {
+		template<typename Arc>
+		void save(Arc& archive) const {
 			archive(type, vertex, name);
 			switch (type) {
 				case eDataType::FLOAT: archive(*(reinterpret_cast<float*>(data))); break;
@@ -31,8 +31,8 @@ namespace el
 			};
 		}
 
-		template<typename T>
-		void load(T& archive) {
+		template<typename Arc>
+		void load(Arc& archive) {
 			archive(type, vertex, name);
 			switch (type) {
 				case eDataType::FLOAT: data = malloc(sizeof(float)); archive(*(reinterpret_cast<float*>(data))); break;
@@ -65,8 +65,8 @@ namespace el
 			return ((textures.size() > 0) && textures[0]);
 		}
 
-		template<typename T>
-		void serialize(T& archive) {
+		template<typename Arc>
+		void serialize(Arc& archive) {
 			archive(textures, uniforms);
 		}
 
@@ -77,5 +77,7 @@ namespace el
 	};
 
 	using Material = MaterialImpl<0, 0>;
+	using EditorMaterial = MaterialImpl<1, 1>;
+	using EditorProjectMaterial = MaterialImpl<1, 0>;
 }
 

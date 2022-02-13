@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../elang_library_builder.h"
 #include "../common/keysym.h"

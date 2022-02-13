@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../common/stream.h"
 #include "../common/batch.h"
@@ -37,8 +37,9 @@ namespace el
 	{
 		PainterImpl();
 		PainterImpl(strview vertexShader, strview fragmentShader, sizet maxVertexCount = 3000U,
-			asset<Camera> camera = NullEntity, Projection projection = Projection::eOrtho, sizet flags = 0);
+			asset<CameraImpl<C>> camera = NullEntity, Projection projection = Projection::eOrtho, sizet flags = 0);
 
+		// 귀찮은데 언젠가 고쳐야 된다...
 		static void sCreateNullTexture();
 
 		asset<CameraImpl<C>> camera;
@@ -46,14 +47,11 @@ namespace el
 		sizet flags, drawtype;
 		vec4 color;
 
-		template<typename T>
-		void serialize(T& archive) {
+		template<typename Arc>
+		void serialize(Arc& archive) {
 			archive(mVertLabel, mFragLabel, mLocked, mTargetCount, camera, projection, flags, drawtype, color);
 		}
-		void init() {
-			bindShaderBuffer();
-			bindDataBuffer();
-		}
+		void init();
 		void destroy();
 		void batchline(const line& line, const color8& c, float depth = 0.0f);
 		void batchAABB(const aabb& aabb, const color8& c, float depth = 0.0f);
@@ -61,9 +59,9 @@ namespace el
 		void batchCircle(const circle& circ, const color8& c, float depth = 0.0f);
 		void batchPoly(const poly2d& circ, const color8& c, float depth = 0.0f);
 
-		template<typename T, typename ...Arg>
+		template<typename A, typename ...Arg>
 		void batch(Arg... args) {
-			if (!mLocked && sizeof(T) == mVert->size()) {
+			if (!mLocked && sizeof(A) == mVert->size()) {
 				mBatches.emplace_back(args...);
 				mBatchOrder.emplace_back(mBatchOrder.size());
 			}
@@ -111,7 +109,14 @@ namespace el
 
 		static uint32 sNullTextureID;
 	};
-	
+
+	using Painter = PainterImpl<0, 0, 0>;
+	using EditorPainter = PainterImpl<1, 1, 1>;
+	using EditorProjectPainter = PainterImpl<1, 0, 1>;
+	using EditorWorldPainter = PainterImpl<1, 1, 0>;
+	using EditorWorldProjectPainter = PainterImpl<1, 0, 0>; // probably won't be used
+	using EditorShapeDebugPainter = PainterImpl<0, 0, 1>;
+
 	template<int C>
 	struct ShapeDebugImpl
 	{
@@ -156,8 +161,9 @@ namespace el
 		bool mInit;
 	};
 
-	using Painter = PainterImpl<0, 0, 0>;
+
 	using ShapeDebug = ShapeDebugImpl<0>;
+	using EditorShapeDebug = ShapeDebugImpl<1>;
 
 	extern ELANG_DLL vector<Entity> gAtelier;
 };

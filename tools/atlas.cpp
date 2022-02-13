@@ -1,4 +1,4 @@
-#include "atlas.h"
+﻿#include "atlas.h"
 
 #include "texture.h"
 
@@ -10,8 +10,6 @@ namespace el {
 	//TODO: change ordering and data structure
 	template<int N>
 	void AtlasImpl<N>::makeFromAtlsFile(const string& filePath) {
-		cout << "why is this not firing" << endl;
-
 		int aw, ah;
 
 		string out;
@@ -87,24 +85,28 @@ namespace el {
 			gProject->destroy(e.second);
 		} for (auto e : clips) {
 			gProject->destroy(e.second);
-		}
+		} cells.clear();
+		clips.clear();
 	}
 
 	template<int N>
-	void AtlasImpl<N>::packAndCacheCells() {
-		auto&& ents = linearCells();
+	vector<asset<CellImpl<N>>> AtlasImpl<N>::packedAndCachedCells() {
+		auto&& cv = linearCells();
 
-		vector<CellImpl<N>> data; data.reserve(ents.size());
-		for (sizet i = 0; i < ents.size(); i++) {
-			data.emplace_back(*ents[i]);
+		vector<CellImpl<N>> data; data.reserve(cv.size());
+		for (sizet i = 0; i < cv.size(); i++) {
+			data.emplace_back(*cv[i]);
 		}
 
-		gProject->remove<CellImpl<N>>(ents.begin(), ents.end());
+		//gProject->remove<CellImpl<N>>(ents.begin(), ents.end());
 		for (sizet i = 0; i < data.size(); i++) {
-			auto cell = ents[i];
+			auto cell = cv[i];
+			cell.remove<CellImpl<N>>();
 			cell.add<CellImpl<N>>(data[i]);
-			cell->index = (uint32)i;
-		}
+		} 
+
+		std::sort(cv.begin(), cv.end(), [&](auto lhs, auto rhs) { return lhs->index < rhs->index; });
+		return std::move(cv);
 	}
 
 	template<int N>

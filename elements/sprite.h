@@ -29,4 +29,8 @@ namespace el
 	};
 
 	using Sprite = SpriteImpl<SpriteVertex, 0, 0, 0>;
+	using EditorSprite = SpriteImpl<SpriteVertex, 1, 1, 1>;
+	using EditorProjectSprite = SpriteImpl<SpriteVertex, 1, 0, 1>;
+	using EditorWorldSprite = SpriteImpl<SpriteVertex, 1, 1, 0>;
+	using EditorWorldProjectSprite = SpriteImpl<SpriteVertex, 1, 0, 0>; // probably won't be used
 }

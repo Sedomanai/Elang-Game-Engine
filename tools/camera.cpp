@@ -1,4 +1,4 @@
-#include "camera.h"
+ï»¿#include "camera.h"
 
 #include "../common/keysym.h"
 #include "../common/math.h"
@@ -6,6 +6,7 @@
 namespace el
 {
 	template struct CameraImpl<0>;
+	template struct CameraImpl<1>;
 
 	void updateViewport(float left, float right, float bottom, float top)
 	{
@@ -22,7 +23,7 @@ namespace el
 		dat[14] = -1.0f;
 		dat[15] = 1.0f;
 
-		float focal = -1000; // Ä«¸Ş¶ó°¡ -1000ÀÏ ¶§
+		float focal = -1000; // ì¹´ë©”ë¼ê°€ -1000ì¼ ë•Œ
 		float far_ = 0.0f;
 
 		float n = -0.000001f;

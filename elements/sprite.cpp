@@ -3,6 +3,10 @@
 namespace el
 {
 	template struct SpriteImpl<SpriteVertex, 0, 0, 0>;
+	template struct SpriteImpl<SpriteVertex, 1, 1, 1>;
+	template struct SpriteImpl<SpriteVertex, 1, 0, 1>;
+	template struct SpriteImpl<SpriteVertex, 1, 1, 0>;
+	template struct SpriteImpl<SpriteVertex, 1, 0, 0>;
 
 	template<typename V, int M, int T, int C>
 	SpriteImpl<V, M, T, C>::SpriteImpl(asset<MaterialImpl<M, T>> material_, asset<PainterImpl<M, T, C>> painter_, const string& cell)

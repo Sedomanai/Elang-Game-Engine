@@ -1,4 +1,4 @@
-// The heart of Elang Engine
+﻿// The heart of Elang Engine
 
 #pragma once
 
@@ -136,7 +136,7 @@ namespace el
     ELANG_DLL extern Project* gProject;
     ELANG_DLL extern Stage* gStage;
     inline void bind(Project& project) { gProject = &project; }
-    inline void bind(Stage& stage) { gStage = &stage; }
+    inline void bind(Stage* stage) { gStage = stage; }
 
 #define __EL_DEFINE_REGISTRY_NODES(classname, regname) \
     template<typename T> \
