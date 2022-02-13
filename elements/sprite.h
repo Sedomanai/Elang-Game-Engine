@@ -12,6 +12,7 @@ namespace el
 		SpriteImpl(asset<MaterialImpl<M, T>> material, asset<PainterImpl<M, T, C>> painter, const string& cell_key);
 
 		void update(Entity e);
+		void setCell(asset<CellImpl<T>> cell) { mCell = cell; }
 		void setCell(const string& value);
 		void flip() { mFlipped = !mFlipped; }
 		void flipside(bool invert) { mFlipped = invert; }
