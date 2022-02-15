@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 
 #include <random>
 
 namespace  el
 {
-	/** ·£´ı »ç¿ë¹æ¹ı
+	/** ëœë¤ ì‚¬ìš©ë°©ë²•
 	* rng r
 	* r.seed(SEED()());
 	* irand/rrand rand(min, max)

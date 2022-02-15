@@ -14,6 +14,8 @@ namespace el
 		void update(Entity e);
 		void setCell(asset<CellImpl<T>> cell) { mCell = cell; }
 		void setCell(const string& value);
+		bool hasValidCell() { return mCell; }
+
 		void flip() { mFlipped = !mFlipped; }
 		void flipside(bool invert) { mFlipped = invert; }
 

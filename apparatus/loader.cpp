@@ -171,7 +171,7 @@ namespace el
 	void saveElangProject(const char* project_path) {
 		OutArchive ar(project_path);
 		if (ar.valid()) {
-			gProject->save<FileData, Texture, Atlas, Cell, Clipframe, Clip,
+			gProject->save<FileData, Texture, Atlas, Cell, Clip,
 				FontFace, FontGlyph, Material, Painter, Camera>(ar);
 			cout << "Saving Elang Project at Project Path " << project_path << "  ..." << endl;
 		} else {
@@ -183,7 +183,7 @@ namespace el
 		InArchive ar(project_path);
 		if (ar.valid()) {
 			cout << "Loading Elang Project at Project Path " << project_path << "  ..." << endl;
-			gProject->load<FileData, Texture, Atlas, Cell, Clipframe, Clip,
+			gProject->load<FileData, Texture, Atlas, Cell, Clip,
 				FontFace, FontGlyph, Material, Painter, Camera>(ar);
 			cout << "Project Name:	   " << gProject->name << endl;
 			cout << "Asset  Directory: " << gProject->assetDir << endl;

@@ -1,4 +1,5 @@
 #pragma once
+#include "../tools/atlas.h"
 #include "visage.h"
 #include "basic.h"
 
@@ -11,6 +12,7 @@ namespace el
 		CanvasImpl(asset<MaterialImpl<M, T>> material, asset<PainterImpl<M, T, C>> painter);
 
 		void update();
+		void update(asset<CellImpl<T>>);
 		aabb bounds;
 		vec2 uvpos, uvsize;
 
@@ -21,4 +23,7 @@ namespace el
 	};
 
 	using Canvas = CanvasImpl<SpriteVertex, 0, 0, 0>;
+	using EditorCanvas = CanvasImpl<SpriteVertex, 1, 1, 1>;
+	using EditorProjectCanvas = CanvasImpl<SpriteVertex, 1, 0, 1>;
+
 }

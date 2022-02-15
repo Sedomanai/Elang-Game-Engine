@@ -30,8 +30,8 @@ namespace el
 	template<int N>
 	struct ClipframeImpl
 	{
-		uint16 cell;
-		uint16 duration;
+		asset<CellImpl<N>> cell;
+		uint32 duration;
 
 		template<typename T>
 		void serialize(T& archive) {

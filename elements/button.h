@@ -14,32 +14,15 @@ namespace el
 		void postUpdate(Entity self, Entity context);
 	};
 
-	struct Button
+	struct ELANG_DLL Button
 	{
 		Button() : ev(0), mPrev(false), mCurr(false) {};
-		Button(IButtonEvent* buttonEvent)
+		Button(IButtonEvent* buttonEvent, obj<Entity> context_ = NullEntity)
 			: mPrev(false), mCurr(false), ev(buttonEvent) {}
 
-		void update(Entity e, bool hit) {
-			mPrev = mCurr;
-			mCurr = hit;
+		void update(Entity e, bool hit);
 
-			if (mCurr) {
-				if (mPrev) {
-					ev->onHover(e, context);
-				}
-				else {
-					ev->onHover(e, context);
-					ev->onEnter(e, context);
-				}
-			}
-			else if (mPrev) {
-				ev->onExit(e, context);
-			}
-			ev->postUpdate(e, context);
-		}
-
-		template<typename T> void serialize(T& archive) {};
+		template<typename T> void serialize(T& archive) { archive(context); };
 
 		obj<Entity> context;
 	private:

@@ -17,9 +17,9 @@ namespace el {
 
 		AtlasAction act = AtlasAction::NONE;
 		int index, x, y, w, h, ox, oy;
-		Clipframe frame;
+		ClipframeImpl<N> frame;
 
-		asset<Clip> clip;
+		asset<ClipImpl<N>> clip;
 		iterate(out, '\n', [&](strview line, sizet) -> bool {
 			iterate(line, ' ', [&](strview word, sizet iter) -> bool {
 				switch (iter) {
@@ -33,7 +33,7 @@ namespace el {
 						ah = toInt(word);
 						return false;
 					case AtlasAction::SET_CLIP:
-						clip = gProject->makeSub<Clip>();
+						clip = gProject->makeSub<ClipImpl<N>>();
 						clips.emplace(string(word), clip);
 						return false;
 					}
@@ -63,9 +63,8 @@ namespace el {
 						break;
 					case AtlasAction::SET_CLIP:
 						if (iter % 2 == 0) {
-							frame.cell = toInt(word);
-						}
-						else {
+							//frame.cell = toInt(word);
+						} else {
 							frame.duration = toInt(word);
 							clip->push_back(frame);
 						}
