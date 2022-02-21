@@ -7,31 +7,32 @@
 namespace el
 {
 	//TODO: creator destructors to free memory
-	struct ELANG_DLL Text
+	template<int M, int T, int C>
+	struct ELANG_DLL TextImpl
 	{
-		Text() : mDepth(0), mCursor(0, 0),
+		TextImpl() : mDepth(0), mCursor(0, 0),
 			mVertices(0), mIndices(0), mVCount(0), mICount(0), mVMax(0), mIMax(0) {};
-		Text(asset<FontFace> face, asset<Painter> painter, const string& text);
+		TextImpl(asset<FontFaceImpl<M, T>> face, asset<PainterImpl<M, T, C>> painter, const string& text);
 		
 		void init();
 		
-		template<typename T>
-		void save(T& archive) {
+		template<typename Arc>
+		void save(Arc& archive) {
 			archive(mDepth, mFace, mPainter, mText);
 		}
-		template<typename T>
-		void load(T& archive) {
+		template<typename Arc>
+		void load(Arc& archive) {
 			archive(mDepth, mFace, mPainter, mText);
 			init();
 		}
 
 	protected:
-		asset<FontGlyph> getGlyph(uint32 charid);
-		void addGlyph(FontGlyph& glyph);
-		void fixGlyph(FontGlyph& glyph, sizet id);
+		asset<FontGlyphImpl<T>> getGlyph(uint32 charid);
+		void addGlyph(FontGlyphImpl<T>& glyph);
+		void fixGlyph(FontGlyphImpl<T>& glyph, sizet id);
 
-		asset<FontFace> mFace;
-		asset<Painter> mPainter;
+		asset<FontFaceImpl<M, T>> mFace;
+		asset<PainterImpl<M, T, C>> mPainter;
 		vec2 mCursor;
 		string mText;
 
@@ -42,23 +43,26 @@ namespace el
 		float mDepth;
 	};
 
-	struct ELANG_DLL Textfield : Text
+	template<int M, int T, int C>
+	struct ELANG_DLL TextfieldImpl : TextImpl<M, T, C>
 	{
-		Textfield() : Text() {};
-		Textfield(asset<FontFace> face, asset<Painter> painter, const string& text);
+		TextfieldImpl() : TextImpl<M, T, C>() {};
+		TextfieldImpl(asset<FontFaceImpl<M, T>> face, asset<PainterImpl<M, T, C>> painter, const string& text);
 		void batch();
 		void update(Entity e);
 		void addChar(char ch);
 		void align(eAlignment alignment) { mAlign = alignment; }
 
-		template<typename T>
-		void save(T& archive) const {
-			archive(mDepth, mFace, mPainter, mText, mAlign);
+		template<typename Arc>
+		void save(Arc& archive) const {
+			archive(TextImpl<M, T, C>::mDepth, TextImpl<M, T, C>::mFace, TextImpl<M, T, C>::mPainter, 
+				TextImpl<M, T, C>::mText, mAlign);
 		}
-		template<typename T>
-		void load(T& archive) {
-			archive(mDepth, mFace, mPainter, mText, mAlign);
-			init();
+		template<typename Arc>
+		void load(Arc& archive) {
+			archive(TextImpl<M, T, C>::mDepth, TextImpl<M, T, C>::mFace, TextImpl<M, T, C>::mPainter, 
+				TextImpl<M, T, C>::mText, mAlign);
+			TextImpl<M, T, C>::init();
 		}
 
 	private:
@@ -67,7 +71,8 @@ namespace el
 		eAlignment mAlign;
 	};
 
-	struct ELANG_DLL Textbox : Text
+	template<int M, int T, int C>
+	struct ELANG_DLL TextboxImpl : TextImpl<M, T, C>
 	{
 		struct Line {
 			uint32 tbegin, tend;
@@ -77,20 +82,22 @@ namespace el
 			Line() : tbegin(0), tend(0), gbegin(0), gend(0), adv(0.0f) {}
 		};
 
-		Textbox() : Text() {};
-		Textbox(asset<FontFace> face, asset<Painter> painter, const string& text);
+		TextboxImpl() : TextImpl<M, T, C>() {};
+		TextboxImpl(asset<FontFaceImpl<M, T>> face, asset<PainterImpl<M, T, C>> painter, const string& text);
 		void batch(Entity e);
 		void update(Entity e);
 		void addChar(obj<aabb> e, char ch);
 
-		template<typename T>
-		void save(T& archive) const {
-			archive(mDepth, mFace, mPainter, mText, spacing);
+		template<typename Arc>
+		void save(Arc& archive) const {
+			archive(TextImpl<M, T, C>::mDepth, TextImpl<M, T, C>::mFace, TextImpl<M, T, C>::mPainter, 
+				TextImpl<M, T, C>::mText, spacing);
 		}
-		template<typename T>
-		void load(T& archive) {
-			archive(mDepth, mFace, mPainter, mText, spacing);
-			init();
+		template<typename Arc>
+		void load(Arc& archive) {
+			archive(TextImpl<M, T, C>::mDepth, TextImpl<M, T, C>::mFace, TextImpl<M, T, C>::mPainter, 
+				TextImpl<M, T, C>::mText, spacing);
+			TextImpl<M, T, C>::init();
 		}
 
 		float spacing, scroll;
@@ -101,4 +108,12 @@ namespace el
 
 		vector<Line> mLines;
 	};
+
+	using Text = TextImpl<0, 0, 0>;
+	using Textfield = TextfieldImpl<0, 0, 0>;
+	using Textbox = TextboxImpl<0, 0, 0>;
+
+	using EditorText = TextImpl<1, 1, 1>;
+	using EditorTextfield = TextfieldImpl<1, 1, 1>;
+	using EditorTextbox = TextboxImpl<1, 1, 1>;
 };

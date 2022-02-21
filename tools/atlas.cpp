@@ -4,7 +4,6 @@
 
 namespace el {
 	template struct CellImpl<0>;
-	template struct ClipframeImpl<0>;
 	template struct AtlasImpl<0>;
 
 	//TODO: change ordering and data structure
@@ -17,8 +16,6 @@ namespace el {
 
 		AtlasAction act = AtlasAction::NONE;
 		int index, x, y, w, h, ox, oy;
-		ClipframeImpl<N> frame;
-
 		asset<ClipImpl<N>> clip;
 		iterate(out, '\n', [&](strview line, sizet) -> bool {
 			iterate(line, ' ', [&](strview word, sizet iter) -> bool {
@@ -61,12 +58,11 @@ namespace el {
 							break;
 						}
 						break;
-					case AtlasAction::SET_CLIP:
+					case AtlasAction::SET_CLIP: // TODO: CHANGE THIS LATER, DURATION NO LONGER EXISTS FOR FRAME
 						if (iter % 2 == 0) {
 							//frame.cell = toInt(word);
 						} else {
-							frame.duration = toInt(word);
-							clip->push_back(frame);
+							clip->emplace_back();
 						}
 						break;
 					}

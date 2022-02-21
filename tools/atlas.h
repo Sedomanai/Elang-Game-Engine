@@ -28,19 +28,7 @@ namespace el
 	};
 
 	template<int N>
-	struct ClipframeImpl
-	{
-		asset<CellImpl<N>> cell;
-		uint32 duration;
-
-		template<typename T>
-		void serialize(T& archive) {
-			archive(cell, duration);
-		}
-	};
-
-	template<int N>
-	using ClipImpl = vector<ClipframeImpl<N>>;
+	using ClipImpl = vector<asset<CellImpl<N>>>;
 
 
 	template<int N>
@@ -95,8 +83,6 @@ namespace el
 	};
 
 	using Cell = CellImpl<0>;
-	using Clipframe = ClipframeImpl<0>;
 	using Clip = ClipImpl<0>;
 	using Atlas = AtlasImpl<0>;
-
 }

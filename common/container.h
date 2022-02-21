@@ -43,7 +43,7 @@ namespace el
 	template <typename T>
 	void swapshift(vector<T>& v, sizet from, sizet to) {
 		if (to > from)
-			std::rotate(v.begin() + from, v.begin() + from + 1, v.begin() + to + 1);
+			std::rotate(v.begin() + from, v.begin() + from + 1, v.begin() + to);
 		else
 			std::rotate(v.rend() - from - 1, v.rend() - from, v.rend() - to);
 	}

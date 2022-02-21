@@ -141,7 +141,7 @@ namespace el
 			if (!mInit && camera_) {
 				mInit = true;
 				fill.camera = point.camera = fill.camera = line.camera = point.camera = camera_;
-				fill.color = vec4(1, 1, 1, 0.2f);
+				//fill.color = vec4(1, 1, 1, 0.2f);
 				point.drawtype = GL_POINTS;
 				line.drawtype = GL_LINES;
 				point.init();

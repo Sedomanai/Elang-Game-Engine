@@ -4,9 +4,11 @@ namespace el
 {
 	template struct FontGlyphImpl<0>;
 	template struct FontFaceImpl<0, 0>;
+	template struct FontGlyphImpl<1>;
+	template struct FontFaceImpl<1, 1>;
 
-	template<int N, int A>
-	void FontFaceImpl<N, A>::makeFromBfntFile(const string& filePath) {
+	template<int M, int T>
+	void FontFaceImpl<M, T>::makeFromBfntFile(const string& filePath) {
 		el::stream ss;
 		ss.toLoad(filePath.c_str());
 		ss.shift(4);
@@ -37,7 +39,7 @@ namespace el
 					ss.shift(2);
 
 					auto glyph =
-						gProject->makeSub<FontGlyphImpl<N>>(x, y, w, h, ox, oy, aw, ah, (float)adv);
+						gProject->makeSub<FontGlyphImpl<T>>(x, y, w, h, ox, oy, aw, ah, (float)adv);
 
 					glyphs.emplace(id, glyph);
 				}
@@ -46,15 +48,15 @@ namespace el
 		}
 	}
 
-	template<int N, int A>
-	void FontFaceImpl<N, A>::destroy() {
+	template<int M, int T>
+	void FontFaceImpl<M, T>::destroy() {
 		for (auto e : glyphs) {
 			gProject->destroy(e.second);
 		}
 	}
 
-	template<int N>
-	FontGlyphImpl<N>::FontGlyphImpl(uint16 x, uint16 y, uint16 w, uint16 h, int16 oX, int16 oY, uint16 aw, uint16 ah, float adv_) :
+	template<int T>
+	FontGlyphImpl<T>::FontGlyphImpl(uint16 x, uint16 y, uint16 w, uint16 h, int16 oX, int16 oY, uint16 aw, uint16 ah, float adv_) :
 		left((float)(oX)), down((float)(-oY - h)), right((float)(oX + w)), up((float)(-oY)),
 		uvLeft((float)x / (float)aw),
 		uvDown((float)(y + h) / (float)ah),

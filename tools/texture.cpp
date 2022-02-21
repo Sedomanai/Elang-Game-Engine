@@ -127,7 +127,6 @@ namespace el {
 		auto key = gProject->textures[self];
 
 		if (atlas) {
-			cout << "fucking destroy" << endl;
 			atlas->destroy();
 		} else {
 			atlas = gProject->make<AtlasImpl<N>>(gProject->atlases, key);

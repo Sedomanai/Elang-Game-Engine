@@ -16,6 +16,7 @@ namespace el
 		void setCell(const string& value);
 		bool hasValidCell() { return mCell; }
 
+		asset<CellImpl<T>> cell() { return mCell; }
 		void flip() { mFlipped = !mFlipped; }
 		void flipside(bool invert) { mFlipped = invert; }
 
