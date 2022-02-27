@@ -4,6 +4,7 @@
 
 namespace el {
 	template struct CellImpl<0>;
+	template struct ClipImpl<0>;
 	template struct AtlasImpl<0>;
 
 	//TODO: change ordering and data structure
@@ -58,7 +59,9 @@ namespace el {
 							break;
 						}
 						break;
-					case AtlasAction::SET_CLIP: // TODO: CHANGE THIS LATER, DURATION NO LONGER EXISTS FOR FRAME
+					case AtlasAction::SET_CLIP: 
+						// TODO: CHANGE THIS LATER, DURATION NO LONGER EXISTS FOR FRAME
+						//		 CLIPS LOADED THIS WAY DO NOT WORK AT THIS MOMENT
 						if (iter % 2 == 0) {
 							//frame.cell = toInt(word);
 						} else {

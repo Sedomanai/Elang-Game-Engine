@@ -28,8 +28,23 @@ namespace el
 	};
 
 	template<int N>
-	using ClipImpl = vector<asset<CellImpl<N>>>;
+	struct ClipImpl : vector<asset<CellImpl<N>>>
+	{
+		float speed;
+		bool repeat;
+		
+		ClipImpl() : vector<asset<CellImpl<N>>>(), speed(1.0f), repeat(false) {}
 
+		template<typename T>
+		void serialize(T& archive) {
+			archive(cereal::base_class<vector<asset<CellImpl<N>>>>(this), speed, repeat);
+		}
+	};
+
+	// specializer: it apperas that vectors use non member serialization functions and clash with ClipImpl serialize()
+	//				this resolves the conflict
+	template <class Archive, int N>
+	struct cereal::specialize<Archive, ClipImpl<N>, cereal::specialization::member_serialize> {};
 
 	template<int N>
 	struct ELANG_DLL AtlasImpl
