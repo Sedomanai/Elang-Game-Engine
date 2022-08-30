@@ -1,4 +1,13 @@
-﻿#pragma once
+﻿/*****************************************************************//**
+ * @file   texture.h
+ * @brief  Texture 2D interface. Currently only supports OpenGL and decodes/encodes png.
+ *         decode/encode 
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
+#pragma once
 
 #include <GL/glew.h>
 
@@ -14,61 +23,85 @@
 namespace el
 {
 
-	template<int N>
-	struct ELANG_DLL TextureImpl
+	struct TextureMeta
 	{
-		TextureImpl() : mID(-1), mWidth(0), mHeight(0) {}
+		sizet meta;
+	};
 
+	/**
+	 * 2D Texture interface. 3D textures not planned. Currently only supports OpenGL.
+	 */
+	struct ELANG_DLL Texture
+	{
+		Texture() : mID(-1), mWidth(10), mHeight(10) { }
 		uint32 id() { return mID; }
 		uint32 width() { return mWidth; }
 		uint32 height() { return mHeight; }
 
-		// a valid .bmp, .jpg, .jpeg, .png, .targa, etc.
-		void makeFromStandardImageFile(const string& filePath);
+		/**
+		 * Load external image. Extensions: a valid .bmp, .jpg, .jpeg, .png, .targa, etc.
+		 * (if not in fpng format, decode with lodepng then encode with fpng)
+		 * @param filePath
+		 */
+		void importFile(const fio::path& path, TextureMeta&);
 
-		// exports elang texture file (encode with fpng)
-		void exportFile(const string& key);
-		// imports elang texture file (decode with fpng)
-		void importFile(const string& key);
+		/**
+		 * Save current image to external filePath. Currently only supports png. (encode with fpng)
+		 *
+		 * @param filePath
+		 */
+		void exportFile(const fio::path& path, TextureMeta&);
 
-		// make texture from raw pixels
-		void make(unsigned char* pixels);
-		// destroy texture
-		void destroy();
 
-		// auto generate an atlas - not perfect, use the gui instead of a raw call
-		void autoGenerateAtlas(asset<TextureImpl<N>> self, float alphaCut);
+		/**
+		 * destroy texture.
+		 */
+		void unload(TextureMeta&);
 
 		// detach atlas from texture - warning: if no other atlas users exist, the atlas is destroyed
-		void removeAtlas(asset<TextureImpl<N>> self);
+		void removeAtlas(asset<Texture> self);
 
+		/**
+		 * Used by Cereal.
+		 * 
+		 * @param archive - OutArchive
+		 */
 		template<typename T>
 		void save(T& archive) const {
-			archive(mWidth, mHeight, atlas);
-			if (gProject->internalBinary) {
-				vector<uint8> encoded;
-				encode(encoded);
-				archive(encoded);
-			}
+			vector<uint8> encoded;
+			encode(encoded);
+			archive(mWidth, mHeight, atlas, encoded);
 		}
+		/**
+		 * Used by Cereal.
+		 *
+		 * @param archive - InArchive
+		 */
 		template<typename T>
 		void load(T& archive) {
-			archive(mWidth, mHeight, atlas);
-			if (gProject->internalBinary) {
-				vector<uint8> decoded;
-				archive(decoded);
-				decode(decoded);
-			}
+			vector<uint8> decoded;
+			decode(decoded);
+			archive(mWidth, mHeight, atlas, decoded);
 		}
 
-		asset<AtlasImpl<N>> atlas;
+		/**
+		 * @brief Auto generate an atlas. The genereated atlas' cells is not sorted in any manner at the moment.
+		 * The atlas must also be empty but this may change in the near future.
+		 * 
+		 * @param atlas - The given empty atlas should already have been created using AssetSync.
+		 * Its users are not populated, this must be done manually. 
+		 * @param alphacut
+		 */
+		void autoGenerateAtlas(asset<Atlas> atlas, float alphaCut);
+
+		asset<Atlas> atlas;
 	private:
-		void autogenAlgorithm(hashmap<int64, vector<int64>>&, float alphaCut);
+		// make texture from raw pixels
+		void make(unsigned char* pixels);
+		void autogenAlgorithm(hashmap<sizet, vector<sizet>>&, float alphaCut);
 		void encode(vector<uint8>& out) const;
 		void decode(vector<uint8>& in);
 		uint32 mID;
 		uint16 mWidth, mHeight;
 	};
-
-	using Texture = TextureImpl<0>;
 }

@@ -84,8 +84,8 @@ namespace el
 				float foot = center().x;
 				bool fixedFootwise = platform.footwise &&
 					(
-						(!platform.isClosed(Platform::eSide::LEFT) && foot < platform.l) ||
-						(!platform.isClosed(Platform::eSide::RIGHT) && foot > platform.r)
+						(!platform.isClosed(Platform::eSide::Left) && foot < platform.l) ||
+						(!platform.isClosed(Platform::eSide::Right) && foot > platform.r)
 						);
 
 				if (!fixedFootwise) {
@@ -95,11 +95,11 @@ namespace el
 				}
 			}
 
-			if (platform.isClosed(Platform::eSide::LEFT) && mPrev.r < platform.l) {
+			if (platform.isClosed(Platform::eSide::Left) && mPrev.r < platform.l) {
 				offset.x = platform.l - r - 0.02f;
 				mHitX = eHitType::HIGH_HIT;
 			}
-			else if (platform.isClosed(Platform::eSide::RIGHT) && mPrev.l > platform.r) {
+			else if (platform.isClosed(Platform::eSide::Right) && mPrev.l > platform.r) {
 				offset.x = platform.r - l + 0.02f;
 				mHitX = eHitType::LOW_HIT;
 			}

@@ -6,55 +6,21 @@
 #include "../elements/button.h"
 #include "../elements/sprite.h"
 
+#include "../elang_library_builder.h"
+
+#include <tweeny/tweeny.h>
+
 namespace el
 {
-	template<int M, int T, int C>
-	inline void syncButtonsToSprite() {
-		for (auto e : gStage->view<SpriteImpl<SpriteVertex, M, T, C>, Button>()) {
-			auto rect = obj<Box>(e);
-			auto circ = obj<Radius>(e);
-			if (rect.has()) {
-				obj<SpriteImpl<SpriteVertex, M, T, C>>(e)->sync(*rect);
-			}
-			else if (circ.has()) {
-				obj<SpriteImpl<SpriteVertex, M, T, C>>(e)->sync(*circ);
-			}
-		}
-	}
-
-	template<int C>
-	inline void updateAllButtons(asset<CameraImpl<C>> camera) {
-		auto pos = *camera * gMouse.currentPosition();
-		for (auto e : gStage->view<Button>()) {
-			obj<Button> button = e;
-			auto rect = obj<Box>(e);
-			auto circ = obj<Radius>(e);
-
-			bool hit = ((rect.has() && rect->contains(pos)) ||
-				(circ.has() && circ->contains(pos)));
-			button->update(button, hit);
-		}
-	}
-
-	template<int N>
-	void moveCameraWASD(asset<CameraImpl<N>> camera, float speed) {
-		if (camera) {
-			if (gKey.state(eKeyCode::A) == eInput::HOLD) {
-				camera->move(vec3(-speed, 0, 0));
-			}
-			else if (gKey.state(eKeyCode::D) == eInput::HOLD) {
-				camera->move(vec3(speed, 0, 0));
-			}
-			if (gKey.state(eKeyCode::W) == eInput::HOLD) {
-				camera->move(vec3(0, speed, 0));
-			}
-			else if (gKey.state(eKeyCode::S) == eInput::HOLD) {
-				camera->move(vec3(0, -speed, 0));
-			}
-		}
-	}
-
 	extern ELANG_DLL void syncButtonsToSprite();
-	extern ELANG_DLL void updateAllButtons(asset<Camera>);
+	extern ELANG_DLL void updateAllButtons(asset<Camera> camera);
 	extern ELANG_DLL void moveCameraWASD(asset<Camera> camera, float speed);
+	extern ELANG_DLL bool zoomCamera(Camera& camera, bool mousePivot = false, double scrollMultiplier = 1.1, float lowlimit = 0.02f, float highlimit = 50.0f);
+	extern ELANG_DLL void setupCameraTween(tweeny::tween<vec3>&);
+	extern ELANG_DLL void tweenCameraInput(tweeny::tween<vec3>&, Camera& camera, Camera& target, int duration = 15);
+	inline void tweenCamera(tweeny::tween<vec3>& tween, Camera& camera, Camera& target) {
+		tweenCameraInput(tween, camera, target);
+		if (tween.progress() != 1.0f)
+			tween.step(1);
+	}
 };

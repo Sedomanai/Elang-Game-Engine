@@ -72,7 +72,7 @@ namespace el
 	/// TextfieldImpl<M, T, C>
 	template<int M, int T, int C>
 	TextfieldImpl<M, T, C>::TextfieldImpl(asset<FontFaceImpl<M, T>> field, asset<PainterImpl<M, T, C>> painter, const string& text)
-		: TextImpl<M, T, C>(field, painter, text), mAlign(eAlignment::LEFT) {}
+		: TextImpl<M, T, C>(field, painter, text), mAlign(eAlignment::Left) {}
 
 	template<int M, int T, int C>
 	void TextfieldImpl<M, T, C>::batch() {
@@ -95,10 +95,10 @@ namespace el
 			TextImpl<M, T, C>::mCursor = (rect) ? vec2(rect->l, rect->t) : vec2(0, 0);
 
 			switch (mAlign) {
-			case eAlignment::MID:
+			case eAlignment::Mid:
 				TextImpl<M, T, C>::mCursor.x += ((rect->width() - lineWidth()) / 2.0f);
 				break;
-			case eAlignment::RIGHT:
+			case eAlignment::Right:
 				TextImpl<M, T, C>::mCursor.x += ((rect->width() - lineWidth()));
 				break;
 			}

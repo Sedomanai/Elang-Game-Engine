@@ -32,17 +32,15 @@ namespace el
 		Z_CLEAR = 16,
 	};
 
-	template<int M, int T, int C>
-	struct ELANG_DLL PainterImpl
+	struct ELANG_DLL Painter
 	{
-		PainterImpl();
-		PainterImpl(strview vertexShader, strview fragmentShader, sizet maxVertexCount = 3000U,
-			asset<CameraImpl<C>> camera = NullEntity, Projection projection = Projection::eOrtho, sizet flags = 0);
+		Painter();
+		Painter(strview vertexShader, strview fragmentShader, sizet maxVertexCount = 3000U,
+			asset<Camera> camera = NullEntity, Projection projection = Projection::eOrtho, sizet flags = 0);
 
-		// 귀찮은데 언젠가 고쳐야 된다...
 		static void sCreateNullTexture();
 
-		asset<CameraImpl<C>> camera;
+		asset<Camera> camera;
 		Projection projection;
 		sizet flags, drawtype;
 		vec4 color;
@@ -87,7 +85,7 @@ namespace el
 		void sort();
 		void flush();
 		void clear();
-		void setCamera();
+		void setGlobalUniform();
 		void bindMaterial(uint32 material);
 		void bindShaderBuffer();
 		void bindDataBuffer();
@@ -110,26 +108,19 @@ namespace el
 		static uint32 sNullTextureID;
 	};
 
-	using Painter = PainterImpl<0, 0, 0>;
-	using EditorPainter = PainterImpl<1, 1, 1>;
-	using EditorProjectPainter = PainterImpl<1, 0, 1>;
-	using EditorWorldPainter = PainterImpl<1, 1, 0>;
-	using EditorWorldProjectPainter = PainterImpl<1, 0, 0>; // probably won't be used
-	using EditorShapeDebugPainter = PainterImpl<0, 0, 1>;
-
-	template<int C>
-	struct ShapeDebugImpl
+	struct ShapeDebug2d
 	{
-		PainterImpl<0, 0, C> point;
-		PainterImpl<0, 0, C> line;
-		PainterImpl<0, 0, C> fill;
+		Painter point;
+		Painter line;
+		Painter fill;
 
-		ShapeDebugImpl() : mInit(false),
-			point("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR),
-			line("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR),
-			fill("debug2d", "debug", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR)
+		ShapeDebug2d() : mInit(false),
+			point("__el_editor_/shader/debug2d.vert", "__el_editor_/shader/debug2d.frag", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR),
+			line("__el_editor_/shader/debug2d.vert", "__el_editor_/shader/debug2d.frag", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR),
+			fill("__el_editor_/shader/debug2d.vert", "__el_editor_/shader/debug2d.frag", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR)
 		{};
-		~ShapeDebugImpl() {
+
+		~ShapeDebug2d() {
 			if (mInit) {
 				point.destroy();
 				line.destroy();
@@ -137,7 +128,7 @@ namespace el
 			}
 		}
 
-		void init(asset<CameraImpl<C>> camera_) {
+		void init(asset<Camera> camera_) {
 			if (!mInit && camera_) {
 				mInit = true;
 				fill.camera = point.camera = fill.camera = line.camera = point.camera = camera_;
@@ -160,10 +151,6 @@ namespace el
 	private:
 		bool mInit;
 	};
-
-
-	using ShapeDebug = ShapeDebugImpl<0>;
-	using EditorShapeDebug = ShapeDebugImpl<1>;
 
 	extern ELANG_DLL vector<Entity> gAtelier;
 };

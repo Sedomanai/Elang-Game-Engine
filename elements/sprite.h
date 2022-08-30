@@ -5,36 +5,32 @@
 namespace el
 {
 	
-	template<typename V, int M, int T, int C>
-	struct ELANG_DLL SpriteImpl : Quad<V, M, T, C>
+	template<typename VertexType>
+	struct ELANG_DLL SpriteType : Quad<VertexType>
 	{
-		SpriteImpl() : Quad<V, M, T, C>() {};
-		SpriteImpl(asset<MaterialImpl<M, T>> material, asset<PainterImpl<M, T, C>> painter, const string& cell_key);
+		SpriteType();
+		SpriteType(asset<Material> material, asset<Painter> painter, const string& cell_key);
 
 		void update(Entity e);
-		void setCell(asset<CellImpl<T>> cell) { mCell = cell; }
+		void setCell(asset<Cell> cell) { mCell = cell; }
 		void setCell(const string& value);
 		bool hasValidCell() { return mCell; }
 
-		asset<CellImpl<T>> cell() { return mCell; }
+		asset<Cell> cell() { return mCell; }
 		void flip() { mFlipped = !mFlipped; }
 		void flipside(bool invert) { mFlipped = invert; }
 
 		template<typename Arc>
 		void serialize(Arc& archive) {
-			archive(Visage<M, T, C>::material, Visage<M, T, C>::painter, mCell, mFlipped);
+			archive(Visage::material, Visage::painter, mCell, mFlipped);
 		}
+		void updatePositionSprite(Position& position);
+		void updatePlanarSprite(Planar& plane);
 	protected:
-		void updatePositionSprite(obj<Position> position);
-		void updatePlanarSprite(obj<Planar> plane);
 
-		asset<CellImpl<T>> mCell;
+		asset<Cell> mCell;
 		bool mFlipped;
 	};
 
-	using Sprite = SpriteImpl<SpriteVertex, 0, 0, 0>;
-	using EditorSprite = SpriteImpl<SpriteVertex, 1, 1, 1>;
-	using EditorProjectSprite = SpriteImpl<SpriteVertex, 1, 0, 1>;
-	using EditorWorldSprite = SpriteImpl<SpriteVertex, 1, 1, 0>;
-	using EditorWorldProjectSprite = SpriteImpl<SpriteVertex, 1, 0, 0>; // probably won't be used
+	using Sprite = SpriteType<SpriteVertex>;
 }

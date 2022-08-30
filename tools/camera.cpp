@@ -5,11 +5,8 @@
 
 namespace el
 {
-	template struct CameraImpl<0>;
-	template struct CameraImpl<1>;
 
-	void updateViewport(float left, float right, float bottom, float top)
-	{
+	void updateViewport(float left, float right, float bottom, float top) {
 		float width = right - left;
 		float height = top - bottom;
 
@@ -63,6 +60,5 @@ namespace el
 		dat[13] = (bottom + top) / (bottom - top);
 		dat[14] = -1.0f;
 		dat[15] = 1.0f;
-	}
-
+	};
 }

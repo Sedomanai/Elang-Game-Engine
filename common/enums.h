@@ -1,75 +1,75 @@
+/*****************************************************************//**
+ * @file   enums.h
+ * @brief  Contains very common enum structs (enum class). All enum structs are previxed with e. 
+ *         Yes I know, hungarian notation, I got too used to it.
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
 #pragma once
 
 #include "define.h"
 
 enum struct eSwitch
 {
-	ON = 0,
-	OFF
+	On = 0,
+	Off
 };
 
 enum struct eInput
 {
-	NONE = 0,
-	LIFT,
-	SNAP,
-	ONCE,
-	HOLD,
-	FLAP
+	None = 0,
+	Lift,
+	Snap,
+	Once,
+	Hold,
+	Flap
 };
 
 enum struct eSelect
 {
-	NO_CHANGE,
-	SELECTED,
-	DESELECTED
+	No_change,
+	Selected,
+	Deselected
 };
 
 
 enum struct eAlignment
 {
-	MID,
-	LEFT,
-	RIGHT
+	Left = -1,
+	Mid,
+	Right
 };
-
-
-enum struct eExtension
-{
-	MID,
-	LEFT,
-	RIGHT
-};
-
 
 enum struct eDataType
 {
-	VOID_TYPE = 0,
+	Void_type = 0,
 
-	INT,
-	SHORT,
-	LONG,
-	LONGLONG,
-	INT8,
-	INT16,
-	INT32,
-	INT64,
+	Int,
+	Short,
+	Long,
+	Longlong,
+	Int8,
+	Int16,
+	Int32,
+	Int64,
 
-	UINT,
-	USHORT,
-	ULONG,
-	ULONGLONG,
-	UINT8,
-	UINT16,
-	UINT32,
-	UINT64,
+	Uint,
+	Ushort,
+	Ulong,
+	Ulonglong,
+	Uint8,
+	Uint16,
+	Uint32,
+	Uint64,
 
-	FLOAT,
-	VEC2,
-	VEC3,
-	VEC4,
-	COLOR8,
+	Float,
+	Vec2,
+	Vec3,
+	Vec4,
+	Color8,
 
-	MATRIX3,
-	MATRIX4
+	Matrix3,
+	Matrix4
 };

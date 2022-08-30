@@ -1,4 +1,11 @@
-﻿#pragma once
+﻿/*****************************************************************//**
+ * @file   math.h
+ * @brief  Math collection
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+#pragma once
 
 #include <cmath>
 #include <limits>   
@@ -16,14 +23,17 @@ namespace el
     inline constexpr float div_pi = 0.31830988618f;
 
     struct color8 { 
-        unsigned char r, g, b, a; 
-        color8(unsigned char r_, unsigned char g_, unsigned char b_, unsigned char a_) 
+        uint8 r, g, b, a; 
+        color8(uint8 r_, uint8 g_, uint8 b_, uint8 a_)
         : r(r_), g(g_), b(b_), a(a_) {}
     };
 
     inline constexpr float to_radians = pi * div_180;
     inline constexpr float to_degrees = 180.0f * div_pi;
 
+    /**
+     * Normalizes angle in degrees so that it is >= 0 and <= 360.
+     */
     inline float normalizeAngle(float degrees) {
         // reduce the angle  
         degrees = fmod(degrees, 360.f);
@@ -58,12 +68,12 @@ namespace el
             : sqrtNewtonRaphson<T>(x, 0.5f * (curr + x / curr), curr);
     }
 
-    /*
-    * Constexpr version of the square root
-    * Return value:
-    *   - For a finite and non-negative value of "x", returns an approximation for the square root of "x"
-    *   - Otherwise, returns NaN
-    */
+
+    /**
+     * Constexpr version of the square root.
+     * 
+     * @return For a finite and non-negative value of x, returns an approximation of the square root of x, otherwise, returns NaN
+     */
     template<typename T>
     T constexpr sqrt(T x) {
         return x >= 0 && x < std::numeric_limits<T>::infinity()
@@ -94,6 +104,12 @@ namespace el
         constexpr vec2& operator-=(const vec2& v) {
             x -= v.x; y -= v.y;
             return *this;
+        }
+        constexpr bool operator==(const vec2& v) {
+            return x == v.x && y == v.y;
+        }
+        constexpr bool operator!=(const vec2& v) {
+            return x != v.x || y != v.y;
         }
         constexpr vec2& operator*=(const float v) {
             x *= v; y *= v;
@@ -135,17 +151,34 @@ namespace el
             float dy = y - ent.y;
             return sqrt(dx * dx + dy * dy);
         }
+
+        /**
+         * distanceFrom without square root. Great for distance comparisons without in need of actual distance value.
+         * 
+         * @param ent- Distance from this vector point to this vector
+         * @return Squared value of distance in float
+         */
         constexpr float squaredDistanceFrom(const vec2& ent) const {
             float dx = x - ent.x;
             float dy = y - ent.y;
             return dx * dx + dy * dy;
         }
+
+        /**
+         * Creates new vector with normalized value.
+         * 
+         * @return Normalized new vector
+         */
         constexpr vec2 normalized() const {
             if (x != 0.0f && y != 0.0f) {
                 float mag = 1.0f / sqrt(x * x + y * y);
                 return vec2(x * mag, y * mag);
             } else return vec2();
         }
+
+        /**
+         * Normalizes this vector. Value before normalization is lost.
+         */
         void normalize() {
             if (x != 0.0f && y != 0.0f) {
                 float mag = 1.0f / sqrt(x * x + y * y);
@@ -158,10 +191,12 @@ namespace el
         void serialize(T& archive) {
             archive(x, y);
         }
-        friend stream& operator<<(stream& save, const vec2& vec) {
+        // deprecated
+        friend stream& operator<<(stream& save, const vec2& vec) { 
             save << vec.x << vec.y;
             return save;
         }
+        // deprecated
         friend stream& operator>>(stream& load, vec2& vec) {
             load >> vec.x >> vec.y;
             return load;
@@ -199,6 +234,12 @@ namespace el
             x *= v; y *= v; z *= v;
             return *this;
         }
+        constexpr bool operator==(const vec3& v) {
+            return x == v.x && y == v.y && z == v.z;
+        }
+        constexpr bool operator!=(const vec3& v) {
+            return x != v.x || y != v.y || z != v.z;
+        }
         constexpr vec3& operator*=(const vec3& v) {
             x *= v.x; y *= v.y; z *= v.z;
             return *this;
@@ -231,7 +272,7 @@ namespace el
         constexpr bool isZero() const {
             return x == 0.0f && y == 0.0f && z == 0.0f;
         }
-        constexpr bool sOne() const {
+        constexpr bool isOne() const {
             return x == 1.0f && y == 1.0f && z == 1.0f;
         }
         constexpr float magnitude() const {
@@ -240,24 +281,42 @@ namespace el
         constexpr float	magnitudeSquared() const {
             return x * x + y * y + z * z;
         }
+
         constexpr float distanceFrom(const vec3& ent) const {
             float dx = x - ent.x;
             float dy = y - ent.y;
             float dz = z - ent.z;
             return sqrt(dx * dx + dy * dy + dz * dz);
         }
+
+        /**
+         * distanceFrom method without square root. Great for distance comparisons without in need of actual distance value.
+         *
+         * @param ent- Distance from this vector point to this vector
+         * @return Squared value of distance in float
+         */
         constexpr float squaredDistanceFrom(const vec3& ent) const {
             float dx = x - ent.x;
             float dy = y - ent.y;
             float dz = z - ent.z;
             return dx * dx + dy * dy + dz * dz;
         }
+
+        /**
+         * Creates new vector with normalized value.
+         *
+         * @return Normalized new vector
+         */
         constexpr vec3 normalized() const {
             if (x != 0.0f || y != 0.0f || z != 0.0f) {
                 float mag = 1.0f / sqrt(x * x + y * y + z * z);
                 return vec3(x * mag, y * mag, z * mag);
             } else return vec3();
         }
+
+        /**
+         * Normalizes this vector. Value before normalization is lost.
+         */
         void normalize() {
             if (x != 0.0f || y != 0.0f || z != 0.0f) {
                 float mag = 1.0f / sqrt(x * x + y * y + z * z);
@@ -275,6 +334,11 @@ namespace el
 
         vec4 quaternion() const;
 
+        /**
+         * For Cereal.
+         *
+         * @param Cereal InArchive
+         */
         template<typename T>
         void serialize(T& archive) {
             archive(x, y, z);
@@ -307,6 +371,12 @@ namespace el
         constexpr vec4& operator=(const vec4& v) {
             x = v.x; y = v.y; z = v.z; w = v.w;
             return *this;
+        }
+        constexpr bool operator==(const vec4& v) {
+            return x == v.x && y == v.y && z == v.z && w == v.w;
+        }
+        constexpr bool operator!=(const vec4& v) {
+            return x != v.x || y != v.y || z != v.z || w == v.w;
         }
         constexpr vec4& operator+=(const vec4& v) {
             x += v.x; y += v.y; z += v.z; w += v.w;
@@ -346,6 +416,11 @@ namespace el
             return x == 1.0f && y == 1.0f && z == 1.0f && w == 1.0f;
         }
 
+        /**
+         * For Cereal.
+         *
+         * @param Cereal InArchive
+         */
         template<typename T>
         void serialize(T& archive) {
             archive(x, y, z, w);
@@ -365,6 +440,9 @@ namespace el
         }
     };
 
+    /**
+     * @return Quaternion of this vector in vec4
+     */
     inline vec4 vec3::quaternion() const {
         // -radians(val * 0.5f)
         float rx = -x * pi * div_360;
@@ -405,7 +483,6 @@ namespace el
             memcpy(data, s_identity, sizeof(float) * 16);
         }
 
-        // I may change this later
         constexpr matrix4x4 operator*(const matrix4x4& m) const {
             matrix4x4 res;
             auto& r = res.data;
@@ -423,6 +500,11 @@ namespace el
             return res;
         }
 
+        /**
+         * For Cereal.
+         * 
+         * @param Cereal InArchive
+         */
         template<typename T>
         void serialize(T& archive) {
             for (sizet i = 0; i < 16; i++) // optimize?..

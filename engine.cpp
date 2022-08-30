@@ -1,8 +1,8 @@
 #include "engine.h"
 #include "common/time.h"
 #include "common/math.h"
-#include "elements/sprite.h"
-#include "elements/button.h"
+//#include "elements/sprite.h"
+//#include "elements/button.h"
 
 namespace el 
 {
@@ -12,7 +12,6 @@ namespace el
 		SDL_Init(SDL_INIT_EVERYTHING);
 		SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
 
-		// TODO: config window type somewhere
 		mWindow = SDL_CreateWindow("Ilang.exe", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 			800, 600, SDL_WINDOW_OPENGL);
 		if (!mWindow)
@@ -80,13 +79,13 @@ namespace el
 					position = vec2(e.button.x - mW / 2.0f, -e.button.y + mH / 2.0f);
 					switch (e.button.button) {
 					case SDL_BUTTON_LEFT:
-						gMouse.onPress(position, MouseSym::LEFT);
+						gMouse.onPress(position, MouseSym::Left);
 						break;
 					case SDL_BUTTON_MIDDLE:
-						gMouse.onPress(position, MouseSym::MIDDLE);
+						gMouse.onPress(position, MouseSym::Middle);
 						break;
 					case SDL_BUTTON_RIGHT:
-						gMouse.onPress(position, MouseSym::RIGHT);
+						gMouse.onPress(position, MouseSym::Right);
 						break;
 					}
 					break;
@@ -94,15 +93,18 @@ namespace el
 					position = vec2(e.button.x - mW / 2.0f, -e.button.y + mH / 2.0f);
 					switch (e.button.button) {
 					case SDL_BUTTON_LEFT:
-						gMouse.onRelease(position, MouseSym::LEFT);
+						gMouse.onRelease(position, MouseSym::Left);
 						break;
 					case SDL_BUTTON_MIDDLE:
-						gMouse.onRelease(position, MouseSym::MIDDLE);
+						gMouse.onRelease(position, MouseSym::Middle);
 						break;
 					case SDL_BUTTON_RIGHT:
-						gMouse.onRelease(position, MouseSym::RIGHT);
+						gMouse.onRelease(position, MouseSym::Right);
 						break;
 					}
+					break;
+				case SDL_MOUSEWHEEL:
+					gMouse.updateWheel((float)e.wheel.y);
 					break;
 				}
 			}
@@ -116,9 +118,9 @@ namespace el
 			while (lag >= nns_per_update) {
 				lag -= nns_per_update;
 				input();
-				if ((gKey.state(eKeyCode::LCTRL) == eInput::HOLD) && 
-					(gKey.state(eKeyCode::LSHIFT) == eInput::HOLD) && 
-					(gKey.state(eKeyCode::D) == eInput::ONCE)) 
+				if ((gKey.state(eKeyCode::LCtrl) == eInput::Hold) && 
+					(gKey.state(eKeyCode::LShift) == eInput::Hold) &&
+					(gKey.state(eKeyCode::D) == eInput::Once)) 
 				{
 					debugging = !debugging;
 				}
@@ -129,6 +131,7 @@ namespace el
 				vec2 position = vec2(mx - mW / 2.0f, -my + mH / 2.0f);
 				gKey.updateKeys();
 				gMouse.updateKeys(position);
+				gMouse.updateWheel(0.0f);
 			}
 			render();
 		};

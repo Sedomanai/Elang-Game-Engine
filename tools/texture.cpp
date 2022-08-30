@@ -3,78 +3,81 @@
 #include <encoder/fpng.h>
 #include <encoder/fpng.cpp>
 
+#pragma warning( push )
+#pragma warning( disable : 26495 )
+#pragma warning( push )
+#pragma warning( disable : 4267 )
+#pragma warning( push )
+#pragma warning( disable : 4334 )
+
 #include <lodepng/lodepng.h>
 #include <lodepng/lodepng.cpp>
 
-namespace el {
+#include "asset_data.h"
 
-	template struct TextureImpl<0>;
+#pragma warning( pop )
+#pragma warning( pop )
+#pragma warning( pop )
 
-	template<int N>
-	void TextureImpl<N>::makeFromStandardImageFile(const string& filePath) {
+namespace el
+{
+	void Texture::importFile(const fio::path& path, TextureMeta& meta) {
 		uint32 w = mWidth, h = mHeight, ent = 4;
 		vector<uint8> out;
-		if (fpng::fpng_decode_file(filePath.c_str(), out, w, h, ent, 4) == 0) {
-			mWidth = (uint16)w;
-			mHeight = (uint16)h;
-			make(&out[0]);
-		} else { // load with image with spng first and then encode with fpng so that it can be faster later
-			vector<unsigned char> image; //the raw pixels
-			unsigned width, height;
-			unsigned error = lodepng::decode(image, width, height, filePath);
 
-			//if there's an error, display it
-			if (error) {
-				cout << "Failed to load texture at " << filePath << " for errorcode " << error << " : "
-					<< lodepng_error_text(error) << endl;
-			}
-			else {
-				mWidth = (uint16)width;
-				mHeight = (uint16)height;
-				make(&image[0]);
-				fpng::fpng_encode_image_to_file(filePath.c_str(), &image[0], mWidth, mHeight, 4, 4);
+		auto ext = path.extension();
+
+		if (ext == ".png") {
+			if (fpng::fpng_decode_file(path.generic_u8string().c_str(), out, w, h, ent, 4) == 0) {
+				mWidth = (uint16)w;
+				mHeight = (uint16)h;
+				make(&out[0]);
+			} else { // decode with image with lodepng first and then immediately encode the same file with fpng so that it can be loaded faster later
+				vector<uint8> image; //the raw pixels
+				uint width, height;
+				uint error = lodepng::decode(image, width, height, path.generic_u8string());
+
+				//if there's an error, display it
+				if (error) {
+					cout << "Failed to load texture at " << path << " for errorcode " << error << " : "
+						<< lodepng_error_text(error) << endl;
+				} else {
+					mWidth = (uint16)width;
+					mHeight = (uint16)height;
+					make(&image[0]);
+					fpng::fpng_encode_image_to_file(path.generic_u8string().c_str(), &image[0], mWidth, mHeight, 4, 4);
+				}
 			}
 		}
 	}
 
-	template<int N>
-	void TextureImpl<N>::importFile(const string& key) {
-		string filePath = gProject->datDir + key;
-		uint32 w = mWidth, h = mHeight, ent = 4;
-		vector<uint8> out;
-		if (fpng::fpng_decode_file(filePath.c_str(), out, w, h, ent, 4) == 0) {
-			make(&out[0]);
-		}
-#ifdef _DEBUG
-		else {
-			cout << "Failed to decode Erang texture file at " << filePath << std::endl;
-		}
-#endif
-	}
+	void Texture::exportFile(const fio::path& path, TextureMeta& meta) {
 
-	template<int N>
-	void TextureImpl<N>::exportFile(const string& key) {
-		string filePath = gProject->datDir + key;
+		auto ext = path.extension();
+		if (ext != ".png") {
+			std::cout << "Failed to export texture to " << path << ". Must have a valid extension (png)" << std::endl;
+			return;
+		}
+
 		auto size = mWidth * mHeight * 4;
 		unsigned char* pixels = (unsigned char*)malloc(size);
 		glBindTexture(GL_TEXTURE_2D, mID);
 		glGetTextureImage(mID, 0, GL_RGBA, GL_UNSIGNED_BYTE, size, pixels);
 #ifdef _DEBUG
-		if (fpng::fpng_encode_image_to_file(filePath.c_str(), pixels, mWidth, mHeight, 4, 0) == 0)
-			std::cout << "Failed to export texture to " << filePath << std::endl;
+		if (fpng::fpng_encode_image_to_file(path.generic_u8string().c_str(), pixels, mWidth, mHeight, 4, 0) == 0)
+			std::cout << "Failed to export texture to " << path << std::endl;
 #else
-		fpng::fpng_encode_image_to_file(filePath.c_str(), pixels, mWidth, mHeight, 4, 0);
+		fpng::fpng_encode_image_to_file(path.generic_u8string().c_str(), pixels, mWidth, mHeight, 4, 0);
 #endif
 	}
 
-	template<int N>
-	void TextureImpl<N>::destroy() {
+	void Texture::unload(TextureMeta&) {
 		glDeleteTextures(1, &mID);
 		mID = -1;
 	}
 
-	template<int N>
-	void TextureImpl<N>::decode(vector<uint8>& in) {
+
+	void Texture::decode(vector<uint8>& in) {
 		uint32 w = mWidth, h = mHeight, ent = 4;
 		vector<uint8> out;
 
@@ -83,12 +86,11 @@ namespace el {
 		}
 #ifdef _DEBUG
 		else
-			std::cout << "Failed to load texture from memory"  << std::endl;
+			std::cout << "Failed to load texture from memory" << std::endl;
 #endif
 	}
 
-	template<int N>
-	void TextureImpl<N>::encode(vector<uint8>& out) const {
+	void Texture::encode(vector<uint8>& out) const {
 		auto size = mWidth * mHeight * 4;
 		unsigned char* pixels = (unsigned char*)malloc(size);
 		glBindTexture(GL_TEXTURE_2D, mID);
@@ -100,8 +102,8 @@ namespace el {
 		}
 	}
 
-	template<int N>
-	void TextureImpl<N>::make(unsigned char* pixels) {
+
+	void Texture::make(unsigned char* pixels) {
 		glGenTextures(1, &mID);
 		glBindTexture(GL_TEXTURE_2D, mID);
 
@@ -119,67 +121,75 @@ namespace el {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	template<int N>
-	void TextureImpl<N>::autoGenerateAtlas(asset<TextureImpl<N>> self, float alphaCut) {
-		if (!gProject->textures.contains(self))
+
+	void Texture::autoGenerateAtlas(asset<Atlas> new_atlas, float alphaCut) {
+		if (new_atlas->cells.size() > 0 || !new_atlas.has<AssetData>() || !new_atlas.has<AtlasMeta>()) {
 			return;
-
-		auto key = gProject->textures[self];
-
-		if (atlas) {
-			atlas->destroy();
-		} else {
-			atlas = gProject->make<AtlasImpl<N>>(gProject->atlases, key);
 		}
 
-		int64 w = (sizet)mWidth;
-		int64 h = (sizet)mHeight;
-		int64 pixcount = w * h;
+		string str = new_atlas.get<AssetData>().filePath.stem().generic_u8string();
 
-		hashmap<int64, vector<int64>> result;
+		auto& atlasmeta = new_atlas.get<AtlasMeta>();
+		atlasmeta.self = new_atlas;
+		sizet w = atlasmeta.width = (sizet)mWidth;;
+		sizet h = atlasmeta.height = (sizet)mHeight;
+		sizet pixcount = w * h;
+
+		hashmap<sizet, vector<sizet>> result;
 		autogenAlgorithm(result, alphaCut);
 
-		int64 name = 0;
+		sizet index = 0;
 		auto intmax = std::numeric_limits<int64>::max();
 		for (auto& vec : result) {
 			int64 il = intmax;
 			int64 ib = intmax;
 			int64 ir = -intmax;
 			int64 it = -intmax;
-			for (int s : vec.second) {
-				il = min(il, (s % w));
-				ib = min(ib, (s / w));
-				ir = max(ir, (s % w) + 1);
-				it = max(it, (s / w) + 1);
+			for (sizet s : vec.second) {
+				il = min(il, (int64)(s % w));
+				ib = min(ib, (int64)(s / w));
+				ir = max(ir, (int64)(s % w) + 1);
+				it = max(it, (int64)(s / w) + 1);
 			}
-
-			auto cell = gProject->makeSub<Cell>((int)il, (int)ib, (int)(ir - il), (int)(it - ib), 0, 0, (int)w, (int)h, -1);
-			atlas->cells.emplace(key + "_" + std::to_string(name++), cell);
+			auto name = str + "_" + std::to_string(index);
+			auto meta = gProject->make<SubAssetData>(index, name, new_atlas)
+				.add<CellMeta>(il, ib, ir-il, it-ib, 0, 0);
+			new_atlas->addCell(meta, atlasmeta);
+			index++;
 		}
 	}
 
-	template<int N>
-	void TextureImpl<N>::removeAtlas(asset<TextureImpl<N>> self) {
-		if (atlas) {
-			auto& tex = atlas->textures;
-			for (auto it = tex.begin(); it != tex.end(); it++) {
-				if (*it == self) {
-					atlas->textures.erase(it);
-					if (atlas->textures.size() == 0) {
-						atlas->destroy();
-						gProject->atlases.erase(atlas);
-					} break;
-				}
-			} atlas = NullEntity;
-		}
+
+	void Texture::removeAtlas(asset<Texture> self) {
+		//if (!atlas)
+		//	return;
+
+		//asset<AtlasMeta> meta = atlas;
+		//if (!meta)
+		//	return;
+
+		//auto& users = meta->users;
+		//for (auto it = users.begin(); it != users.end(); it++) {
+		//	if (*it == self.get<AssetData>().filePath) {
+		//		
+
+		//		atlas->textures.erase(it);
+		//		if (atlas->textures.size() == 0) {
+		//			atlas->destroy();
+		//			gProject->atlases.erase(atlas);
+		//		} break;
+		//	}
+		//} 
+		
+		atlas = NullEntity;
 	}
 
-	template<int N>
-	void TextureImpl<N>::autogenAlgorithm(hashmap<int64, vector<int64>>& result, float alphaCut) {
-		int64 name = 0;
-		int64 w = (int64)mWidth;
-		int64 h = (int64)mHeight;
-		int64 pixcount = w * h;
+
+	void Texture::autogenAlgorithm(hashmap<sizet, vector<sizet>>& result, float alphaCut) {
+		sizet name = 0;
+		sizet w = (sizet)mWidth;
+		sizet h = (sizet)mHeight;
+		sizet pixcount = w * h;
 
 		auto pixels = (unsigned char*)malloc(pixcount);
 		glActiveTexture(GL_TEXTURE0);
@@ -187,8 +197,8 @@ namespace el {
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_ALPHA, GL_UNSIGNED_BYTE, pixels);
 
-		int64* buffer = (int64*)malloc((pixcount) * sizeof(int64));
-		for (int64 i = 0; i < pixcount; i++) {
+		sizet* buffer = (sizet*)malloc((pixcount) * sizeof(sizet));
+		for (sizet i = 0; i < pixcount; i++) {
 			bool notop = ((i < w) || (buffer[i - w] == 0));
 			bool noleft = ((i % w == 0) || (buffer[i - 1] == 0));
 			bool notopleft = ((i < w) || (i % w == 0) || (buffer[i - w - 1] == 0));
@@ -203,26 +213,22 @@ namespace el {
 							buffer[i] = ++name;
 							result[name].reserve(256);
 							result[name].push_back(i);
-						}
-						else {
+						} else {
 							// only topleft
 							buffer[i] = buffer[i - w - 1];
 							result[buffer[i]].push_back(i);
 						}
-					}
-					else {
+					} else {
 						// top (topleft should it exist would already be the same as top)
 						buffer[i] = buffer[i - w];
 						result[buffer[i]].push_back(i);
 					}
-				}
-				else {
+				} else {
 					if (notop) {
 						// left (topleft should it exist would already be the same as left)
 						buffer[i] = buffer[i - 1];
 						result[buffer[i]].push_back(i);
-					}
-					else {
+					} else {
 						if (notopleft) {
 							// only left and above
 							auto top = buffer[i - w];
@@ -241,8 +247,7 @@ namespace el {
 
 							buffer[i] = left;
 							result[left].push_back(i);
-						}
-						else {
+						} else {
 							// all three topleft pixels are the same, could use any
 							buffer[i] = buffer[i - 1];
 							result[buffer[i]].push_back(i);
@@ -257,8 +262,7 @@ namespace el {
 					if (curr == 0) {
 						buffer[i] = topright;
 						result[topright].push_back(i);
-					}
-					else if (curr != topright) {
+					} else if (curr != topright) {
 						auto& toprights = result[topright];
 						auto& currs = result[curr];
 						for (sizet i = 0; i < currs.size(); i++) {

@@ -1,4 +1,12 @@
-﻿#pragma once
+﻿/*****************************************************************//**
+ * @file   container.h
+ * @brief  Container types and algorithms. Also includes custom containers.
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
+#pragma once
 
 #include <vector>
 #include <map>
@@ -36,10 +44,27 @@ namespace el
 	template<typename Ty_>
 	struct array { Ty_* data; size_t size; };
 
+
+	// cout vector
+	template<class T>
+	inline std::ostream& operator<<(std::ostream& out, const vector<T>& v) {
+		cout << "{ ";
+
+		for (int i = 0; i < v.size(); i++) {
+			cout << v[i] << (i == (v.size() - 1) ? " " : ", ");
+		}
+
+		cout << "}";
+		return out;
+	}
+
 	/**
-	* Rotate vectors
-	* Useful for list UIs where there's a lot of mouse input reordering
-	*/
+	 * Rotate vetors. Useful for list-like types where there can be a lot of index reordering.
+	 * 
+	 * @param v- Vector to swapshift
+	 * @param from- Original index of item to swapshift
+	 * @param to- 
+	 */
 	template <typename T>
 	void swapshift(vector<T>& v, sizet from, sizet to) {
 		if (to > from)

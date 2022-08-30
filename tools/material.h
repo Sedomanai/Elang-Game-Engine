@@ -17,45 +17,44 @@ namespace el
 
 		Uniform(eDataType type_, uint32 vertex_, void* data_, const string& name_) 
 			: type(type_), vertex(vertex_), data(data_), name(name_) {};
-		Uniform() : type(eDataType::FLOAT), vertex(1), data(0), name("uSomething__NULL_") {};
+		Uniform() : type(eDataType::Float), vertex(1), data(0), name("uSomething__NULL_") {};
 
-		template<typename Arc>
-		void save(Arc& archive) const {
+		template<typename T>
+		void save(T& archive) const {
 			archive(type, vertex, name);
 			switch (type) {
-				case eDataType::FLOAT: archive(*(reinterpret_cast<float*>(data))); break;
-				case eDataType::VEC2: archive(*(reinterpret_cast<vec2*>(data))); break;
-				case eDataType::VEC3: archive(*(reinterpret_cast<vec3*>(data))); break;
-				case eDataType::VEC4: archive(*(reinterpret_cast<vec4*>(data))); break;
-				case eDataType::MATRIX4: archive(*(reinterpret_cast<matrix4x4*>(data))); break;
+				case eDataType::Float: archive(*(reinterpret_cast<float*>(data))); break;
+				case eDataType::Vec2: archive(*(reinterpret_cast<vec2*>(data))); break;
+				case eDataType::Vec3: archive(*(reinterpret_cast<vec3*>(data))); break;
+				case eDataType::Vec4: archive(*(reinterpret_cast<vec4*>(data))); break;
+				case eDataType::Matrix4: archive(*(reinterpret_cast<matrix4x4*>(data))); break;
 			};
 		}
 
-		template<typename Arc>
-		void load(Arc& archive) {
+		template<typename T>
+		void load(T& archive) {
 			archive(type, vertex, name);
 			switch (type) {
-				case eDataType::FLOAT: data = malloc(sizeof(float)); archive(*(reinterpret_cast<float*>(data))); break;
-				case eDataType::VEC2: data = malloc(sizeof(vec2)); archive(*(reinterpret_cast<vec2*>(data))); break;
-				case eDataType::VEC3: data = malloc(sizeof(vec3)); archive(*(reinterpret_cast<vec3*>(data))); break;
-				case eDataType::VEC4: data = malloc(sizeof(vec4)); archive(*(reinterpret_cast<vec4*>(data))); break;
-				case eDataType::MATRIX4: data = malloc(sizeof(matrix4x4)); archive(*(reinterpret_cast<matrix4x4*>(data))); break;
+				case eDataType::Float: data = malloc(sizeof(float)); archive(*(reinterpret_cast<float*>(data))); break;
+				case eDataType::Vec2: data = malloc(sizeof(vec2)); archive(*(reinterpret_cast<vec2*>(data))); break;
+				case eDataType::Vec3: data = malloc(sizeof(vec3)); archive(*(reinterpret_cast<vec3*>(data))); break;
+				case eDataType::Vec4: data = malloc(sizeof(vec4)); archive(*(reinterpret_cast<vec4*>(data))); break;
+				case eDataType::Matrix4: data = malloc(sizeof(matrix4x4)); archive(*(reinterpret_cast<matrix4x4*>(data))); break;
 			}
 		}
 	};
 
-
-	template<int N, int TextureIndex>
-	struct MaterialImpl
+	struct MaterialMeta { sizet meta; };
+	struct Material
 	{
 		vector<Uniform> uniforms;
-		vector<asset<TextureImpl<TextureIndex>>> textures;
+		vector<asset<Texture>> textures;
 
 		void addUniform(eDataType type_, uint32 vertex_, void* data_, const string& name_) {
 			uniforms.emplace_back(type_, vertex_, data_, name_);
 		}
 
-		void setTexture(asset<TextureImpl<TextureIndex>> texture, sizet index = 0) {
+		void setTexture(asset<Texture> texture, sizet index = 0) {
 			while (textures.size() <= index) {
 				textures.emplace_back();
 			} textures[index] = texture;
@@ -65,19 +64,44 @@ namespace el
 			return ((textures.size() > 0) && textures[0]);
 		}
 
+		void importFile(fio::path path, MaterialMeta& meta) {
+			InArchive archive(path.generic_u8string());
+
+			int32 size;
+			archive(size);
+			for (auto i = 0; i < (sizet)size; i++) {
+				string tex;
+				archive(tex);
+				if (gTextures.names.contains(tex)) {
+					textures.emplace_back(gTextures.names[tex]);
+				} else
+					textures.emplace_back(NullEntity);
+			} archive(uniforms);
+		}
+
+		void exportFile(fio::path path, MaterialMeta& meta) {
+			OutArchive archive(path.generic_u8string());
+
+			auto size = (int32)textures.size();
+			archive(size);
+			for (auto tex : textures) {
+				if (tex) {
+					archive(tex.get<AssetData>().filePath.generic_u8string());
+				} else {
+					archive("");
+				}
+			} archive(uniforms);
+		}
+
 		template<typename Arc>
 		void serialize(Arc& archive) {
 			archive(textures, uniforms);
 		}
 
-		void reset() {
+		void unload(MaterialMeta& meta) {
 			textures.clear();
 			uniforms.clear();
 		}
 	};
-
-	using Material = MaterialImpl<0, 0>;
-	using EditorMaterial = MaterialImpl<1, 1>;
-	using EditorProjectMaterial = MaterialImpl<1, 0>;
 }
 

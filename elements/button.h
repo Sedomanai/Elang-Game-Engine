@@ -20,11 +20,12 @@ namespace el
 		Button(IButtonEvent* buttonEvent, obj<Entity> context_ = NullEntity)
 			: mPrev(false), mCurr(false), ev(buttonEvent) {}
 
-		void update(Entity e, bool hit);
+		void update(Entity self, bool hit);
 
 		template<typename T> void serialize(T& archive) { archive(context); };
 
 		obj<Entity> context;
+		void setEvent(IButtonEvent* event_) { ev = event_; }
 	private:
 		IButtonEvent* ev;
 		bool mPrev, mCurr;

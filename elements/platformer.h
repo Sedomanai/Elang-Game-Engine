@@ -61,9 +61,9 @@ namespace el
 		Platform(float left, float bottom, float right, float top) : aabb(left, bottom, right, top), mSides(0), footwise(true) {};
 
 		enum class eSide {
-			LEFT = 1,
+			Left = 1,
 			BOTTOM = 2,
-			RIGHT = 4,
+			Right = 4,
 			TOP = 8,
 			TOP_SLOPE = 16,
 			BOTTOM_SLOPE = 32

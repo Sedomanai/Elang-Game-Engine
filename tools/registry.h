@@ -1,142 +1,64 @@
-﻿// The heart of Elang Engine
+﻿/*****************************************************************//**
+ * @file   registry.h
+ * @brief  The heart of Elang Engine
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
 
 #pragma once
 
+#include <common/fileio.h>
 #include <entt/entt.hpp>
-
 #include "../elang_library_builder.h"
 #include "serialization.h"
 
 namespace el
 {
-    using Registry = entt::registry;
-    using RegistrySaver = entt::snapshot;
-    using RegistryLoader = entt::snapshot_loader;
-    using Entity = entt::entity;
-    using Observer = entt::observer;
-#define NullEntity entt::null
+	using Registry = entt::registry;
+	using Entity = entt::entity;
+	using RegistrySaver = entt::snapshot;
+	using RegistryLoader = entt::snapshot_loader;
 
-    template<typename T>
-    struct asset;
-    template<typename T>
-    struct obj;
+	#define NullEntity entt::null
+	template<typename T>
+	struct asset;
+	template<typename T>
+	struct obj;
 
-    struct ELANG_DLL Project : Registry
-    {
-        using Registry::Registry;
 
-        string name, assetDir, datDir, srcDir, entryStage;
-        bihashmap<string, Entity> textures, atlases, models, fonts,
-            sfx, bgm, events, texts, materials, painters, cameras, misc;
-        bool internalBinary;
+	struct ELANG_DLL Project : Registry
+	{
+		using Registry::Registry;
+        fio::path directory;
 
-        template<typename T, typename... Args>
-        asset<T> makeSub(Args... args) {
-            auto e = Registry::create();
-            Registry::emplace<T>(e, args...);
-            return e;
-        }
+		template<typename T, typename... Args>
+		asset<T> make(Args... args) {
+		    auto e = Registry::create();
+		    Registry::emplace<T>(e, args...);
+		    return e;
+		}
+	};
 
-        template<typename T, typename... Args>
-        asset<T> make(bihashmap<string, Entity>& labels, const string& key, Args... args) {
-            if (!labels.contains(key)) {
-                auto e = Registry::create();
-                Registry::emplace<T>(e, args...);
-                labels.emplace(key, e);
-                return e;
-            } return labels[key];
-        }
+	struct ELANG_DLL Stage : Registry
+	{
+		using Registry::Registry;
 
-        template<typename ...Arg>
-        void save(OutArchive& archive) const {
-            RegistrySaver shot(*this);
-            archive(internalBinary);
-            shot.entities(archive).component<Arg...>(archive);
-            archive(name, assetDir, datDir, srcDir, entryStage,
-                textures, atlases, models, fonts, sfx, bgm, events, texts, materials, painters, cameras, misc);
-        }
-        template<typename ...Arg>
-        void load(InArchive& archive) {
-            clear();
-            RegistryLoader shot(*this);
-            archive(internalBinary);
-            shot.entities(archive).component<Arg...>(archive);
-            archive(name, assetDir, datDir, srcDir, entryStage,
-                textures, atlases, models, fonts, sfx, bgm, events, texts, materials, painters, cameras, misc);
-        }
-        void reset() {
-            clear();
-            name = assetDir = datDir = srcDir = entryStage = "";
-            textures.clear();
-            atlases.clear();
-            models.clear();
-            fonts.clear();
-            sfx.clear();
-            bgm.clear();
-            events.clear();
-            texts.clear();
-            materials.clear();
-            painters.clear();
-            cameras.clear();
-            misc.clear();
-        }
+		template<typename T, typename... Args>
+		obj<T> make(Args... args) {
+			auto e = Registry::create();
+			Registry::emplace<T>(e, args...);
+			return e;
+		}
+	};
+
+    struct Label {
+        int index;
+        string name;
     };
 
-    struct ELANG_DLL Stage : Registry
-    {
-        using Registry::Registry;
-
-        string name, project;
-        bihashmap<string, Entity> named;
-        vector<Entity> atelier;
-        //bihashmap<string, vector<Entity>> namedGroups; // TODO: can't because of vector hash function, find another way
-
-        template<typename T, typename... Args>
-        obj<T> make(Args... args) {
-            auto e = create();
-            Registry::emplace<T>(e, args...);
-            return e;
-        }
-
-        template<typename T, typename... Args>
-        obj<T> makeNamed(const string& key, Args... args) {
-            if (!named.contains(key)) {
-                auto e = Registry::create();
-                Registry::emplace<T>(e, args...);
-                named.emplace(key, e);
-                return e;
-            } return named[key];
-        }
-
-        template<typename T>
-        void serializeProject(T& archive) { archive(project); }
-
-        template<typename ...Arg>
-        void save(OutArchive& archive) const {
-            RegistrySaver shot(*this);
-            shot.entities(archive).component<Arg...>(archive);
-            archive(named);
-        }
-        template<typename ...Arg>
-        void load(InArchive& archive) {
-            clear();
-            RegistryLoader shot(*this);
-            shot.entities(archive).component<Arg...>(archive).orphans();
-            archive(named);
-        }
-        //template<typename T, typename... Args>
-        //obj<T> makeForGroup(const string& key, Args... args) {
-        //    auto e = Registry::create();
-        //    Registry::emplace<T>(e, args...);
-        //    namedGroups[key].emplace_back(e);
-        //    return e;
-        //}
-    };
-
-    ELANG_DLL extern Project* gProject;
-    ELANG_DLL extern Stage* gStage;
-    inline void bind(Project& project) { gProject = &project; }
-    inline void bind(Stage* stage) { gStage = stage; }
+	ELANG_DLL extern Project* gProject;
+	ELANG_DLL extern asset<Stage> gStage;
 
 #define __EL_DEFINE_REGISTRY_NODES(classname, regname) \
     template<typename T> \
@@ -211,11 +133,7 @@ namespace el
     private:\
         Entity e;\
     };
+
     __EL_DEFINE_REGISTRY_NODES(asset, gProject)
     __EL_DEFINE_REGISTRY_NODES(obj, gStage)
-
-    template<typename T, typename ...Arg>
-    inline void connectObserver(Observer& observer) {
-        observer.connect(*gStage, entt::collector.update<T>().where<Arg...>());
-    }
 }

@@ -1,4 +1,10 @@
-﻿// Deprecated with cereal - used only in specific conditions
+﻿/*****************************************************************//**
+ * @file   stream.h
+ * @brief  For bitstreaming i.e. serializing. Mostly replaced by cereal, used only in specific conditions
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
 
 #pragma once
 
@@ -34,42 +40,53 @@ namespace el
         }
 
 
-        void shift(sizet size) { f.seekp(f.tellp() + std::streampos(size)); }
+        void skip(sizet size) { f.seekp(f.tellp() + std::streampos(size)); }
         bool invalid() { return f.tellg() == -1; }
         sizet curr() { return (sizet)f.tellp(); }
 
         //////Save//////
+        // Save data
+        template<typename T>
+        std::enable_if_t<!std::is_pointer_v<T >&& std::is_pod_v<T>, el::stream&>
+            operator<<(T t) {
+            f.write(reinterpret_cast<const char*>(&t), sizeof(T));
+            return (*this);
+        }
+
+        // Save array (no count)
+        template<typename T>
+        std::enable_if_t<!std::is_pointer_v<T >&& std::is_pod_v<T>, el::stream&>
+            operator<<(array<T> a) {
+            f.write(reinterpret_cast<const char*>(a.data), sizeof(T) * a.size);
+            return *this;
+        }
+
         // Save string
-        stream& operator<<(std::string& str) {
-            sizet size = str.size();
-            f.write(reinterpret_cast<const char*>(&size), sizeof(sizet));
+        stream& operator<<(const std::string& str) {
+            int32 size = (int32)str.size();
+            f.write(reinterpret_cast<const char*>(&size), sizeof(int32));
             f.write(str.c_str(), size);
             return *this;
         }
 
-        // Save data
-        template<typename Ty_>
-        std::enable_if_t<!std::is_pointer_v<Ty_ >&& std::is_pod_v<Ty_>, el::stream&>
-        operator<<(Ty_ t) {
-            f.write(reinterpret_cast<const char*>(&t), sizeof(Ty_));
-            return (*this);
-        }
-
-        // Save array
-        template<typename Ty_>
-        std::enable_if_t<!std::is_pointer_v<Ty_ >&& std::is_pod_v<Ty_>, el::stream&>
-        operator<<(array<Ty_> a) {
-            f.write(reinterpret_cast<const char*>(a.data), sizeof(Ty_) * a.size);
+        // Save vector
+        template<typename T>
+        std::enable_if_t<!std::is_pointer_v<T >&& std::is_pod_v<T>, el::stream&>
+        operator<<(const vector<T>& t) {
+            int32 size = (int32)t.size();
+            f.write(reinterpret_cast<const char*>(&size), sizeof(int32));
+            f.write(reinterpret_cast<const char*>(&t[0]), sizeof(T) * size);
             return *this;
         }
 
-        // Save vector
-        template<typename Ty_>
-        std::enable_if_t<!std::is_pointer_v<Ty_ >&& std::is_pod_v<Ty_>, el::stream&>
-        operator<<(const vector<Ty_>& t) {
-            sizet size = t.size();
-            f.write(reinterpret_cast<const char*>(&size), sizeof(sizet));
-            f.write(reinterpret_cast<const char*>(&t[0]), sizeof(Ty_) * size);
+        // Save vector of recursive data
+        template<typename T>
+        el::stream& operator<<(const vector<T>& t) {
+            int32 size = (int32)t.size();
+            f.write(reinterpret_cast<const char*>(&size), sizeof(int32));
+            for (sizet i = 0; i < size; i++) {
+                operator<<(t[i]);
+            }
             return *this;
         }
 
@@ -77,41 +94,53 @@ namespace el
 
         // Load string
         stream& operator>>(std::string& str) {
-            sizet size;
-            f.read(reinterpret_cast<char*>(&size), sizeof(sizet));
-            str.resize(size);
-            f.read(&str[0], size);
+            int32 size;
+            f.read(reinterpret_cast<char*>(&size), sizeof(int32));
+            str.resize((sizet)size);
+            f.read(&str[0], (std::streamsize)size);
             return *this;
         }
 
         // Load data
-        template<typename Ty_>
-        std::enable_if_t<!std::is_pointer_v<Ty_ >&& std::is_pod_v<Ty_>, el::stream&>
-        operator>>(Ty_& t) {
-            f.read(reinterpret_cast<char*>(&t), sizeof(Ty_));
+        template<typename T>
+        std::enable_if_t<!std::is_pointer_v<T >&& std::is_pod_v<T>, el::stream&>
+        operator>>(T& t) {
+            f.read(reinterpret_cast<char*>(&t), sizeof(T));
             return *this;
         }
 
         // Load array
-        template<typename Ty_>
-        std::enable_if_t<!std::is_pointer_v<Ty_ >&& std::is_pod_v<Ty_>, el::stream&>
-        operator>>(array<Ty_> a) {
-            f.read(reinterpret_cast<char*>(a.data), sizeof(Ty_) * a.size);
+        template<typename T>
+        std::enable_if_t<!std::is_pointer_v<T >&& std::is_pod_v<T>, el::stream&>
+        operator>>(array<T> a) {
+            f.read(reinterpret_cast<char*>(a.data), sizeof(T) * a.size);
             return *this;
         }
 
         // Load vector
-        template<typename Ty_>
-        std::enable_if_t<!std::is_pointer_v<Ty_ >&& std::is_pod_v<Ty_>, el::stream&>
-        operator>>(vector<Ty_>& t) {
-            sizet size;
-            f.read(reinterpret_cast<char*>(&size), sizeof(sizet));
-            t.reserve(size);
-            f.read(reinterpret_cast<char*>(&t[0]), sizeof(Ty_) * size);
-            t.erase(t.begin() + size, t.end());
+        template<typename T>
+        std::enable_if_t<!std::is_pointer_v<T >&& std::is_pod_v<T>, el::stream&>
+        operator>>(vector<T>& t) {
+            int32 size;
+            f.read(reinterpret_cast<char*>(&size), sizeof(int32));
+            t.reserve((sizet)size);
+            f.read(reinterpret_cast<char*>(&t[0]), sizeof(T) * (std::streamsize)size);
+            t.erase(t.begin() + (std::streamsize)size, t.end());
             return *this;
         }
 
+        // Load vector of recursive data
+        template<typename T>
+        el::stream& operator>>(vector<T>& t) {
+            int32 size;
+            f.read(reinterpret_cast<char*>(&size), sizeof(int32));
+            t.reserve((sizet)size);
+            for (sizet i = 0; i < size; i++) {
+                auto& data = t.emplace_back();
+                operator>>(data);
+            }
+            return *this;
+        }
 
     private:
         std::fstream f;

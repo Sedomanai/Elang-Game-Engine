@@ -5,5 +5,5 @@
 
 namespace el
 {
-	extern ELANG_DLL void notifyPositionalChange(Observer& observer);
+	//extern ELANG_DLL void notifyPositionalChange(Observer& observer);
 };

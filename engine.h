@@ -5,7 +5,7 @@
 
 #include "elang_library_builder.h"
 #include "tools/controls.h"
-#include "apparatus/loader.h"
+#include "apparatus/asset_loader.h"
 
 namespace el
 {

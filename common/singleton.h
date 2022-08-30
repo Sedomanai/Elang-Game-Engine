@@ -1,4 +1,12 @@
-\#pragma once
+/*****************************************************************//**
+ * @file   singleton.h
+ * @brief  Singelton
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
+#pragma once
 
 namespace el {
 	template<typename T>

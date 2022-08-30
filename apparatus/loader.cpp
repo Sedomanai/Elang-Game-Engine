@@ -1,31 +1,34 @@
 #include "loader.h"
+#include "../tools/assetdata.h"
 
 namespace el
 {
 	asset<Material> createSingleTextureMaterial(const string& tex_label) {
-		asset<Material> outMaterial = gProject->make<Material>(gProject->materials, tex_label);
+		asset<Material> outMaterial = gProject->make<Material>();
+		gMaterials.emplace(tex_label, outMaterial);
+
 		if (outMaterial->textures.size() == 0)
-			outMaterial->textures.emplace_back(gProject->textures[tex_label]);
+			outMaterial->textures.emplace_back(gTextures[tex_label]);
 		return outMaterial;
 	}
 
 	void connectAssetDstr() {
-		gProject->on_destroy<Painter>().connect<entt::invoke<&Painter::destroy>>();
-		gProject->on_destroy<Texture>().connect<entt::invoke<&Texture::destroy>>();
-		gProject->on_destroy<Atlas>().connect<entt::invoke<&Atlas::destroy>>();
-		gProject->on_destroy<FontFace>().connect<entt::invoke<&FontFace::destroy>>();
+		//gProject->on_destroy<Painter>().connect<entt::invoke<&Painter::destroy>>();
+		//gProject->on_destroy<Texture>().connect<entt::invoke<&Texture::destroy>>();
+		//gProject->on_destroy<Atlas>().connect<entt::invoke<&Atlas::destroy>>();
+		//gProject->on_destroy<FontFace>().connect<entt::invoke<&FontFace::destroy>>();
 		Painter::sCreateNullTexture();
 		//TODO: Fonts and everything
 	}
 
 	void initElang() {
-		connectAssetDstr();
-		compileDefaultShaders();
-		for (auto e : gProject->view<Painter>()) {
-			asset<Painter>(e)->init();
-		}
-		cout << "Initiating Elang Project " << gProject->name << " .." << endl;
-		cout << "..." << endl;
+		//connectAssetDstr();
+		//compileDefaultShaders();
+		//for (auto e : gProject->view<Painter>()) {
+		//	asset<Painter>(e)->init();
+		//}
+		//cout << "Initiating Elang Project " << gProject->name << " .." << endl;
+		//cout << "..." << endl;
 	}
 
 	void __s_registerAsset(bihashmap<string, Entity>& map, eFileExtension ext) {
@@ -39,7 +42,7 @@ namespace el
 				file->updateTime = __s_gLoader_AssetCurrTime;
 			}
 		} else {
-			auto file = gProject->makeSub<FileData>(
+			auto file = gProject->make<FileData>(
 				__s_gLoader_AssetCurrKey, __s_gLoader_AssetCurrTime,
 				ext, eFileState::CREATED
 				);
@@ -56,7 +59,7 @@ namespace el
 					auto filePath = path.string();
 					auto fileName = path.filename().string();
 
-					auto wtime = lastWriteTime(e);
+					auto wtime = fileLastWriteTime(e);
 					__s_gLoader_AssetCurrTime = wtime.time_since_epoch().count();
 
 					string keyext = filePath.substr(

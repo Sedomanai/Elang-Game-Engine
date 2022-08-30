@@ -1,15 +1,22 @@
+/*****************************************************************//**
+ * @file   transform.h
+ * @brief  Transform. For more info check the Transform comment documentaiton
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
 #pragma once
 
 #include "shape2d.h"
 
 namespace el
 {	
-	//=======================================================================================
-	// Transform is not a matrix4x4
-	// Rather it uses abbreviated calculations for game related geometric transformations
-	// This makes Transform a somewhat faster alternative to matrix4x4 (at the expense of two more variables)
-    // Neither is optimized by simd
-	//=======================================================================================
+    /**
+     * @brief Transform is not a matrix4x4. Rather it uses abbreviated calculations for game related geometric transformations. 
+     * This makes Transform a somewhat faster alternative to matrix4x4 (at the expense of 8 more bytes of memory).
+     * Granted, neither is optimized by simd at the moment
+     */
 	struct Transform
 	{
         Transform() :

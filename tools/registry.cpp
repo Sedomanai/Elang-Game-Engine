@@ -3,5 +3,5 @@
 namespace el
 {
 	Project* gProject = 0;
-	Stage* gStage = 0;
+	asset<Stage> gStage = 0;
 }

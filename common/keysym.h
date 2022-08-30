@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * @file   keysym.h
+ * @brief  Basic operations for all kinds of key simulations. 
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
 #pragma once
 
 #include "../elang_library_builder.h"
@@ -5,22 +13,23 @@
 
 namespace el
 {
+	// This keycode was created centered around SDL keycode
 	enum class eKeyCode
 	{
-		BACKSPACE = 8,
-		TAB,
+		Backspace = 8,
+		Tab,
 
-		RETURN = 13,
-		ESCAPE = 27,
+		Return = 13,
+		Escape = 27,
 
-		SPACE = 32,
+		Space = 32,
 
-		APOSTROPHE = 39,
+		Apostrophe = 39,
 
-		COMMA = 44,
-		MINUS,
-		PERIOD,
-		SLASH,
+		Comma = 44,
+		Minus,
+		Period,
+		Slash,
 
 		N0 = 48,
 		N1,
@@ -33,14 +42,14 @@ namespace el
 		N8,
 		N9,
 
-		SEMICOLON = 59,
-		EQUALS = 61,
+		Semicolon = 59,
+		Equals = 61,
 
-		LBRACKET = 91,
-		BACKSLASH,
-		RBRACKET,
+		LBracket = 91,
+		BackSlahs,
+		RBracket,
 
-		ACUTE = 96,
+		Acute = 96,
 		A,
 		B,
 		C,
@@ -68,18 +77,18 @@ namespace el
 		Y,
 		Z,
 
-		DELETE_ = 127,
+		Delete = 127,
 
-		LCTRL = 167,
-		LSHIFT,
-		LALT,
-		LWIN,
-		RCTRL,
-		RSHIFT,
-		RALT,
-		RWIN,
+		LCtrl = 167,
+		LShift,
+		LAlt,
+		LWin,
+		RCtrl,
+		RShift,
+		RAlt,
+		RWin,
 
-		CAPS = 200,
+		Caps = 200,
 		F1,
 		F2,
 		F3,
@@ -92,52 +101,56 @@ namespace el
 		F10,
 		F11,
 		F12,
-		PRINT_SCREEN,
-		LOCK,
-		BREAK,
-		INSERT,
-		HOME,
-		PGUP,
-		VOID_,
-		END,
-		PGDN,
+		Print_Screen,
+		Lock,
+		Break,
+		Insert,
+		Home,
+		Pgup,
+		Void,
+		End,
+		Pgdn,
 
-		RIGHT,
-		LEFT,
-		DOWN,
-		UP,
+		Right,
+		Left,
+		Down,
+		Up,
 
-		NUM_LOCK,
-		NUM_SLASH,
-		NUM_ASTERISK,
-		NUM_MINUS,
-		NUM_PLUS,
-		NUM_ENTER,
-		NUM1,
-		NUM2,
-		NUM3,
-		NUM4,
-		NUM5,
-		NUM6,
-		NUM7,
-		NUM8,
-		NUM9,
-		NUM0,
-		NUM_PERIOD,
+		NumLock,
+		NumSlash,
+		NumAsterisk,
+		NumMinus,
+		NumPlus,
+		NumEnter,
+		Num1,
+		Num2,
+		Num3,
+		Num4,
+		Num5,
+		Num6,
+		Num7,
+		Num8,
+		Num9,
+		Num0,
+		NumPeriod,
 
-		CONTEXT = 244
+		Context = 244
 	};
 
 	#define ELANG_TOTAL_KEY_PRESS_COUNT 32
 	
-	//=======================================================================================
-	// Refined button input, useful for event based loop such as game loops.
-	// Can also be used in GUI app for more refined keyboard input.
-	// eKeyCode based on modified version of SDLK(ey)
-	// update() must register at the END of a game loop along with MouseSym update.
-	//=======================================================================================
+	/**
+	 * @brief Refined button input, useful for event based loops such as game loops. Can also be used in GUI app for more refined keyboard input.
+	 * eKeyCode is based on modified version of SDLK(ey). update() must register at the END of a game loop along with MouseSym update.
+	 */
 	struct KeySym
 	{
+		/**
+		 * Translate from SDL Keycode to Elang Keycode.
+		 * 
+		 * @param SDL key
+		 * @return Elang key
+		 */
 		sizet translateFromSDLKeyCode(sizet key) {
 			if (key > 1000000000) {
 				key -= 1073741681;
@@ -146,71 +159,109 @@ namespace el
 			} return key;
 		}
 
-		sizet translateFromQtKeyCode(sizet key) {
-			if (key > 1000000000) {
-				key -= 1073741681;
-				if (key > 300)
-					key -= 200;
-			} return key;
-		}
+		//sizet translateFromQtKeyCode(sizet key) {
+		//	if (key > 1000000000) {
+		//		key -= 1073741681;
+		//		if (key > 300)
+		//			key -= 200;
+		//	} return key;
+		//}
 
+		/**
+		 * Current eInput state of key in Elang Keycode. Refer to <common/enum.h> for more on eInput state.
+		 * 
+		 * @param key Elang keycode
+		 * @return Current state of key
+		 */
 		eInput state(eKeyCode key) {
 			return state(sizet(key));
 		}
 
+
+		/**
+		 * Current eInput state of key in Elang Keycode. Refer to <common/enum.h> for more on eInput state.
+		 *
+		 * @param key- Elang keycode
+		 * @return Current state of key
+		 */
 		eInput state(sizet key) {
 			if (0 < key && key < 256) {
-				return (mKeys[key] == eInput::FLAP) ? eInput::SNAP : mKeys[key];
-			} else return eInput::NONE;
+				return (mKeys[key] == eInput::Flap) ? eInput::Snap : mKeys[key];
+			} else return eInput::None;
 		}
 
+		/**
+		 * Fire this in any event that can transfer key press signal.
+		 * Updates all None state to Once state
+		 * 
+		 * @param key- Must be translated to eKeyCode
+		 */
 		void onPress(sizet key) {
 			switch (mKeys[key]) {
-			case eInput::NONE:
-				mKeys[key] = eInput::ONCE;
+			case eInput::None:
+				mKeys[key] = eInput::Once;
 				registerUpdate(key);
 				break;
-			case eInput::LIFT:
-			case eInput::SNAP:
-				mKeys[key] = eInput::FLAP;
+			// Ignore Snap or Flap for now, that is a safety measure for key update loops slower than say 10fps.
+			case eInput::Lift:
+			case eInput::Snap:
+				mKeys[key] = eInput::Flap;
 				registerUpdate(key);
 				break;
 			}
 		}
 
+		/**
+		 * Fire this in any event that can transfer key release signal.
+		 * Updates all Hold state to Lift
+		 *
+		 * @param key- Must be translated to eKeyCode
+		 */
 		void onRelease(sizet key) {
 			switch (mKeys[key]) {
-			case eInput::HOLD:
-				mKeys[key] = eInput::LIFT;
+			case eInput::Hold:
+				mKeys[key] = eInput::Lift;
 				registerUpdate(key);
 				break;
-			case eInput::ONCE:
-			case eInput::FLAP:
-				mKeys[key] = eInput::SNAP;
+			// Ignore Snap or Flap for now, that is a safety measure for key update loops slower than say 10fps.
+			case eInput::Once:
+			case eInput::Flap:
+				mKeys[key] = eInput::Snap;
 				registerUpdate(key);
 				break;
 			}
 		}
 
+		/**
+		 * Fire this every frame or any interval that should detect key signals. Updates all key states.
+		 * Detects presses and releases from previous frame. If pressed (Once state) update to Hold state.
+		 * If released (Lift state) update to Lift state.
+		 * 
+		 * For more info on when exactly to invoke this method, refer to the KeySym comment intellisense. 
+		 */
 		void updateKeys() {
 			for (unsigned int i = 0; i < mUpdateNum; i++) {
 				auto j = mUpdates[i];
+				// Ignore Snap or Flap for now, that is a safety measure for key update loops slower than say 10fps.
 				switch (mKeys[j]) {
-				case eInput::ONCE:
-				case eInput::FLAP:
-					mKeys[j] = eInput::HOLD;
+				case eInput::Once:
+				case eInput::Flap:
+					mKeys[j] = eInput::Hold;
 					break;
-				case eInput::LIFT:
-				case eInput::SNAP:
-					mKeys[j] = eInput::NONE;
+				case eInput::Lift:
+				case eInput::Snap:
+					mKeys[j] = eInput::None;
 					break;
 				}
 			} mUpdateNum = 0;
 		}
 
+		/**
+		 * Resets all 256 key states.
+		 */
 		void reset() {
 			for (int i = 0; i < 256; i++) {
-				mKeys[i] = eInput::NONE;
+				mKeys[i] = eInput::None;
 			} mUpdateNum = 0;
 		}
 

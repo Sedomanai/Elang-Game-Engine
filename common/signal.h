@@ -1,3 +1,12 @@
+/*****************************************************************//**
+ * @file   signal.h
+ * @brief  Signal-slot system, like event/delegates
+ *		   Possibly deprecated due to entt
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
 #pragma once
 
 #include <functional>

@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * @file   time.h
+ * @brief  All time related variables and functions
+ *
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
 #pragma once
 
 #include <chrono>
@@ -12,27 +20,42 @@
 
 namespace  el
 {
-	//프로파일 (함수 객체, 나노초 단위로 경과시간 리턴)
 	//receive functor as parameter, return elapsed time by nano-seconds
+
+	/**
+	 * For the most basic manual profiling
+	 * 
+	 * @param functor - Statement to be profiled, mostly in lambda
+	 * @param times - Number of repetition time 
+	 * 
+	 * @return Total time elapsed
+	 */
 	template <typename F>
-	inline long long profile(sizet times, const F& func) {
+	inline long long profile(const F& functor, sizet times) {
 		auto t1 = chrono_now;
 		for (sizet i = 0; i < times; i++)
-			func();
+			functor();
 		auto t2 = chrono_now;
 		auto ret = chrono_nnsec(t2 - t1).count();
 		return ret;
 	}
 
-	//시간차 루프 speed = tick/sec
+	/**
+	 * Simple loop function. Not appropriate for endless loops.
+	 * Do not use this to replace iteration statements such as for loops
+	 * 
+	 * @param functor - Statement to be looped, mostly in lambda
+	 * @param speed - Interval between loop iteration in seconds
+	 * @param loopCount - Total loop iteration count
+	 */
 	template<typename F>
-	void loop(F functor, float speed = 1.0f, sizet loopCount = 10000000) {
+	void loop(const F& functor, float interval = 1.0f, sizet loopCount = 10000000) {
 		sizet tick = 0;
 		auto begin = chrono_now;
 		long long it = 0;
 		while (true) {
 			auto duration = chrono_msec(chrono_now - begin).count();
-			if (it < duration - (long long)(1000 / speed)) {
+			if (it < duration - (long long)(1000 / interval)) {
 				it = duration;
 				functor();
 				tick++;

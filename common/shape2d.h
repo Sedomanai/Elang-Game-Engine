@@ -1,8 +1,19 @@
-﻿#pragma once
+﻿/*****************************************************************//**
+ * @file   shape2d.h
+ * @brief  2D Shape related
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
+#pragma once
 #include "math.h"
 
 namespace el
 {
+    /**
+     * Line between 2 points with x,y coordinates.
+     */
     struct line
     {
         line() : p1x(0.0f), p1y(0.0f), p2x(0.0f), p2y(0.0f) {}
@@ -20,6 +31,9 @@ namespace el
         float p1x, p1y, p2x, p2y;
     };
 
+    /**
+     * Rectanble bound with left, bottom, right, and top values.
+     */
     struct aabb
 	{
         constexpr aabb() : l(0), b(0), r(0), t(0) {}
@@ -35,7 +49,7 @@ namespace el
         constexpr float height() const {
             return t - b;
         }
-        constexpr  float area() const {
+        constexpr float area() const {
             return (r - l) * (t - b);
         }
         constexpr void move(const vec2& value) {
@@ -56,48 +70,70 @@ namespace el
                 t = temp;
             }
         }
+        constexpr void expand(float dx, float dy) { l -= dx; r += dx; b -= dy; t += dy;}
         constexpr bool contains(const vec2& point) const {
             return point.x >= l && point.x <= r && point.y >= b && point.y <= t;
         }
+
+        // @return True only if aabb "a" is fully contained within this aabb
         constexpr bool contains(const aabb& a) const {
             return a.l >= l && a.r <= r && a.b >= b && a.t <= t;
         }
+        // @return True if aabb "a" intersects or even just completely touches this aabb
         constexpr bool intersects(const aabb& a) const {
             return (a.l <= r && l <= a.r && a.b <= t && b <= a.t);
         }
+
+        // @return Returns a new rect derived from the intersection betwwen "a" and this aabb
         constexpr aabb intersected(const aabb& a) const {
             return aabb(l > a.l ? l : a.l, b > a.b ? b : a.b, r < a.r ? r : a.r, t < a.t ? t : a.t);
         }
+        // @return Returns a new rect derived from the unification of outermost bounds betwwen "a" and this aabb
         constexpr aabb united(const aabb& a) const {
             return aabb(l<a.l ? l : a.l, b < a.b ? b : a.b, r>a.r ? r : a.r, t > a.t ? t : a.t);
         }
+        
+        /**
+         * Traps a point within this aabb, uses clamp.
+         * 
+         * @param point - The point to trap in vec2, overwrites value
+         */
         constexpr void trap(vec2& point) {
             point.x = clamp(point.x, l, r);
             point.y = clamp(point.y, b, t);
         }
+        /**
+         * @brief Traps an aabb within this aabb, uses clamp. 
+         * If a dimesnion of the aabb to trap is smaller than the same dimension of this aabb, 
+         * the aabb is snapped to either the the left or top (lt corner).
+         *
+         * @param a - The aabb to trap in vec2, overwrites value
+         */
         constexpr void trap(aabb& a) {
             vec2 val;
-            bool lo = a.l < l;
-            bool ro = a.r > r;
-            bool bo = a.b < b;
-            bool to = a.t > t;
-
-            if (lo) {
-                if (!ro)
-                    val.x = l - a.l;
-            } else if (ro) {
-                val.x = r - a.r;
+            if (a.width() < width()) {
+            	if (a.l < l)
+            		val.x = l - a.l;
+            	if (a.r > r)
+                    val.x = r - a.r;
+            } else {
+            	a.r = l + a.width();
+            	a.l = l;
             }
 
-            if (bo)
-                if (!to)
+            if (a.height() < height()) {
+            	if (a.b < b)
                     val.y = b - a.b;
-            else if (to)
-                val.y = t - a.t;
-
+            	if (a.t > t)
+                    val.y = t - a.t;
+            } else {
+            	a.b = t - a.height();
+            	a.t = t;
+            }
             a.move(val);
         }
 
+        // Round all corners to the nearest integers. 
         void roundCorners() {
             l = round(l);
             r = round(r);
@@ -105,6 +141,9 @@ namespace el
             t = round(t);
         }
 
+        // Round all corners to the nearest multipels of 0.5 (including negatives). 
+        // TODO: this needs trimming but something else is using this, I can't find the reference because I can't load the project right now
+        // But I remember I made this for a reason and something delicate is still using it.
         void halfRoundCorners(bool hori, bool verti) {
             if (hori) {
                 l = round(l + 0.5f) - 0.5f;
@@ -123,10 +162,38 @@ namespace el
             }
         } 
 
+        void halfRoundHorizontalCorners() {
+            l = round(l + 0.5f) - 0.5f;
+            r = round(r + 0.5f) - 0.5f;
+        }
+        void halfRoundVerticalCorners() {
+            t = round(t + 0.5f) - 0.5f;
+            b = round(b + 0.5f) - 0.5f;
+        }
+        void roundHorizontalCorners() {
+            l = round(l);
+            r = round(r);
+        }
+        void roundVerticalCorners() {
+            b = round(b);
+            t = round(t);
+        }
+
+        /**
+         * Copies a new aabb out of this one.
+         * 
+         * @param offset - A new aabb in a new position determined by offset value
+         * @return New aabb
+         */
         aabb copy(const vec2& offset) {
             return aabb(l + offset.x, b + offset.y, r + offset.x, t + offset.y);
         }
 		
+        /**
+         * Used by Cereal.
+         * 
+         * @param InArchive or OutArchive
+         */
         template<typename T>
         void serialize(T& archive) {
             archive(l, b, r, t);
@@ -146,16 +213,28 @@ namespace el
         circle(float x_, float y_, float radius)
             : x(x_), y(y_), r(radius) {}
 
+        // @return True only if aabb "a" is fully contained within this aabb
         bool contains(const vec2& point) const {
             auto dx = (x - point.x);
             auto dy = (y - point.y);
             return dx * dx + dy * dy < r* r;
         }
 
+        /**
+         * Copies a new circle out of this one.
+         *
+         * @param offset - A new aabb in a new position determined by offset value
+         * @return New aabb
+         */
         circle copy(const vec2& offset) {
             return circle(x + offset.x, y + offset.y, r);
         }
 
+        /**
+         * Used by Cereal.
+         *
+         * @param InArchive or OutArchive
+         */
         template<typename T>
         void serialize(T& archive) {
             archive(x, y, r);

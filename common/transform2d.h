@@ -1,14 +1,22 @@
+/*****************************************************************//**
+ * @file   transform2d.h
+ * @brief  Transform2d. For more info check the Transform2d comment documentaiton
+ *
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
 #pragma once
 
 #include "shape2d.h"
 
 namespace el
 {
-	//=======================================================================================
-	// Transform2d is not a matrix3x3
-	// Rather it uses abbreviated calculations for game related geometric transformations
-	// This makes Transform2d a much faster alternative to matrix3x3 (at the expense of 1 more variable)
-	//=======================================================================================
+	/**
+	 * @brief Transform2d is not a matrix3x3. Rather it uses abbreviated calculations for game related geometric transformations.
+	 * This makes Transform2d a somewhat faster alternative to matrix3x3 (at the expense of 4 more bytes of memory).
+	 * Granted, neither is optimized by simd at the moment
+	 */
 	struct Transform2d
 	{
 		Transform2d() :

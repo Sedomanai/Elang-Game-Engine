@@ -1,4 +1,12 @@
-﻿#pragma once
+﻿/*****************************************************************//**
+ * @file   algorithm.h
+ * @brief  A couple or more simple algorithms that is not so readily available in standard libraries
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
+#pragma once
 
 #include <type_traits>
 
@@ -17,17 +25,38 @@ struct identity
     typedef T type;
 };
 
-// minmax
+/**
+ * Min function.
+ * 
+ * @param left- Value
+ * @param right- Another value
+ * @return Smaller value
+ */
 template<typename T, typename U>
 constexpr typename std::common_type_t<T, U> const& min(const T& left, const U& right) {
     return (left < right) ? left : right;
 }
+
+/**
+ * Max function.
+ *
+ * @param left- Value
+ * @param right- Another value
+ * @return Larger value
+ */
 template<typename T, typename U>
 constexpr typename std::common_type_t<T, U> const& max(const T& left, const U& right) {
     return (left > right) ? left : right;
 }
 
-// clamp
+/**
+ * Clamp function.
+ * 
+ * @param val - Value in question
+ * @param low - Low limit
+ * @param high - High limit
+ * @return Clamped value
+ */
 template<typename T>
 constexpr T const& clamp(const T& val, const std::_Identity_t<T>& low, const std::_Identity_t<T>& high) {
 	return (val < low) ? low : (val > high) ? high : val;

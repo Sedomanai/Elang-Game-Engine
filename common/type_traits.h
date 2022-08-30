@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * @file   type_traits.h
+ * @brief  Commonly used type traits. May merge with algorithm? Not decided
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+
 #pragma once
 #include <type_traits>
 
