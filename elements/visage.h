@@ -1,21 +1,23 @@
 /*****************************************************************//**
  * @file   visage.h
  * @brief  Graphic batchables base
- * 
+ *
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
-#include "../tools/registry.h"
-#include "../tools/material.h"
-#include "../tools/painter.h"
-#include "../elang_library_builder.h"
+#include "../tools/tool_declarer.h"
+#include "../tools/project.h"
 
 namespace el
 {
+	struct Material;
+	struct Painter;
+	struct aabb;
+	struct circle;
+	struct poly2d;
 	/**
-	 * Any graphic element that can be displayed must inherit from this class.
+	 * @brief Any displayable graphic element that can be displayed must inherit from this class.
 	 */
 	struct ELANG_DLL Visage
 	{
@@ -26,7 +28,7 @@ namespace el
 	};
 
 	/**
-	 * Any displayable element that comes in a quad form. Has 4 vertices.
+	 * @brief Any displayable graphic element that comes in a quad form. Has 4 vertices.
 	 */
 	template<typename VertexType>
 	struct ELANG_DLL Quad : Visage
@@ -34,7 +36,7 @@ namespace el
 		Quad() : Visage(), mDepth(0) {};
 		Quad(asset<Material> material_, asset<Painter> painter_);
 
-		// Batch grpphic element. Invoke every display loop. 
+		// Batch displayable graphic element. Invoke every display loop
 		// A valid material and painter must be populated for this to work.
 		void batch();
 		// Resize quad so that it syncs with any aabb. Works for ANY quad types. (Canvas, Sprite, etc)

@@ -1,19 +1,30 @@
-﻿#pragma once
-
-#include <iostream>
-#include <fstream>
+﻿/*****************************************************************//**
+ * @file   serialization.h
+ * @brief  This is for most serializations between c++ programs
+ *		   Internally uses Cereal
+ * 
+ *	       Since it's hard to find the exact parsing methods of Cereal,
+ *		   It is only used for serializing between c++ programs (which is most of the time)
+ *		   To export to other languages/platforms, try using el::stream instead
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+#pragma once
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/utility.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/vector.hpp>
-#include <cereal/types/map.hpp>
-#include <cereal/types/unordered_map.hpp>
 #include <cereal/types/array.hpp>
-#include <cereal/types/list.hpp>
 #include <cereal/types/common.hpp>
+#include <fstream>
 
-#include "hash.h"
+#include "../common/define.h"
+#include "../common/string.h"
 
+#ifndef __ELANG_CEREAL
+#define __ELANG_CEREAL
+#endif
 
 namespace el
 {
@@ -56,11 +67,8 @@ namespace el
 	// TSL robin map/set has a serialize() method which would clash with the following non-member load/save functions
 	// This will tell cereal to use our custom functions instead
 
-	template <class A, class T, class U>
-	struct cereal::specialize<A, hashmap<T, U>, cereal::specialization::non_member_load_save> {};
-	template <class A, class T>
-	struct cereal::specialize<A, hashset<T>, cereal::specialization::non_member_load_save> {};
-
+#if (defined(__ELANG_HASHMAP) || defined(__ELANG_HASHSET))
+#ifndef __ELANG_HASH_SERIALIZED
 	// serializer that follows the robin guidelines
 	template<class A>
 	struct robin_cereal_saver
@@ -80,6 +88,12 @@ namespace el
 		template<typename T>
 		auto operator()() { T t; archive(t); return t; };
 	};
+#define __ELANG_HASH_SERIALIZED
+#endif
+
+#ifdef __ELANG_HASHMAP
+	template <class A, class T, class U>
+	struct cereal::specialize<A, hashmap<T, U>, cereal::specialization::non_member_load_save> {};
 
 	// TSL robin map non-member save function
 	template <class A, class T, class U>
@@ -93,6 +107,12 @@ namespace el
 		robin_cereal_loader loader(archive);
 		map = hashmap<T, U>::deserialize(loader, true);
 	}
+#endif
+
+#ifdef __ELANG_HASHSET
+	template <class A, class T>
+	struct cereal::specialize<A, hashset<T>, cereal::specialization::non_member_load_save> {};
+
 	// TSL robin set non-member save function
 	template <class A, class T>
 	void save(A& ar, const hashset<T>& set) {
@@ -105,5 +125,6 @@ namespace el
 		robin_cereal_loader loader(archive);
 		set = hashset<T>::deserialize(loader);
 	}
-
+#endif
+#endif
 }

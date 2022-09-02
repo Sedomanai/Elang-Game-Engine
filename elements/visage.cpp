@@ -1,4 +1,11 @@
+#include <elpch.h>
 #include "visage.h"
+#include "../tools/vertex.h"
+#include "../tools/painter.h"
+#include "../tools/material.h"
+#include "../common/aabb.h"
+#include "../common/circle.h"
+#include "../common/poly2d.h"
 
 namespace el
 {

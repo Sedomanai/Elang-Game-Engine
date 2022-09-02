@@ -5,25 +5,24 @@
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
-
-#include "../common/math.h"
-#include "../common/string.h"
-#include "../common/enums.h"
+#include "define.h"
+#include "enums.h"
+#include "vec2.h"
+#include "../elang_builder.h"
 
 namespace el
 {
+	struct vec2;
 	/**
-	 * @brief In Qt (and in most frameworks) mouse update should happen during mouse_move event
+	 * @brief * In Qt (and in most frameworks) mouse update should happen during mouse_move event
 	 * and once before mouse press and release events in order to update the delta value properly.
 	 * In game loops (in SDL etc.), update() must register at the END of the loop along with ButtonSym update. 
-	 * @brief *
-	 * @brief Position varies per system depending on where it receives the coordinate values. 
+	 * @brief * Position varies per system depending on where it receives the coordinate values. 
 	 * MouseSym does not care about the absolute coordinates, only mouse events and its relative change.
 	 * You may need to input and translate this value according to your own needs.
 	 */
-	struct MouseSym
+	struct ELANG_DLL MouseSym
 	{
 		enum
 		{
@@ -32,107 +31,70 @@ namespace el
 			Middle = 0x02,
 		};
 
+		MouseSym();
+
 		/**
-		 * Fire this in any event that can transfer mouse press signal.
-		 * Updates all None state to Once state
+		 * @brief Fire this in any event that can transfer mouse press signal
+		 * @brief Updates all None state to Once state
 		 *
-		 * @param pos- Current mouse position
-		 * @param buttonIndex- Must be translated to MousSym.enum state
+		 * @param pos : Current mouse position
+		 * @param buttonIndex : Must be translated to MousSym.enum state
 		 */
-		void onPress(const vec2 pos, sizet buttonIndex) {
-			mLastC[buttonIndex] = pos;
-			switch (mState[buttonIndex]) {
-			case eInput::None:
-				mState[buttonIndex] = eInput::Once;
-				break;
-			case eInput::Lift:
-			case eInput::Snap:
-				mState[buttonIndex] = eInput::Flap;
-				break;
-			}
-		}
+		void onPress(const vec2& pos, sizet buttonIndex);
 
 		/**
-		 * Fire this in any event that can transfer mouse release signal.
-		 * Updates all Hold state to Lift
+		 * @brief Fire this in any event that can transfer mouse release signal
+		 * @brief Updates all Hold state to Lift
 		 *
-		 * @param pos- Current mouse position
-		 * @param buttonIndex- Must be translated to MousSym.enum state
+		 * @param pos : Current mouse position
+		 * @param buttonIndex : Must be translated to MousSym.enum state
 		 */
-		void onRelease(const vec2 pos, sizet buttonIndex) {
-			mLastR[buttonIndex] = pos;
-			switch (mState[buttonIndex]) {
-			case eInput::Hold:
-				mState[buttonIndex] = eInput::Lift;
-				break;
-			case eInput::Once:
-			case eInput::Flap:
-				mState[buttonIndex] = eInput::Snap;
-				break;
-			}
-		}
+		void onRelease(const vec2& pos, sizet buttonIndex);
 
 		/**
-		 * Fire this every frame or any interval that should detect mouse signals. Updates all mouse states.
-		 * Detects presses and releases from previous frame. If pressed (Once state) update to Hold state.
-		 * If released (Lift state) update to Lift state.
+		 * @brief Fire this every frame or any interval that should detect mouse signals. Updates all mouse states
+		 * @brief Detects presses and releases from previous frame. If pressed (Once) update to Hold state. 
+		 * If released (Lift), update to None state
 		 *
-		 * For more info on when exactly to invoke this method, refer to the MouseSym comment intellisense.
+		 * @brief * For more info on when exactly to invoke this method, refer to the MouseSym comment intellisense.
 		 */
-		void updateKeys(const vec2 pos) {
-			mPrev = mCurr;
-			mCurr = pos;
-			for (sizet i = 0; i < 3; i++) {
-				switch (mState[i]) {
-				case eInput::Once:
-				case eInput::Flap:
-					mState[i] = eInput::Hold;
-					break;
-				case eInput::Lift:
-				case eInput::Snap:
-					mState[i] = eInput::None;
-					break;
-				}
-			}
-		}
+		void updateKeys(const vec2& pos);
 
 		/**
-		 * Log current data, including mosue state and delta position as well as last clicked and last released functions. 
-		 * Uses cout.
+		 * @brief Log current data, including mosue state and delta position as well as last clicked and last released functions 
+		 * @brief Uses cout.
 		 */
-		void print() const {
-			cout << "=========== Mouse State ===============" << endl;
-			cout << "Current State: " << sizet(mState[0]) << endl;
-			cout << "Delta Position: " << deltaPosition().x << " " << deltaPosition().y << " Previous Position: " << endl;
-			//cout << "Current Position: " << mCurr.x << " " << mCurr.y << " Previous Position: " << mPrev.x << " " << mPrev.y << endl;
-			cout << "Last Clicked: " << mLastC[0].x << " " << mLastC[0].y << " Last Released: " << mLastR[0].x << " " << mLastR[0].y << endl;
-			cout << "=======================================" << endl;
-		}
-
-		vec2 currentPosition() const { return mCurr; }
-		vec2 previousPosition() const { return mPrev; }
-		vec2 deltaPosition() const { return mCurr - mPrev; }
-		vec2 lastClickedPosition(sizet buttonIndex) const { return mLastC[buttonIndex]; }
-		vec2 lastReleasedPosition(sizet buttonIndex) const { return mLastR[buttonIndex]; }
-		eInput state(sizet buttonIndex) const { return (mState[buttonIndex] == eInput::Flap) ? eInput::Snap : mState[buttonIndex]; }
-
+		void print() const;
 
 		/**
-		 * Fire this every frame or any interval that should detect mouse wheel signals. 
+		 * Current eInput state of mouse state
+		 *
+		 * @param buttonIndex : 0 for Left Mouse, 1 for Right, and 2 for Middle
+		 * @return Current state of key in eInput by button index
+		 */
+		eInput state(sizet buttonIndex) const;
+		vec2 currentPosition() const;
+		vec2 previousPosition() const;
+		vec2 deltaPosition() const;
+		vec2 lastClickedPosition(sizet buttonIndex) const;
+		vec2 lastReleasedPosition(sizet buttonIndex) const;
+
+		/**
+		 * @brief Fire this every frame or any interval that should detect mouse wheel signals
 		 * 
-		 * @param value - Mouse wheel delta. Mousesym does not care about magnitude or absolute direction.
+		 * @param value : Mouse wheel delta. Mousesym does not care about magnitude or absolute direction.
 		 */
-		void updateWheel(float value) { mWheel = value; }
-		float wheel() const { return mWheel; }
+		void updateWheel(float value);
+		float wheel() const;
 
-		void reset() {
-			mWheel = 0;
-			mCurr = mPrev;
-			for (int i = 0; i < 3; i++) {
-				mLastR[i] = mLastC[i] = mCurr;
-				mState[i] = eInput::None;
-			}
-		}
+		/**
+		 * @brief Completely reset the mouse simulator. This means clearing all states and previous mouse data, etc
+		 * @brief **** 
+		 * @brief *** WARNING: This may be absolutely necessary when transitioning between mutliple mouse event loops, for example between two windows.
+		 * It really depends on the platform, but generally call this between every window change. Otherwise may result in exceptions and/or weird behavior.
+		 * @brief Alternatively consider creating multiple MouseSym for every window instead of using a single global controller.
+		 */
+		void reset();
 	private:
 		float mWheel;
 		vec2 mPrev, mCurr;

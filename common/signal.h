@@ -1,19 +1,19 @@
 /*****************************************************************//**
  * @file   signal.h
- * @brief  Signal-slot system, like event/delegates
- *		   Possibly deprecated due to entt
- * 
+ * @brief  Extremely simple signal-slot system, like event/delegates
+ *
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
-
 #include <functional>
-#include <vector>
 
 namespace el
 {
+	/**
+	 * @brief Signal
+	 * @brief Able to connect to slots of type function pointer, std::function, and/or a pointer to an object and its method
+	 */
 	template<typename ...Arg>
 	struct signal
 	{
@@ -29,14 +29,18 @@ namespace el
 			mSlots.push_back(function);
 		}
 		template<typename T>
-		void connect(T& instance, void(T::* method)(Arg... arg)) {
-			mSlots.push_back([&instance, method](Arg... arg) { (instance.*method)(arg...); });
+		void connect(T* instance, void(T::* method)(Arg... arg)) {
+			mSlots.push_back([instance, method](Arg... arg) { ((*instance).*method)(arg...); });
 		}
 		void clear() { mSlots.clear(); }
 	private:
 		std::vector<std::function<void(Arg...)>> mSlots;
 	};
-	
+
+	/**
+	 * @brief Signal that can only connect to one Slot
+	 * @brief Able to connect to slots of type function pointer, std::function, and/or a pointer to an object and its method
+	 */
 	template<typename ...Arg>
 	struct single_signal
 	{

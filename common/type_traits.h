@@ -5,7 +5,6 @@
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
 #include <type_traits>
 

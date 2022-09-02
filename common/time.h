@@ -5,12 +5,9 @@
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
-
-#include <chrono>
-
 #include "define.h"
+#include <chrono>
 
 #define chrono_now std::chrono::high_resolution_clock::now()
 #define chrono_nnsec std::chrono::duration_cast<std::chrono::nanoseconds>
@@ -20,13 +17,11 @@
 
 namespace  el
 {
-	//receive functor as parameter, return elapsed time by nano-seconds
-
 	/**
 	 * For the most basic manual profiling
 	 * 
-	 * @param functor - Statement to be profiled, mostly in lambda
-	 * @param times - Number of repetition time 
+	 * @param functor : Statement to be profiled, mostly in lambda
+	 * @param times : Number of repetition time 
 	 * 
 	 * @return Total time elapsed
 	 */
@@ -41,12 +36,12 @@ namespace  el
 	}
 
 	/**
-	 * Simple loop function. Not appropriate for endless loops.
-	 * Do not use this to replace iteration statements such as for loops
+	 * Simple loop function. Not appropriate for endless loops
+	 * @brief Do not use this to replace iteration statements such as for loops
 	 * 
-	 * @param functor - Statement to be looped, mostly in lambda
-	 * @param speed - Interval between loop iteration in seconds
-	 * @param loopCount - Total loop iteration count
+	 * @param functor : Statement to be looped, mostly in lambda
+	 * @param speed : Interval between loop iteration in seconds
+	 * @param loopCount : Total loop iteration count
 	 */
 	template<typename F>
 	void loop(const F& functor, float interval = 1.0f, sizet loopCount = 10000000) {

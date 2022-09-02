@@ -1,25 +1,28 @@
 ﻿/*****************************************************************//**
  * @file   vertex.h
  * @brief  All Vertex types. Should fit any graphic library. (Centered around OpenGL)
- * 
+ *
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
+#include "../common/define.h"
+#include "../common/vec2.h"
+#include "../common/vec3.h"
 
-#include <GL/glew.h>
-
-#include "../common/container.h"
-#include "../common/math.h"
-#include "../common/string.h"
-#include "../common/enums.h"
-
-
-namespace el {
+namespace el
+{
 	inline sizet gLineIndices[2] = { 0, 1 };
 	inline sizet gBox2dFillIndices[6] = { 0, 1, 3, 1, 3, 2 };
 	inline sizet gBox2dLineIndices[8] = { 0, 1, 1, 2, 2, 3, 3, 0 };
+
+	struct color8
+	{
+		uint8 r, g, b, a;
+		color8(uint8 r_, uint8 g_, uint8 b_, uint8 a_)
+			: r(r_), g(g_), b(b_), a(a_) {
+		}
+	};
 
 	/**
 	 * vec3 pos, vec2 uv
@@ -33,7 +36,7 @@ namespace el {
 	/**
 	 * vec3 pos, color8 col
 	 */
-	struct PrimitiveVertex 
+	struct PrimitiveVertex
 	{
 		vec3 pos;
 		color8 col;
@@ -50,7 +53,7 @@ namespace el {
 	/**
 	 * vec2 pos, color8 col
 	 */
-	struct Primitive2DVertex 
+	struct Primitive2DVertex
 	{
 		vec2 pos;
 		color8 col;

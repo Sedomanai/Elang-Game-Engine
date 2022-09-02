@@ -1,14 +1,14 @@
 /*****************************************************************//**
  * @file   singleton.h
- * @brief  Singelton
- * 
+ * @brief  Singleton
+ *
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
 
-namespace el {
+namespace el
+{
 	template<typename T>
 	struct singleton
 	{

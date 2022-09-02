@@ -1,5 +1,5 @@
-#pragma once
-#include "asset_data.h"
+#include <elpch.h>
+#include "asset_database.h"
 
 namespace el
 {

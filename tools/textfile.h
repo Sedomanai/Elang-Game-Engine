@@ -1,7 +1,13 @@
+/*****************************************************************//**
+ * @file   textfile.h
+ * @brief  A placeholder to store auto-imported textfiles
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
 #pragma once
-
-#include "../common/fileio.h"
-#include <entt/entt.hpp>
+#include "tool_declarer.h"
+#include "registry.h"
 
 namespace el
 {
@@ -10,7 +16,6 @@ namespace el
 		entt::entity self;
 		int ss;
 	};
-
 
 	struct AssetSync;
 
@@ -21,11 +26,11 @@ namespace el
 
 	private:
 		void importFile(const fio::path& filePath, TextMeta&) {
-			loadFile(filePath.generic_u8string().data(), text);
+			el_file::load(filePath.generic_u8string().data(), text);
 		}
 
 		void exportFile(const fio::path& filePath, TextMeta&) {
-			saveFile(filePath.generic_u8string().data(), text);
+			el_file::save(filePath.generic_u8string().data(), text);
 		}
 
 		void unload(TextMeta&) { text.clear(); }

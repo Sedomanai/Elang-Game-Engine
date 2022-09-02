@@ -1,8 +1,15 @@
+#include <elpch.h>
 #include "ui.h"
+#include "../common/algorithm.h"
+#include "../tools/camera.h"
+#include "../tools/controls.h"
+#include "../tools/stage.h"
+#include "../elements/basic.h"
+#include "../elements/button.h"
+#include "../elements/sprite.h"
 
 namespace el
 {
-
 	void syncButtonsToSprite() {
 		for (auto e : gStage->view<Sprite, Button>()) {
 			auto rect = obj<Box>(e);
@@ -46,10 +53,10 @@ namespace el
 
 			if (gKey.state(eKeyCode::Q) == eInput::Hold) {
 				camera->scale(1.1f);
-				camera->setSclZ(1.0f);
+				camera->resizeZ(1.0f);
 			} else if (gKey.state(eKeyCode::E) == eInput::Hold) {
 				camera->scale(10.0f/11.0f);
-				camera->setSclZ(1.0f);
+				camera->resizeZ(1.0f);
 			}
 		}
 	}
@@ -66,8 +73,8 @@ namespace el
 			auto prevscale = camera.scale();
 			camera.scale(vec3((float)val, (float)val, 1));
 			if (camera.scale().x < lowlimit || camera.scale().x > highlimit) {
-				camera.setSclX(prevscale.x);
-				camera.setSclY(prevscale.y);
+				camera.resizeX(prevscale.x);
+				camera.resizeY(prevscale.y);
 				return false;
 			}
 
@@ -96,12 +103,18 @@ namespace el
 			.to(vec3(vec2(target.position()), target.scale().x))
 			.during(duration).via(tweeny::easing::quadraticOut).onStep(
 				[&](vec3 v)->bool {
-					camera.setPosX(v.x);
-					camera.setPosY(v.y);
-					camera.setSclX(v.z);
-					camera.setSclY(v.z);
+					camera.toX(v.x);
+					camera.toY(v.y);
+					camera.resizeX(v.z);
+					camera.resizeY(v.z);
 					return false;
 				}
 		);
+	}
+
+	void tweenCamera(tweeny::tween<vec3>& tween, Camera& camera, Camera& target) {
+		tweenCameraInput(tween, camera, target);
+		if (tween.progress() != 1.0f)
+			tween.step(1);
 	}
 };

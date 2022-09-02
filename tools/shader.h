@@ -5,13 +5,9 @@
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
-
-#include "../elang_library_builder.h"
-#include "../common/fileio.h"
-#include "vertex.h"
-#include "hash.h"
+#include "../common/enums.h"
+#include "tool_declarer.h"
 
 namespace el {
 
@@ -63,7 +59,7 @@ namespace el {
 		 * @param type
 		 * @param meta
 		 */
-		void compileShaderVariant(GLuint type, ShaderMeta& meta);
+		void compileShaderVariant(uint type, ShaderMeta& meta);
 		virtual void setupGlslVertexProgram(string& file) {};
 		void glslErrorCheck(const uint32 shader, const char* filePath);
 		uint mShader;

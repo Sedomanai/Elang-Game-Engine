@@ -1,8 +1,10 @@
-#include "engine.h"
+#include <elpch.h>
+#include "common/vec2.h"
 #include "common/time.h"
-#include "common/math.h"
-//#include "elements/sprite.h"
-//#include "elements/button.h"
+#include "engine.h"
+#include "tools/painter.h"
+#include "tools/camera.h"
+#include "tools/controls.h"
 
 namespace el 
 {
@@ -151,5 +153,4 @@ namespace el
 		glViewport(0, 0, mW, mH);
 		updateViewport(-float(mW) / 2.0f, float(mW) / 2.0f, -float(mH) / 2.0f, float(mH) / 2.0f);
 	}
-
 }

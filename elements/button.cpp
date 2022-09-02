@@ -1,11 +1,13 @@
+#include <elpch.h>
 #include "button.h"
+
 
 namespace el 
 {
 	void Button::update(Entity e, bool hit) {
-		mCurr = hit;
+		bool curr = hit;
 
-		if (mCurr) {
+		if (curr) {
 			if (mPrev) {
 				ev->onHover(e, context);
 			} else {
@@ -16,7 +18,7 @@ namespace el
 			ev->onExit(e, context);
 		}
 		ev->postUpdate(e, context);
-		mPrev = mCurr;
+		mPrev = curr;
 	}
 
 }

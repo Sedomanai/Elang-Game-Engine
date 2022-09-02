@@ -1,22 +1,39 @@
-﻿#pragma once
-
-#include "../common/container.h"
-#include "../common/string.h"
-#include "../common/math.h"
+﻿/*****************************************************************//**
+ * @file   material.h
+ * @brief  Graphic materials. 
+ *		   Elang Engine materials do not hold shader data. That is reserved for Painters. 
+ *		   However, materials do hold Uniform/TextureSampler data and can be used across multiple Painters with different shaders
+ *		   This is possible because unmatching Uniforms/TextureSamplers are only discarded and not thrown
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+#pragma once
+#include "tool_declarer.h"
+#include "../common/define.h"
 #include "../common/enums.h"
-#include "texture.h"
+#include "../elang_builder.h"
 
 namespace el
 {
+	struct Texture;
+	struct NullMeta;
+	/**
+	 * @brief Shader Uniform data. Ideally works for any kind of graphic interface. Currently only GLSL is proven to work
+	 */
 	struct Uniform
 	{
+		// Type of data
 		eDataType type;
+		// 0 for Vertex Shader, 1 for Fragment Shader
 		uint32 vertex;
-		void* data;
+		// Name of data, must match name of variable in shader, otherwise discarded
 		string name;
+		void* data;
 
-		Uniform(eDataType type_, uint32 vertex_, void* data_, const string& name_) 
-			: type(type_), vertex(vertex_), data(data_), name(name_) {};
+		Uniform(eDataType type_, uint32 vertex_, void* data_, const string& name_)
+			: type(type_), vertex(vertex_), data(data_), name(name_) {
+		};
 		Uniform() : type(eDataType::Float), vertex(1), data(0), name("uSomething__NULL_") {};
 
 		template<typename T>
@@ -44,63 +61,27 @@ namespace el
 		}
 	};
 
-	struct MaterialMeta { sizet meta; };
-	struct Material
+	/**
+	 * @brief Holds uniform and texture/sampler2d data. Does not hold shader data, that's reserved for painters.
+	 */
+	struct ELANG_DLL Material
 	{
 		vector<Uniform> uniforms;
 		vector<asset<Texture>> textures;
 
-		void addUniform(eDataType type_, uint32 vertex_, void* data_, const string& name_) {
-			uniforms.emplace_back(type_, vertex_, data_, name_);
-		}
+		void addUniform(eDataType type_, uint32 vertex_, void* data_, const string& name_);
+		// Check if it has a valid texture (in index 0)
+		void setTexture(asset<Texture> texture, sizet index = 0);
+		// Check if it has a valid texture (in index 0)
+		bool hasTexture(int i = 0);
+		void importFile(fio::path path, NullMeta& meta);
+		void exportFile(fio::path path, NullMeta& meta);
+		void unload(NullMeta& meta);
 
-		void setTexture(asset<Texture> texture, sizet index = 0) {
-			while (textures.size() <= index) {
-				textures.emplace_back();
-			} textures[index] = texture;
-		}
-
-		bool hasTexture() {
-			return ((textures.size() > 0) && textures[0]);
-		}
-
-		void importFile(fio::path path, MaterialMeta& meta) {
-			InArchive archive(path.generic_u8string());
-
-			int32 size;
-			archive(size);
-			for (auto i = 0; i < (sizet)size; i++) {
-				string tex;
-				archive(tex);
-				if (gTextures.names.contains(tex)) {
-					textures.emplace_back(gTextures.names[tex]);
-				} else
-					textures.emplace_back(NullEntity);
-			} archive(uniforms);
-		}
-
-		void exportFile(fio::path path, MaterialMeta& meta) {
-			OutArchive archive(path.generic_u8string());
-
-			auto size = (int32)textures.size();
-			archive(size);
-			for (auto tex : textures) {
-				if (tex) {
-					archive(tex.get<AssetData>().filePath.generic_u8string());
-				} else {
-					archive("");
-				}
-			} archive(uniforms);
-		}
-
+		// Used by Ceraal
 		template<typename Arc>
 		void serialize(Arc& archive) {
 			archive(textures, uniforms);
-		}
-
-		void unload(MaterialMeta& meta) {
-			textures.clear();
-			uniforms.clear();
 		}
 	};
 }

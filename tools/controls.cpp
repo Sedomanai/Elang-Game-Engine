@@ -1,4 +1,5 @@
-﻿#include "controls.h"
+﻿#include <elpch.h>
+#include "controls.h"
 
 namespace el
 {

@@ -1,8 +1,13 @@
-#pragma once
+/*****************************************************************//**
+ * @file   textbox.h
+ * @brief  Textbox (and Textfields). Currently not used
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
 
-#include "../tools/bmpfont.h"
-#include "../tools/painter.h"
-#include "../common/enums.h"
+#pragma once
+#include "../tools/all.h"
 
 namespace el
 {

@@ -1,4 +1,11 @@
-﻿#pragma once
+﻿/*****************************************************************//**
+ * @file   bmpfont.h
+ * @brief  Bmpfont type. Currently on hold, may undergo huge revision
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+#pragma once
 #include "atlas.h"
 
 namespace el

@@ -1,15 +1,41 @@
-﻿#pragma once
-
-#include "../common/stream.h"
-#include "../common/batch.h"
-#include "../common/shape2d.h"
-#include "material.h"
+﻿/*****************************************************************//**
+ * @file   painter.h
+ * @brief  Graphic Painter
+ *		   Painter can be likened to a graphic pipeline	stage. In Elang engines, this interface is bared open.
+ *		   While materials hold uniform and texture data, they do not hold shaders in Elang - only painters do.
+ *		   This includes vertex/fragment shader info, layer order, sorting, z-buffer options, static batches, and so on.
+ * 
+ *		   Painters only accept batches based on the data size of the vertex - 
+ *		   It does not care about internal data or whether it matches with the structure of the vertex.
+ *		   This makes them extremely flexible, allowing them to accept multiple materials
+ *		   It does also holds most common uniforms like camera or color data
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
+#pragma once
+#include "registry.h"
+#include "tool_declarer.h"
+#include "project.h"
 #include "camera.h"
-#include "vertex.h"
 #include "shader.h"
+#include "../common/batch.h"
+#include "../common/vec4.h"
+
+inline void test() {};
 
 namespace el
 {
+	struct Camera;
+	struct Material;
+
+	struct line;
+	struct circle;
+	struct aabb;
+	struct poly2d;
+	struct color8;
+	struct Primitive2DVertex;
+
 	enum
 	{
 		E_DANGLING_VERTICES = 1,
@@ -32,6 +58,10 @@ namespace el
 		Z_CLEAR = 16,
 	};
 
+	/**
+	 * @brief Grphic layer. A painter has its own GL Shader Pipeline, a VBO, and a VBO.
+	 * @brief Can only batch Visages (and their children) with a matching vertex size
+	 */
 	struct ELANG_DLL Painter
 	{
 		Painter();
@@ -108,46 +138,17 @@ namespace el
 		static uint32 sNullTextureID;
 	};
 
-	struct ShapeDebug2d
+	struct ELANG_DLL ShapeDebug2d
 	{
 		Painter point;
 		Painter line;
 		Painter fill;
 
-		ShapeDebug2d() : mInit(false),
-			point("__el_editor_/shader/debug2d.vert", "__el_editor_/shader/debug2d.frag", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR),
-			line("__el_editor_/shader/debug2d.vert", "__el_editor_/shader/debug2d.frag", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR),
-			fill("__el_editor_/shader/debug2d.vert", "__el_editor_/shader/debug2d.frag", 100000, NullEntity, Projection::eOrtho, ePainterFlags::Z_CLEAR)
-		{};
+		ShapeDebug2d();
+		~ShapeDebug2d();
 
-		~ShapeDebug2d() {
-			if (mInit) {
-				point.destroy();
-				line.destroy();
-				fill.destroy();
-			}
-		}
-
-		void init(asset<Camera> camera_) {
-			if (!mInit && camera_) {
-				mInit = true;
-				fill.camera = point.camera = fill.camera = line.camera = point.camera = camera_;
-				//fill.color = vec4(1, 1, 1, 0.2f);
-				point.drawtype = GL_POINTS;
-				line.drawtype = GL_LINES;
-				point.init();
-				line.init();
-				fill.init();
-			}
-		}
-
-		void draw() {
-			// order matters
-			point.paint();
-			line.paint();
-			fill.paint();
-		}
-
+		void init(asset<Camera> camera_);
+		void draw();
 	private:
 		bool mInit;
 	};

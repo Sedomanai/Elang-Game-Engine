@@ -1,10 +1,17 @@
+/*****************************************************************//**
+ * @file   basic.h
+ * @brief  Basic element types. They are all the equivalent children of existing data types
+ *		   This is only done to let ENTT distinguish them as separate data types
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
 #pragma once
-
-#include "../elang_library_builder.h"
 #include "../common/transform2d.h"
 #include "../common/transform.h"
-#include "../common/shape2d.h"
-#include "../common/define.h"
+#include "../common/circle.h"
+#include "../common/aabb.h"
+#include "../common/vec2.h"
 
 namespace el
 {

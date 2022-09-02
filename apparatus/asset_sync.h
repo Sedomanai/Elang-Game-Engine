@@ -1,14 +1,18 @@
 /*****************************************************************//**
- * @file   assetsync.h
- * @brief  Used to Sync
+ * @file   asset_sync.h
+ * @brief  Used to sync assets with their actual files. 
+ *         Listens to file creation, modification, and erasure and deals accordingly.
+ *		   For specific behavior, see the little footnote below or check the method descriptions. 
+ * 
+ *		   While it has the functionality to import, save, and export, it does not do it automatically.
  * 
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
-#include "../tools/registry.h"
-#include "../tools/asset.h"
+#include "../tools/tool_declarer.h"
+#include "../tools/project.h"
+#include "../tools/asset_database.h"
 
 namespace el
 {
@@ -42,14 +46,29 @@ namespace el
 		 1. upon program window focus (recommended, may have a miniscule chance of slowing down) (chosen)
 		 2. upon ctrl + r (may be buggy)
 	 */
-	struct AssetSync
+
+	/**
+	 * @brief Used to sync any asset. For more specific behaviors, check its methods.
+	 *		  Because this uses ECS style registry, syncing the Asset will automatically and immediately register 
+	 *		  in every element using the Asset
+	 * 
+	 * @brief 
+	 */
+	struct ELANG_DLL AssetSync
 	{
 		friend struct AssetLoader;
 
+		// Sync asset. If the original file is new, enlist the new file data. 
+		// If the original file is erased, internal file data is also erased (and of course unloaded)
+		// If the original file was modified/renamed, the internal file is also reloaded automatically
+		// If the original file was erased but a new file took its place with the same name, that asset will sync with internal data
+		// When the file is both internally and externally modified, this will attach AssetConflict
+		// 
+		// ** Consider calling this via AssetLoader with the syncAllAssets method
 		template<typename T, typename M>
 		asset<T> syncAsset(const fio::path& path, AssetDatabase& reg) {
-			auto id = fileIdentifier(path);
-			auto key = fio::relative(path, gProject->directory);
+			auto id = el_file::identifier(path);
+			auto key = fio::relative(path, gProject.directory);
 
 			auto& bish = reg.names;
 			auto& bishi = reg.registry;
@@ -65,7 +84,7 @@ namespace el
 						// erase previous name
 						auto erased = named;
 						if (erased) { // double check
-							auto eid = erased->id;
+							auto eid = erased->inode;
 							bishi[id] = erased;
 							if (bishi[eid] == erased)
 								bishi[eid] = NullEntity;
@@ -94,8 +113,8 @@ namespace el
 				if (bish.contains(key)) {
 					auto prev = asset<AssetData>(bish[key]);
 					if (prev) { // double check, would always be true
-						if (bishi[prev->id] == prev)
-							bishi[prev->id] = NullEntity;
+						if (bishi[prev->inode] == prev)
+							bishi[prev->inode] = NullEntity;
 						bishi[id] = prev;
 						*prev = { id, key, fio::last_write_time(path) };
 						sync<T, M>(prev, path);
@@ -106,7 +125,7 @@ namespace el
 					}
 					return prev;
 				} else { // completely new read
-					auto dat = gProject->make<AssetData>(id, key, fio::file_time_type());
+					auto dat = gProject.make<AssetData>(id, key, fio::file_time_type());
 					dat.add<M>().add<T>();
 					dat->lastWriteTime = fio::last_write_time(path);
 
@@ -117,49 +136,19 @@ namespace el
 			}
 		}
 
-		void clean() {
-			auto view = gProject->view<AssetData>();
-			for (asset<AssetData> data : view) {
-				if (!data.has<AssetSynced>()) {
-					if (data.has<AssetLoaded>()) {
-						gProject->emplace_or_replace<AssetConflict>(data, true);
-						data->id = -1;
-					} else
-						data.add<AssetErased>();
-				}
-			} gProject->clear<AssetSynced>();
-
-			auto erased = gProject->view<AssetErased>();
-			gProject->destroy(erased.begin(), erased.end());
-
-			for (asset<SubAssetData> data : gProject->view<SubAssetData>()) {
-				if (gProject->valid(data->parent)) {
-					data.add<AssetErased>();
-				}
-			}
-			auto erasedSub = gProject->view<AssetErased>();
-			gProject->destroy(erasedSub.begin(), erasedSub.end());
-
-			for (asset<AssetConflict> conf : gProject->view<AssetConflict>()) {
-				if (!conf.has<AssetModified>())
-					conf.add<AssetModified>();
-			}
-			eraseUnused(gTexts);
-			eraseUnused(gAtlases);
-		}
-
+		// Create a file and sync
 		template<typename T, typename M>
 		void create(const fio::path& path, AssetDatabase& base) {
-			auto key = fio::relative(path, gProject->directory);
+			auto key = fio::relative(path, gProject.directory);
 			key = key.parent_path() / findNonConflictingFilename(fio::directory_entry(path.parent_path()), path.filename());
-			auto new_path = gProject->directory / key;
+			auto new_path = gProject.directory / key;
 
 			if (!syncedHardPath<T, M>(new_path, base)) {
-				auto meta = gProject->make<M>();
+				auto meta = gProject.make<M>();
 				auto txt = meta.add<T>();
 				fio::create_directories(new_path.parent_path());
 				txt->exportFile(new_path, *meta);
-				auto id = fileIdentifier(new_path);
+				auto id = el_file::identifier(new_path);
 				auto data = meta.add<AssetData>(id, key, fio::last_write_time(new_path));
 				base.registry.emplace(id, data);
 				base.names.emplace(key, data);
@@ -168,14 +157,15 @@ namespace el
 			}
 		}
 
+		// Erase a file and sync in editor, unless already loaded in editor (has AssetLoaded), then don't sync (+ AssetConflict)
 		template<typename T, typename M>
 		void erase(const fio::path& path, AssetDatabase& base) {
 			if (syncedHardPath<T, M>(path, base)) {
-				auto key = fio::relative(path, gProject->directory);
+				auto key = fio::relative(path, gProject.directory);
 				if (base.names.contains(key)) {
 					asset<T> data = base.names[key];
 					base.names.erase(key);
-					auto id = asset<AssetData>(data)->id;
+					auto id = asset<AssetData>(data)->inode;
 					if (base.registry.contains(id))
 						base.registry.erase(id);
 					data->unload(data.get<M>());
@@ -185,17 +175,20 @@ namespace el
 			}
 		}
 
+		// Attach AssetModified. This must be done manually. You can also do this directly via gProject
 		template<typename T>
 		void modify(asset<T> data) {
-			gProject->emplace_or_replace<AssetModified>(data);
+			data.addif<AssetModified>();
 		}
 
+		// If unloaded, load (+ AssetLoaded)
+		// If original file no longer exists, proceed to erase internal data
 		template<typename T, typename M>
 		asset<T> open(const fio::path& key, AssetDatabase& base) {
 			if (base.names.contains(key)) {
 				asset<T> t = base.names[key];
 				if (!t.has<AssetLoaded>()) {
-					auto path = gProject->directory / key;
+					auto path = gProject.directory / key;
 					if (syncedHardPath<T, M>(path, base)) {
 						t->importFile(path, t.get<M>());
 						t.add<AssetLoaded>();
@@ -207,50 +200,57 @@ namespace el
 			return asset<T>();
 		}
 
+		// Load All
 		template<typename T, typename M>
 		void openAll(AssetDatabase& base) {
-			for (asset<AssetData> data : gProject->view<T>()) {
+			for (asset<AssetData> data : gProject.view<T>()) {
 				if (data) {
 					open<T, M>(data->filePath, base);
 				}
 			}
 		}
 
+		// If loaded, unload (-AssetLoaded, -AssetModified, -AssetConflict) 
+		// This does not check whether file was saved. Make sure to double check)
+		// If original file no longer exists, proceed to erase internal data
 		template<typename T, typename M>
 		void close(const fio::path& key, AssetDatabase& base) {
 			if (base.names.contains(key)) {
 				asset<T> t = base.names[key];
 				if (t.has<AssetLoaded>()) {
 					t->unload(t.get<M>());
-					gProject->remove<AssetLoaded>(t);
+					t.remove<AssetLoaded>();
 				}
 				if (t.has<AssetModified>())
-					gProject->remove<AssetModified>(t);
+					t.remove<AssetModified>();
 				if (t.has<AssetConflict>())
-					gProject->remove<AssetConflict>(t);
+					t.remove<AssetConflict>();
 			}
 
-			auto path = gProject->directory / key;
+			auto path = gProject.directory / key;
 			syncedHardPath<T, M>(path, base);
 		}
 
+		// If modified, export current file (-AssetModified, -AssetConflict)
 		template<typename T, typename M>
 		void save(asset<T> data) {
 			if (data && data.has<AssetModified>()) {
-				auto path = gProject->directory / data.get<AssetData>().filePath;
+				auto path = gProject.directory / data.get<AssetData>().filePath;
 				unsafeSave<T, M>(path, data);
 				data.remove<AssetModified>();
 			}
 		}
 
+		// If modified, import current file (-AssetModified, -AssetConflict)
+		// If original file no longer exists, proceed to erase internal data
 		template<typename T, typename M>
 		void revert(asset<AssetData> data, AssetDatabase& base) {
-			if (data.has<AssetModified>())
+			//if (data.has<AssetModified>())
 				data.remove<AssetModified>();
-			if (data.has<AssetConflict>())
+			//if (data.has<AssetConflict>())
 				data.remove<AssetConflict>();
 
-			auto path = gProject->directory / data->filePath;
+			auto path = gProject.directory / data->filePath;
 			if (syncedHardPath<T, M>(path, base)) {
 				auto& t = data.get<T>();
 				auto& m = data.get<M>();
@@ -259,131 +259,33 @@ namespace el
 			}
 		}
 
-		void ignoreConflict(asset<AssetData> data) {
-			gProject->emplace_or_replace<AssetModified>(data);
-			data.remove<AssetConflict>();
-		}
-		
-		void rename(const fio::path& path, string new_name, AssetDatabase& base) {
-			if (path.stem() == new_name)
-				return;
+		// If AssetConflict is attached, simply remove and don't do anything
+		// It's a semantics issue; nothing happens, the file would simply no longer be considered conflicting
+		void ignoreConflict(asset<AssetData> data);
 
-			auto key = fio::relative(path, gProject->directory);
-			if (fio::exists(path)) {
-				auto new_key = key.parent_path()
-					/ findNonConflictingFilename(fio::directory_entry(path.parent_path()), new_name + key.extension().generic_u8string());
-				cout << new_key << endl;
+		// Rename file directly from here
+		void rename(const fio::path& path, string new_name, AssetDatabase& base);
 
-				if (base.names.contains(new_key)) {
-					cout << "Rename failed: target name already exists loaded in program. Sync or resolve conflict first." << endl;
-				} else {
-					if (base.names.contains(key)) {
-						cout << key << endl;
-						fio::rename(gProject->directory / key, gProject->directory / new_key);
-						asset<AssetData> data = base.names[key];
-						base.names[new_key] = data;
-						data->filePath = new_key;
-						base.names.erase(key);
-					}
-				}
-			} else {
-				cout << "Path does not exist anymore. Check if external file is renamed/erased, then sync/resolve. Abort." << endl;
-			}
-		}
-
-		string findNonConflictingFilename(fio::directory_entry dir, fio::path filename) {
-			string stem, new_name;
-			new_name = filename.filename().generic_u8string();
-
-			// attach " - Copy"
-			for (auto e : fio::directory_iterator(dir)) {
-				if (!e.is_directory() && filename == e.path().filename()) {
-					stem = filename.stem().generic_u8string() + " - Copy";
-					break;
-				}
-			}
-
-			if (!stem.empty()) {
-				new_name = stem + filename.extension().generic_u8string();
-
-				vector<string> buffer;
-				for (auto e : fio::directory_iterator(dir)) {
-					auto fname = e.path().filename();
-					if (!e.is_directory()) {
-						auto st = fname.stem().generic_u8string();
-						if (st.find(stem) == 0) {
-							buffer.emplace_back(st);
-						}
-					}
-				}
-
-				if (buffer.size() != 0) {
-					hashset<sizet> hash;
-					for (auto str : buffer) {
-						auto sv = ((strview)str).substr(stem.size());
-						if (sv.size() > 2 && sv.substr(0, 2) == " (") {
-							hash.emplace(toSizet(sv.substr(2, 1)));
-						}
-					}
-
-					sizet i = 2;
-					while (true) {
-						if (!hash.contains(i)) {
-							break;
-						} i++;
-					}
-
-					// attach " (n)"
-					stem += " (" + std::to_string(i) + ")";
-					new_name = stem + filename.extension().generic_u8string();
-				}
-			}
-
-			return new_name;
-		}
+		// Find non-conflicting name of a directory (probably OS dependend, currently only Windows style)
+		string findNonConflictingFilename(fio::directory_entry dir, fio::path filename);
 	private:
+		void eraseUnused(AssetDatabase& base);
+
 		template<typename T, typename M>
 		void unsafeSave(const fio::path& path, asset<T> data) {
 			data->exportFile(path, data.get<M>());
 			auto& d = data.get<AssetData>();
 			d.lastWriteTime = fio::last_write_time(path);
-			d.id = fileIdentifier(path);
+			d.inode = el_file::identifier(path);
 			if (data.has<AssetConflict>())
 				data.remove<AssetConflict>();
-		}
-
-		void eraseUnused(AssetDatabase& base) {
-			auto& names = base.names;
-			auto& registry = base.registry;
-
-			vector<fio::path> paths;
-			for (auto it = names.begin(); it != names.end(); it++) {
-				if (!gProject->valid(it.value())) {
-					paths.emplace_back(it.key());
-				}
-			}
-
-			for (auto it = paths.begin(); it != paths.end(); it++) {
-				names.erase(*it);
-			}
-
-			vector<long long> paths2;
-			for (auto it = registry.begin(); it != registry.end(); it++) {
-				if (!gProject->valid(it.value())) {
-					paths2.emplace_back(it.key());
-				}
-			}
-
-			for (auto it = paths2.begin(); it != paths2.end(); it++) {
-				registry.erase(*it);
-			}
 		}
 
 		template<typename T, typename M>
 		void sync(asset<AssetData> data, const fio::path& path) {
 			if (data.has<AssetLoaded>()) {
 				if (data.has<AssetModified>())
-					gProject->emplace_or_replace<AssetConflict>(data, false);
+					data.replace<AssetConflict>(false);
 				else {
 					auto& t = data.get<T>();
 					auto& m = data.get<M>();
@@ -398,7 +300,7 @@ namespace el
 			auto lwt = fio::last_write_time(path);
 			if (lwt > data->lastWriteTime && data.has<AssetLoaded>()) {
 				if (data.has<AssetModified>()) {
-					gProject->emplace_or_replace<AssetConflict>(data, false);
+					gProject.emplace_or_replace<AssetConflict>(data, false);
 				} else {
 					auto& t = data.get<T>();
 					auto& m = data.get<M>();
@@ -411,13 +313,13 @@ namespace el
 
 		template<typename T, typename M>
 		bool syncedHardPath(const fio::path& path, AssetDatabase& base) {
-			auto key = fio::relative(path, gProject->directory);
+			auto key = fio::relative(path, gProject.directory);
 			if (base.names.contains(key)) {
 				if (!fio::exists(path)) {
 					auto data = asset<AssetData>(base.names[key]);
 					base.names.erase(key);
 					if (data) {
-						base.registry.erase(data->id);
+						base.registry.erase(data->inode);
 						data.get<T>().unload(data.get<M>());
 						data.destroy();
 					} return false;

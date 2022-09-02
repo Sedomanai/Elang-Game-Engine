@@ -1,7 +1,5 @@
-﻿#include "camera.h"
-
-#include "../common/keysym.h"
-#include "../common/math.h"
+﻿#include <elpch.h>
+#include "camera.h"
 
 namespace el
 {

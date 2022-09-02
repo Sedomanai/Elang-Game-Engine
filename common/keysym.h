@@ -1,15 +1,14 @@
 /*****************************************************************//**
  * @file   keysym.h
- * @brief  Basic operations for all kinds of key simulations. 
- * 
+ * @brief  Basic operations for all kinds of key simulations
+ *
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
-
-#include "../elang_library_builder.h"
-#include "../common/enums.h"
+#include "define.h"
+#include "enums.h"
+#include "../elang_builder.h"
 
 namespace el
 {
@@ -137,145 +136,80 @@ namespace el
 		Context = 244
 	};
 
-	#define ELANG_TOTAL_KEY_PRESS_COUNT 32
-	
+#define ELANG_TOTAL_KEY_PRESS_COUNT 32
+
 	/**
-	 * @brief Refined button input, useful for event based loops such as game loops. Can also be used in GUI app for more refined keyboard input.
-	 * eKeyCode is based on modified version of SDLK(ey). update() must register at the END of a game loop along with MouseSym update.
+	 * @brief Refined button input, useful for event based loops such as game loops
+	 * @brief Can also be used in GUI app for more refined keyboard input
+	 * @brief eKeyCode is based on modified version of SDLK(ey)
+	 * @brief * update() must register at the END of a game loop along with MouseSym update
 	 */
-	struct KeySym
+	struct ELANG_DLL KeySym
 	{
 		/**
 		 * Translate from SDL Keycode to Elang Keycode.
-		 * 
-		 * @param SDL key
-		 * @return Elang key
-		 */
-		sizet translateFromSDLKeyCode(sizet key) {
-			if (key > 1000000000) {
-				key -= 1073741681;
-				if (key > 300)
-					key -= 200;
-			} return key;
-		}
-
-		//sizet translateFromQtKeyCode(sizet key) {
-		//	if (key > 1000000000) {
-		//		key -= 1073741681;
-		//		if (key > 300)
-		//			key -= 200;
-		//	} return key;
-		//}
-
-		/**
-		 * Current eInput state of key in Elang Keycode. Refer to <common/enum.h> for more on eInput state.
-		 * 
-		 * @param key Elang keycode
-		 * @return Current state of key
-		 */
-		eInput state(eKeyCode key) {
-			return state(sizet(key));
-		}
-
-
-		/**
-		 * Current eInput state of key in Elang Keycode. Refer to <common/enum.h> for more on eInput state.
 		 *
-		 * @param key- Elang keycode
-		 * @return Current state of key
+		 * @param key : SDL keycode
+		 * @return Elang keycode
 		 */
-		eInput state(sizet key) {
-			if (0 < key && key < 256) {
-				return (mKeys[key] == eInput::Flap) ? eInput::Snap : mKeys[key];
-			} else return eInput::None;
-		}
+		sizet translateFromSDLKeyCode(sizet key);
 
 		/**
-		 * Fire this in any event that can transfer key press signal.
-		 * Updates all None state to Once state
-		 * 
-		 * @param key- Must be translated to eKeyCode
+		 * Current eInput state of key in Elang Keycode. Refer to <common/enum.h> for more on eInput state
+		 *
+		 * @param key : Elang keycode
+		 * @return Current state of key in eInput by keycode
 		 */
-		void onPress(sizet key) {
-			switch (mKeys[key]) {
-			case eInput::None:
-				mKeys[key] = eInput::Once;
-				registerUpdate(key);
-				break;
-			// Ignore Snap or Flap for now, that is a safety measure for key update loops slower than say 10fps.
-			case eInput::Lift:
-			case eInput::Snap:
-				mKeys[key] = eInput::Flap;
-				registerUpdate(key);
-				break;
-			}
-		}
+		eInput state(eKeyCode key);
+
+		/**
+		 * Current eInput state of key in Elang Keycode. Refer to <common/enum.h> for more on eInput state
+		 *
+		 * @param key : Elang keycode
+		 * @return Current state of key, by keycode
+		 */
+		eInput state(sizet key);
+
+		/**
+		 * Fire this in any event that can transfer key press signal
+		 * @brief Updates all None state to Once state
+		 *
+		 * @param key : Must be translated to eKeyCode
+		 */
+		void onPress(sizet key);
 
 		/**
 		 * Fire this in any event that can transfer key release signal.
 		 * Updates all Hold state to Lift
 		 *
-		 * @param key- Must be translated to eKeyCode
+		 * @param key : Must be translated to eKeyCode
 		 */
-		void onRelease(sizet key) {
-			switch (mKeys[key]) {
-			case eInput::Hold:
-				mKeys[key] = eInput::Lift;
-				registerUpdate(key);
-				break;
-			// Ignore Snap or Flap for now, that is a safety measure for key update loops slower than say 10fps.
-			case eInput::Once:
-			case eInput::Flap:
-				mKeys[key] = eInput::Snap;
-				registerUpdate(key);
-				break;
-			}
-		}
+		void onRelease(sizet key);
 
 		/**
-		 * Fire this every frame or any interval that should detect key signals. Updates all key states.
-		 * Detects presses and releases from previous frame. If pressed (Once state) update to Hold state.
-		 * If released (Lift state) update to Lift state.
-		 * 
-		 * For more info on when exactly to invoke this method, refer to the KeySym comment intellisense. 
+		 * @brief Fire this every frame or any interval that should detect key signals. Updates all key states
+		 * @brief Detects presses and releases from previous frame. If pressed (Once) update to Hold state.
+		 * If released (Lift) update to None state
+		 *
+		 * @brief * For more info on when exactly to invoke this method, refer to the KeySym comment intellisense.
 		 */
-		void updateKeys() {
-			for (unsigned int i = 0; i < mUpdateNum; i++) {
-				auto j = mUpdates[i];
-				// Ignore Snap or Flap for now, that is a safety measure for key update loops slower than say 10fps.
-				switch (mKeys[j]) {
-				case eInput::Once:
-				case eInput::Flap:
-					mKeys[j] = eInput::Hold;
-					break;
-				case eInput::Lift:
-				case eInput::Snap:
-					mKeys[j] = eInput::None;
-					break;
-				}
-			} mUpdateNum = 0;
-		}
+		void updateKeys();
 
 		/**
-		 * Resets all 256 key states.
+		 * @brief Completely reset the key simulator. This means clearing all 256 key states
+		 * @brief ****
+		 * @brief *** WARNING: This may be absolutely necessary when transitioning between mutliple mouse event loops, for example between two windows.
+		 * It really depends on the platform, but generally call this between every window change. Otherwise may result in exceptions and/or weird behavior.
+		 * @brief Alternatively consider creating multiple MouseSym for every window instead of using a single global controller.
 		 */
-		void reset() {
-			for (int i = 0; i < 256; i++) {
-				mKeys[i] = eInput::None;
-			} mUpdateNum = 0;
-		}
+		void reset();
 
 	private:
 		eInput mKeys[256];
 		sizet mUpdates[ELANG_TOTAL_KEY_PRESS_COUNT];
 		sizet mUpdateNum;
-		
-		void registerUpdate(sizet key) {
-			if (mUpdateNum < ELANG_TOTAL_KEY_PRESS_COUNT) {
-				mUpdates[mUpdateNum] = key;
-				mUpdateNum++;
-			}
-		}
+
+		void registerUpdate(sizet key);
 	};
 
 	extern ELANG_DLL KeySym gKey;

@@ -5,18 +5,18 @@
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
-
 #include <random>
 
-namespace  el
+namespace el
 {
-	/** HOW TO USE RNG (because I never remember this)
-	* rng r
-	* r.seed(SEED()());
-	* (i/r/ui)rand rand(min, max)
-	* lv = (i/r/ui)rand(r)
+	/** 
+	 * @brief ** HOW TO USE RNG (because I never remember this)
+	 * @brief -------------------------------------------------------------
+	 * @brief rng r
+	 * @brief r.seed(SEED()());
+	 * @brief (i/r/ui)rand rand(min, max)
+	 * @brief lv = (i/r/ui)rand(r)
 	*/
 	using rng = std::mt19937;
 	using irand = std::uniform_int_distribution<int>;

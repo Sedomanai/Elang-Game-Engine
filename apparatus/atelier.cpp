@@ -1,5 +1,5 @@
+#include <elpch.h>
 #include "atelier.h"
-
 
 namespace el
 {
@@ -7,9 +7,9 @@ namespace el
 		for (auto e : gStage->view<GraphicUpdate2d>()) {
 			auto spr = obj<Sprite>(e);
 			if (spr)
-				spr->update(spr);
+				spr->recalc(spr);
 			if (spr.has<Canvas<SpriteVertex>>())
-				spr.get<Canvas<SpriteVertex>>().update();
+				spr.get<Canvas<SpriteVertex>>().recalc();
 		} gStage->clear<GraphicUpdate2d>();
 	}
 

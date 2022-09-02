@@ -1,3 +1,11 @@
-__simple_backup/
-_elqt/
+elements/platformer.h
+elements/platformer.cpp
+elements/textbox.h
+elements/textbox.cpp
+elements/visage.tcc
+apparatus/world.h
+apparatus/world.cpp
+apparatus/loader.h
+apparatus/loader.cpp
+
 *.exe

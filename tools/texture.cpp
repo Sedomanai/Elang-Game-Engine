@@ -1,7 +1,10 @@
-﻿#include "texture.h"
-
-#include <encoder/fpng.h>
-#include <encoder/fpng.cpp>
+﻿#include <elpch.h>
+#include "../common/algorithm.h"
+#include "hashmap.h"
+#include "texture.h"
+#include "cell.h"
+#include "atlas.h"
+#include "asset.h"
 
 #pragma warning( push )
 #pragma warning( disable : 26495 )
@@ -9,12 +12,8 @@
 #pragma warning( disable : 4267 )
 #pragma warning( push )
 #pragma warning( disable : 4334 )
-
-#include <lodepng/lodepng.h>
+#include <encoder/fpng.cpp>
 #include <lodepng/lodepng.cpp>
-
-#include "asset_data.h"
-
 #pragma warning( pop )
 #pragma warning( pop )
 #pragma warning( pop )
@@ -152,7 +151,7 @@ namespace el
 				it = max(it, (int64)(s / w) + 1);
 			}
 			auto name = str + "_" + std::to_string(index);
-			auto meta = gProject->make<SubAssetData>(index, name, new_atlas)
+			auto meta = gProject.make<SubAssetData>(index, name, new_atlas)
 				.add<CellMeta>(il, ib, ir-il, it-ib, 0, 0);
 			new_atlas->addCell(meta, atlasmeta);
 			index++;

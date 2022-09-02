@@ -1,14 +1,20 @@
-﻿#include "shader.h"
+﻿#include <elpch.h>
+#include "shader.h"
+#include "../common/string_algorithm.h"
+#include "../common/vec2.h"
+#include "../common/vec3.h"
+#include "../common/vec4.h"
+#include "vertex.h"
 
 namespace el
 {
 	void FragmentShader::importFile(const fio::path& path, ShaderMeta& meta) {
-		loadFile(path.generic_u8string().c_str(), meta.file);
+		el_file::load(path.generic_u8string().c_str(), meta.file);
 		compileShaderVariant(GL_FRAGMENT_SHADER, meta);
 		meta.file.clear();
 	}
 
-	void FragmentShader::compileShaderVariant(GLuint type, ShaderMeta& meta) {
+	void FragmentShader::compileShaderVariant(uint type, ShaderMeta& meta) {
 		if (meta.compiled)
 			return;
 
@@ -61,7 +67,7 @@ namespace el
 namespace el
 {
 	void VertexShader::importFile(const fio::path& path, ShaderMeta& meta) {
-		loadFile(path.generic_u8string().c_str(), meta.file);
+		el_file::load(path.generic_u8string().c_str(), meta.file);
 		compileShaderVariant(GL_VERTEX_SHADER, meta);
 		meta.file.clear();
 	}
@@ -110,13 +116,13 @@ namespace el
 
 	void VertexShader::setupGlslVertexProgram(string& file) {
 		int state = 0, nameshift = 0;
-		iterate(file, '\n', [&](strview line, sizet) -> bool {
+		el_string::iterate(file, '\n', [&](strview line, sizet) -> bool {
 			int read = 0;
 			bool bvec4 = false;
 			if (state == 2)
 				return true;
 
-			iterate(line, ' ', [&](strview str, sizet) -> bool {
+			el_string::iterate(line, ' ', [&](strview str, sizet) -> bool {
 				switch (read) {
 				default:
 				if (str == "in") {

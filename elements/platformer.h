@@ -1,7 +1,14 @@
-#pragma once
+/*****************************************************************//**
+ * @file   platformer.h
+ * @brief  Very simple platformer logic
+ * @brief  The entire thing is currently on hold, re-establishing the GUI is the primary focus
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
 
-#include "../tools/registry.h"
-#include "../tools/painter.h"
+#pragma once
+#include "../tools/all.h"
 #include "basic.h"
 
 namespace el
@@ -102,7 +109,7 @@ namespace el
 		void open(eSide side) { mSides &= ~(char)side; }
 		void toggle(eSide side) { mSides ^= (char)side; }
 		bool isClosed(eSide side) { return (mSides & (char)side) == (char)side; }
-		void debug(ShapeDebug* debug, const color8& c, bool fill);
+		void debug(ShapeDebug2d* debug, const color8& c, bool fill);
 
 		template<typename T>
 		void serialize(T& archive) {

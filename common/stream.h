@@ -1,20 +1,23 @@
 ﻿/*****************************************************************//**
  * @file   stream.h
- * @brief  For bitstreaming i.e. serializing. Mostly replaced by cereal, used only in specific conditions
+ * @brief  For bitstreaming i.e. serializing. 
+ *         Mostly replaced by cereal, used only in specific conditions 
+ *         (Exporting serialized data to other languages like C# for exmaple)
  * 
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
-
 #include <fstream>
-
-#include "container.h"
+#include <vector>
 
 namespace el 
 {
-    using logger = std::ostream;
+    template <typename T>
+    using vector = std::vector<T>;
+    template<typename Ty_>
+    struct array { Ty_* data; size_t size; };
+
     struct stream {
         stream() {}
 

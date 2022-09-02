@@ -1,12 +1,11 @@
+/*****************************************************************//**
+ * @file   atelier.h
+ * @brief  Painter order related
+ * 
+ * @author Sedomanai
+ * @date   August 2022
+ *********************************************************************/
 #pragma once
-
-#include "../elang_library_builder.h"
-#include "../tools/painter.h"
-//
-#include "../elements/basic.h"
-#include "../elements/sprite.h"
-#include "../elements/canvas.h"
-//#include "../elements/textbox.h" 
 
 namespace el
 {

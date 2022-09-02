@@ -1,4 +1,9 @@
+#include <elpch.h>
 #include "canvas.h"
+#include "../tools/cell.h"
+#include "../tools/texture.h"
+#include "../tools/material.h"
+#include "../tools/painter.h"
 
 namespace el
 {
@@ -23,7 +28,7 @@ namespace el
 	}
 
 	template<typename T>
-	void Canvas<T>::update() {
+	void Canvas<T>::recalc() {
 		if (Visage::material && Visage::material->hasTexture()) {
 			auto tex = Visage::material->textures[0];
 			auto w = float(tex->width());
@@ -46,7 +51,7 @@ namespace el
 	}
 
 	template<typename T>
-	void Canvas<T>::update(asset<Cell> cell) {
+	void Canvas<T>::recalc(asset<Cell> cell) {
 		Quad<T>::mVertices[0].uv = vec2(cell->uvLeft, cell->uvUp);
 		Quad<T>::mVertices[1].uv = vec2(cell->uvRight, cell->uvUp);
 		Quad<T>::mVertices[2].uv = vec2(cell->uvRight, cell->uvDown);

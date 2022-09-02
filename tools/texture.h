@@ -1,28 +1,20 @@
 ﻿/*****************************************************************//**
  * @file   texture.h
  * @brief  Texture 2D interface. Currently only supports OpenGL and decodes/encodes png.
- *         decode/encode 
- * 
+ *         decode/encode
+ *
  * @author Sedomanai
  * @date   August 2022
  *********************************************************************/
-
 #pragma once
-
-#include <GL/glew.h>
-
-#include "../elang_library_builder.h"
-#include "../common/container.h"
-#include "../common/fileio.h"
-#include "../common/math.h"
-
-#include "registry.h"
-#include "atlas.h"
-
+#include "tool_declarer.h"
+#include "project.h"
+#include "../common/define.h"
+#include "../elang_builder.h"
 
 namespace el
 {
-
+	struct Atlas;
 	struct TextureMeta
 	{
 		sizet meta;
@@ -33,7 +25,7 @@ namespace el
 	 */
 	struct ELANG_DLL Texture
 	{
-		Texture() : mID(-1), mWidth(10), mHeight(10) { }
+		Texture() : mID(-1), mWidth(10), mHeight(10) {}
 		uint32 id() { return mID; }
 		uint32 width() { return mWidth; }
 		uint32 height() { return mHeight; }
@@ -63,7 +55,7 @@ namespace el
 
 		/**
 		 * Used by Cereal.
-		 * 
+		 *
 		 * @param archive - OutArchive
 		 */
 		template<typename T>
@@ -87,9 +79,9 @@ namespace el
 		/**
 		 * @brief Auto generate an atlas. The genereated atlas' cells is not sorted in any manner at the moment.
 		 * The atlas must also be empty but this may change in the near future.
-		 * 
+		 *
 		 * @param atlas - The given empty atlas should already have been created using AssetSync.
-		 * Its users are not populated, this must be done manually. 
+		 * Its users are not populated, this must be done manually.
 		 * @param alphacut
 		 */
 		void autoGenerateAtlas(asset<Atlas> atlas, float alphaCut);

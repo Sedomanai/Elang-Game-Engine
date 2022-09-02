@@ -1,11 +1,7 @@
 #pragma once
-
 #include <SDL/SDL.h>
-#include <GL/glew.h> // in qt, glew must be compiled before anything else
-
-#include "elang_library_builder.h"
-#include "tools/controls.h"
-#include "apparatus/asset_loader.h"
+#include "common/define.h"
+#include "elang_builder.h"
 
 namespace el
 {
