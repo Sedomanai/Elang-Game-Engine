@@ -60,6 +60,7 @@ namespace el
         for (auto i = 0; i < shape.count; i++) {
             load >> shape.norms[i].x >> shape.norms[i].y >> shape.verts[i].x >> shape.verts[i].y;
         }
+        return load;
     }
     logger& operator<<(logger& log, const poly2d& shape) {
         log << "A POLYGON. Please just debug with graphics.";

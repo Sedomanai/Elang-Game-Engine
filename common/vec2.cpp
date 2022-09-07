@@ -4,7 +4,6 @@
 #include "vec3.h"
 #include "vec4.h"
 #include "math.h"
-#include "stream.h"
 
 namespace el
 {

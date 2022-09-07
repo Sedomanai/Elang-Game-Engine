@@ -15,8 +15,11 @@ namespace el
 {
     template <typename T>
     using vector = std::vector<T>;
+#ifndef __EL_ARRAY_
     template<typename Ty_>
     struct array { Ty_* data; size_t size; };
+#define __EL_ARRAY_
+#endif
 
     struct stream {
         stream() {}
