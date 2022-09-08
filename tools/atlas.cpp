@@ -24,27 +24,27 @@ namespace el {
 		return load;
 	}
 
-	void Atlas::importFile(const fio::path& filePath, AtlasMeta& meta) {
+	void Atlas::importFile(const fio::path& filePath, AtlasMeta& data) {
 		stream loader;
 		loader.toLoad(filePath.generic_u8string().data());
 
 		int32 cellCount;
-		loader >> meta >> cellCount;
+		loader >> data >> cellCount;
 		for (sizet i = 0; i < (sizet)cellCount; i++) {
-			auto cell = gProject.make<SubAssetData>(i, "", meta.self);
+			auto cell = gProject.make<SubAssetData>(i, "", data.self);
 			loader >> cell->name;
 
 			auto cell_meta = cell.add<CellMeta>();
 			loader >> *cell_meta;
 
-			addCell(cell, meta);
+			addCell(cell, data);
 		}
 
 		int32 clipCount;
 		loader >> clipCount;
 
 		for (sizet i = 0; i < (sizet)clipCount; i++) {
-			auto clip = gProject.make<SubAssetData>(i, "", meta.self);
+			auto clip = gProject.make<SubAssetData>(i, "", data.self);
 			clip.add<ClipMeta>();
 			auto& frames = *clip.add<Clip>();
 			int32 frameCount;
@@ -54,11 +54,11 @@ namespace el {
 			for (sizet i = 0; i < (sizet)frameCount; i++) {
 				int32 cellindex;
 				loader >> cellindex;
-				frames.cells.emplace_back(meta.cellorder[cellindex]);
+				frames.cells.emplace_back(data.cellorder[cellindex]);
 			}
 
-			meta.cliporder.emplace_back(clip);
-			meta.clipnames.emplace(clip, clip->name);
+			data.cliporder.emplace_back(clip);
+			data.clipnames.emplace(clip, clip->name);
 			clips.emplace(clip->name, clip);
 		}
 

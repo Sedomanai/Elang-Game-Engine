@@ -1,5 +1,10 @@
 #include <elpch.h>
 #include "atelier.h"
+#include "../tools/stage.h"
+#include "../tools/painter.h"
+#include "../elements/sprite.h"
+#include "../elements/canvas.h"
+#include "../elements/basic.h"
 
 namespace el
 {

@@ -332,15 +332,18 @@ namespace el
 
 
 	void Painter::paint() {
+		bool vaobind = false;
 		if (!mLocked) {
+			glBindVertexArray(mVao);
 			sort();
 			flush();
+			vaobind = true;
 		}
 
 		if (mBumpers.size() > 1) {
 			//bindAll
 			glBindProgramPipeline(mPipeline);
-			glBindVertexArray(mVao);
+			if (!vaobind) glBindVertexArray(mVao);
 			glBindBuffer(GL_ARRAY_BUFFER, mVbo);
 
 			if (flags & ePainterFlags::Z_CLEAR) {

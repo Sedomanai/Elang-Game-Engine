@@ -51,8 +51,9 @@ namespace el
 		}
 
 		/**
-		 * @brief This is for importing all oft-used external GUI assets and creating internal GUI assets.
-		 * This must be called the very first thing OpenGL (or any graphic library) is first initialized. This will not fire twice.
+		 * @brief * For importing all oft-used external GUI assets and creating internal GUI assets.
+		 * @brief * Called this function is the very first thing to do once OpenGL (or any graphic library) is first initialized. 
+		 * It should not be fired more than once.
 		 * This may or may not be enough for the GUI program. You may have to create or import various others along the way.
 		 */
 		void importAllNativeGUIAssets();
@@ -82,6 +83,11 @@ namespace el
 		 */
 		void syncAllAssets();
 
+		/**
+		 * @brief Links all assets that are related to each other 
+		 * @brief ex) Link all atlases to their users
+		 */
+		void linkAllRelatedAssets();
 
 		/**
 		* @brief * Sometimes, external files can be internally modified in the editor (GUI or otherwise).

@@ -130,8 +130,10 @@ namespace el
 
 		auto& atlasmeta = new_atlas.get<AtlasMeta>();
 		atlasmeta.self = new_atlas;
-		sizet w = atlasmeta.width = (sizet)mWidth;;
-		sizet h = atlasmeta.height = (sizet)mHeight;
+		atlasmeta.width = (int32)mWidth;
+		atlasmeta.height = (int32)mHeight;
+		sizet w = (sizet)mWidth;
+		sizet h = (sizet)mHeight;
 		sizet pixcount = w * h;
 
 		hashmap<sizet, vector<sizet>> result;

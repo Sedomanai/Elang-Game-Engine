@@ -23,8 +23,8 @@ namespace el
 	template<typename T>
 	struct hashset : tsl::robin_set<T> {
 		using tsl::robin_set<T>::robin_set;
-		void operator=(const tsl::robin_set<T>& map) { tsl::robin_map<T>::operator=(map); }
-		void operator=(tsl::robin_set<T>&& map) { tsl::robin_map<T>::operator=(map); }
+		void operator=(const tsl::robin_set<T>& map) { tsl::robin_set<T>::operator=(map); }
+		void operator=(tsl::robin_set<T>&& map) { tsl::robin_set<T>::operator=(map); }
 	};
 
 #ifdef __ELANG_CEREAL

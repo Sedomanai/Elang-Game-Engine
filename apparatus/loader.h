@@ -1,5 +1,6 @@
 #pragma once
 
+/**
 #include "../default_glsl.h"
 
 #include "../tools/texture.h"
@@ -77,3 +78,4 @@ namespace el
 
 	extern void ELANG_DLL loadTexture(const string& key);
 };
+*/

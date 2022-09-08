@@ -6,10 +6,12 @@
  * @date   August 2022
  *********************************************************************/
 #pragma once
+#include "../tools/vertex.h"
 
 namespace el
 {
 	struct GraphicUpdate2d {};
+	struct ShapeDebug2d;
 
 	extern ELANG_DLL void updateBasicGraphics2d();
 	extern ELANG_DLL void paintStageOrder();

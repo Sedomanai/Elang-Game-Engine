@@ -25,7 +25,7 @@ namespace el
 		friend struct Atlas;
 
 		Entity self;
-		sizet width, height;
+		int32 width, height;
 		vector<string> users;
 		vector<Entity> cellorder, cliporder;
 		hashmap<Entity, string> cellnames, clipnames;

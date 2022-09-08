@@ -22,7 +22,7 @@ namespace el
 
 
 	struct ClipMeta { sizet i; };
-	struct ELANG_DLL Clip
+	struct Clip
 	{
 		vector<asset<Cell>> cells;
 		float speed;

@@ -14,41 +14,41 @@
 
 namespace el
 {
-    stream& operator<<(stream& save, const vec2& vec) {
+    inline stream& operator<<(stream& save, const vec2& vec) {
         save << vec.x << vec.y;
         return save;
     }
-    stream& operator>>(stream& load, vec2& vec) {
+    inline stream& operator>>(stream& load, vec2& vec) {
         load >> vec.x >> vec.y;
         return load;
     }
-    logger& operator<<(logger& log, const vec2& vec) {
+    inline logger& operator<<(logger& log, const vec2& vec) {
         log << "( " << vec.x << ", " << vec.y << " )";
         return log;
     }
 
-    stream& operator<<(stream& save, const vec3& vec) {
+    inline stream& operator<<(stream& save, const vec3& vec) {
         save << vec.x << vec.y << vec.z;
         return save;
     }
-    stream& operator>>(stream& load, vec3& vec) {
+    inline stream& operator>>(stream& load, vec3& vec) {
         load >> vec.x >> vec.y << vec.z;
         return load;
     }
-    logger& operator<<(logger& log, const vec3& vec) {
+    inline logger& operator<<(logger& log, const vec3& vec) {
         log << "( " << vec.x << ", " << vec.y << ", " << vec.z << " )";
         return log;
     }
 
-    stream& operator<<(stream& save, const vec4& vec) {
+    inline stream& operator<<(stream& save, const vec4& vec) {
         save << vec.x << vec.y << vec.z << vec.w;
         return save;
     }
-    stream& operator>>(stream& load, vec4& vec) {
+    inline stream& operator>>(stream& load, vec4& vec) {
         load >> vec.x >> vec.y << vec.z << vec.w;
         return load;
     }
-    logger& operator<<(logger& log, const vec4& vec) {
+    inline logger& operator<<(logger& log, const vec4& vec) {
         log << "( " << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << " )";
         return log;
     }

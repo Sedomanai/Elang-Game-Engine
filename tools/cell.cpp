@@ -3,7 +3,8 @@
 #include "../common/stream.h"
 
 namespace el {
-	CellMeta::CellMeta() {}
+	CellMeta::CellMeta() 
+		: x(0), y(0), w(0), h(0), oX(0), oY(0) {}
 
 	CellMeta::CellMeta(sizet x_, sizet y_, sizet w_, sizet h_, sizet oX_, sizet oY_)
 		: x((int32)x_), y((int32)y_), w((int32)w_), h((int32)h_), oX((int32)oX_), oY((int32)oY_) {
